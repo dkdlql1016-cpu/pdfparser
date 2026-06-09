@@ -1427,6 +1427,65 @@ def text_for_word_ids(words, word_ids):
     return " ".join(str(words[i].get("text", "")) for i in word_ids if isinstance(i, int) and 0 <= i < len(words))
 
 
+def semantic_map_for_run_dir(run_dir: Path):
+    return (read_json(run_dir / "viewer_data.json", {}) or {}).get("semantic_map", {}) or {}
+
+
+def section_context_for_side(run_dir: Path, side):
+    if side in ("old", "prev", "previous"):
+        return run_dir / "prev_report.md", read_json(run_dir / "prev_section_map.json", {}) or {}
+    return run_dir / "report.md", read_json(run_dir / "section_map.json", {}) or {}
+
+
+def equal_refs_for_selection(semantic_map, side, word_ids):
+    wanted = {int(w) for w in word_ids if isinstance(w, int) or str(w).isdigit()}
+    if not wanted:
+        return []
+    key = "old_word_id" if side in ("old", "prev", "previous") else "new_word_id"
+    refs = [e for e in (semantic_map or {}).get("equal_words", []) if e.get(key) in wanted]
+    refs.sort(key=lambda e: (e.get("old_line") or 0, e.get("old_word_id") or 0, e.get("new_word_id") or 0))
+    return refs
+
+
+def compact_equal_ref(entry):
+    return {
+        "old_word_id": entry.get("old_word_id"),
+        "new_word_id": entry.get("new_word_id"),
+        "old_line": entry.get("old_line"),
+        "new_line": entry.get("new_line"),
+        "segment_id": entry.get("segment_id"),
+        "text": entry.get("text", ""),
+    }
+
+
+def build_anchor_md_metadata(run_dir: Path, side, anchor, semantic_map=None):
+    semantic_map = semantic_map if semantic_map is not None else semantic_map_for_run_dir(run_dir)
+    refs = equal_refs_for_selection(semantic_map, side, anchor.get("word_ids", []))
+    md_path, section_map = section_context_for_side(run_dir, side)
+    section_id = infer_section_id_for_anchor(section_map, anchor, md_path)
+    old_lines = sorted({r.get("old_line") for r in refs if r.get("old_line") is not None})
+    new_lines = sorted({r.get("new_line") for r in refs if r.get("new_line") is not None})
+    return {
+        "source": "selection_equal" if refs else "section_only",
+        "section_id": section_id,
+        "old_lines": old_lines,
+        "new_lines": new_lines,
+        "segment_ids": sorted({r.get("segment_id") for r in refs if r.get("segment_id")}, key=lambda x: int(re.search(r"(\d+)$", str(x)).group(1)) if re.search(r"(\d+)$", str(x)) else 0),
+        "equal_refs": [compact_equal_ref(r) for r in refs[:120]],
+    }
+
+
+def apply_md_metadata_to_anchor(anchor, md_meta):
+    if not md_meta:
+        return anchor
+    anchor["md_anchor"] = md_meta
+    anchor["section_id"] = md_meta.get("section_id")
+    anchor["old_lines"] = md_meta.get("old_lines", [])
+    anchor["new_lines"] = md_meta.get("new_lines", [])
+    anchor["segment_ids"] = md_meta.get("segment_ids", [])
+    return anchor
+
+
 def anchor_for_selection(run_dir: Path, run_id, side, word_ids, rect=None):
     words_path = run_dir / ("prev_words.json" if side in ("old", "prev", "previous") else "words.json")
     words = read_json(words_path, []) or []
@@ -1434,7 +1493,7 @@ def anchor_for_selection(run_dir: Path, run_id, side, word_ids, rect=None):
     ids = [i for i in ids if 0 <= i < len(words)]
     if not ids:
         return None
-    return {
+    anchor = {
         "run_id": run_id,
         "side": "old" if side in ("old", "prev", "previous") else "new",
         "word_ids": ids,
@@ -1446,6 +1505,7 @@ def anchor_for_selection(run_dir: Path, run_id, side, word_ids, rect=None):
         "text": text_for_word_ids(words, ids),
         "floating": False,
     }
+    return apply_md_metadata_to_anchor(anchor, build_anchor_md_metadata(run_dir, side, anchor))
 
 
 def review_projection_for_anchor(review, anchor_run_id, display_side=None):
@@ -1465,6 +1525,8 @@ def review_projection_for_anchor(review, anchor_run_id, display_side=None):
         "change_ids": anchor.get("change_ids", []),
         "old_lines": anchor.get("old_lines", []),
         "new_lines": anchor.get("new_lines", []),
+        "section_id": anchor.get("section_id"),
+        "md_anchor": anchor.get("md_anchor", {}),
         "text": anchor.get("text") or review.get("text", ""),
         "selection": {"page": anchor.get("page"), "rect": anchor.get("rect"), "word_ids": anchor.get("word_ids", [])},
         "comment": "\n\n".join(c.get("text", "") for c in review.get("comments", []) if c.get("text")),
@@ -1477,13 +1539,20 @@ def review_projection_for_anchor(review, anchor_run_id, display_side=None):
     return projected
 
 
+def run_side_anchor_key(run_id, side):
+    return f"{run_id}:{side}"
+
+
 def document_reviews_for_run(doc_id, run_id):
     meta = load_document_meta(doc_id) or {}
     run_meta = next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), {})
     prev_run_id = run_meta.get("previous_run_id")
     projected = []
     for review in load_document_reviews(doc_id):
-        if prev_run_id and prev_run_id != run_id:
+        explicit_old_projection = review_projection_for_anchor(review, run_side_anchor_key(run_id, "old"), "old")
+        if explicit_old_projection:
+            projected.append(explicit_old_projection)
+        elif prev_run_id and prev_run_id != run_id:
             prev_anchor = (review.get("anchors") or {}).get(prev_run_id)
             if prev_anchor and prev_anchor.get("side") != "old":
                 prev_projection = review_projection_for_anchor(review, prev_run_id, "old")
@@ -1520,6 +1589,25 @@ def create_document_level_review(doc_id, run_id, run_dir: Path, data):
     return review_projection_for_anchor(review, run_id)
 
 
+def remapped_old_side_md_metadata(prev_anchor, semantic_map):
+    previous_meta = prev_anchor.get("md_anchor") or {}
+    carried_old_lines = previous_meta.get("new_lines") or prev_anchor.get("new_lines") or previous_meta.get("old_lines") or prev_anchor.get("old_lines") or []
+    carried_old_lines = sorted({line for line in carried_old_lines if line is not None})
+    refs = [
+        e for e in (semantic_map or {}).get("equal_words", [])
+        if e.get("old_line") in set(carried_old_lines)
+    ]
+    refs.sort(key=lambda e: (e.get("old_line") or 0, e.get("old_word_id") or 0))
+    return {
+        "source": "carried_md_equal" if refs else "carried_section",
+        "section_id": previous_meta.get("section_id") or prev_anchor.get("section_id"),
+        "old_lines": carried_old_lines,
+        "new_lines": sorted({r.get("new_line") for r in refs if r.get("new_line") is not None}),
+        "segment_ids": sorted({r.get("segment_id") for r in refs if r.get("segment_id")}, key=lambda x: int(re.search(r"(\d+)$", str(x)).group(1)) if re.search(r"(\d+)$", str(x)) else 0),
+        "equal_refs": [compact_equal_ref(r) for r in refs[:120]],
+    }
+
+
 def remap_document_reviews_to_run(doc_id, prev_run_id, run_id, run_dir: Path, semantic_map):
     if not prev_run_id:
         return []
@@ -1551,6 +1639,7 @@ def remap_document_reviews_to_run(doc_id, prev_run_id, run_id, run_dir: Path, se
             "floating": False,
             "previous_run_id": prev_run_id,
         }
+        apply_md_metadata_to_anchor(anchor, remapped_old_side_md_metadata(prev_anchor, semantic_map))
         anchors[run_id] = anchor
         review["updated_at"] = now
         changed = True
@@ -1633,6 +1722,119 @@ def find_word_sequence_by_text(words, text):
     return []
 
 
+def md_equal_entries_for_anchor(old_ids, semantic_map, max_nearby_distance=120):
+    old_ids = sorted({int(w) for w in old_ids if isinstance(w, int) or str(w).isdigit()})
+    if not old_ids:
+        return []
+    eq = [
+        e for e in (semantic_map or {}).get("equal_words", [])
+        if e.get("old_word_id") is not None and e.get("new_word_id") is not None
+    ]
+    exact = [e for e in eq if e.get("old_word_id") in set(old_ids)]
+    if exact:
+        return sorted(exact, key=lambda e: e.get("old_word_id", 0))
+
+    lo, hi = min(old_ids), max(old_ids)
+    def distance(entry):
+        oid = entry.get("old_word_id", 0)
+        if lo <= oid <= hi:
+            return 0
+        return min(abs(oid - lo), abs(oid - hi))
+    nearby = sorted(eq, key=lambda e: (distance(e), e.get("old_word_id", 0)))
+    if not nearby or distance(nearby[0]) > max_nearby_distance:
+        return []
+    best = nearby[0]
+    best_old_line = best.get("old_line")
+    if best_old_line is not None:
+        same_line = [e for e in eq if e.get("old_line") == best_old_line]
+        if same_line:
+            return sorted(same_line, key=lambda e: e.get("old_word_id", 0))
+    return [best]
+
+
+def current_word_ids_from_md_equal_anchor(old_ids, semantic_map, new_words):
+    entries = md_equal_entries_for_anchor(old_ids, semantic_map)
+    if not entries:
+        return []
+    new_lines = {e.get("new_line") for e in entries if e.get("new_line") is not None}
+    eq = (semantic_map or {}).get("equal_words", [])
+    if new_lines:
+        ids = [
+            e.get("new_word_id")
+            for e in eq
+            if e.get("new_line") in new_lines and e.get("new_word_id") is not None
+        ]
+    else:
+        ids = [e.get("new_word_id") for e in entries if e.get("new_word_id") is not None]
+    seen, out = set(), []
+    for wid in ids:
+        if isinstance(wid, int) and 0 <= wid < len(new_words) and wid not in seen:
+            seen.add(wid)
+            out.append(wid)
+    return out
+
+
+def current_word_ids_from_anchor_md(prev_anchor, semantic_map, new_words):
+    md_anchor = prev_anchor.get("md_anchor") or {}
+    refs = md_anchor.get("equal_refs") or []
+    new_lines = {r.get("new_line") for r in refs if r.get("new_line") is not None}
+    if not new_lines:
+        old_lines = set(md_anchor.get("old_lines") or prev_anchor.get("old_lines") or [])
+        if old_lines:
+            new_lines = {
+                e.get("new_line")
+                for e in (semantic_map or {}).get("equal_words", [])
+                if e.get("old_line") in old_lines and e.get("new_line") is not None
+            }
+    ids = []
+    if new_lines:
+        ids = [
+            e.get("new_word_id")
+            for e in (semantic_map or {}).get("equal_words", [])
+            if e.get("new_line") in new_lines and e.get("new_word_id") is not None
+        ]
+    elif refs:
+        ids = [r.get("new_word_id") for r in refs if r.get("new_word_id") is not None]
+    seen, out = set(), []
+    for wid in ids:
+        if isinstance(wid, int) and 0 <= wid < len(new_words) and wid not in seen:
+            seen.add(wid)
+            out.append(wid)
+    return out
+
+
+def word_ids_in_page_bbox(words, page, bbox, pad=18):
+    if not page or not bbox:
+        return []
+    x0, y0, x1, y1 = bbox
+    box = [x0 - pad, y0 - pad, x1 + pad, y1 + pad]
+    ids = []
+    for word in words or []:
+        if word.get("page") != page:
+            continue
+        wx0, wy0, wx1, wy1 = word.get("bbox", [0, 0, 0, 0])
+        if not (wx1 < box[0] or box[2] < wx0 or wy1 < box[1] or box[3] < wy0):
+            wid = word.get("idx")
+            if isinstance(wid, int):
+                ids.append(wid)
+    return ids
+
+
+def fallback_current_word_ids_from_diff(run_dir, prev_anchor, new_words):
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    semantic_map = viewer_data.get("semantic_map", {}) or {}
+    candidates = related_diff_changes_for_review(viewer_data, prev_anchor, semantic_map, limit=3)
+    candidate_ids = {c.get("change_id") for c in candidates}
+    for change in viewer_data.get("changes", []) or []:
+        if change.get("id") not in candidate_ids:
+            continue
+        anchor = change.get("new_anchor") or {}
+        ids = word_ids_in_page_bbox(new_words, anchor.get("page") or change.get("new_page"), anchor.get("bbox"))
+        if ids:
+            return ids
+    return []
+
+
 def migrate_previous_review_to_current(doc_id, run_id, review_id):
     meta = load_document_meta(doc_id)
     if not meta:
@@ -1655,40 +1857,34 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
     if anchors.get(run_id) and anchors[run_id].get("side") == "new":
         return {"review": review_projection_for_anchor(review, run_id), "already_current": True}, 200
 
+    source_anchor_run_id = prev_run_id
     prev_anchor = anchors.get(prev_run_id)
+    if not prev_anchor and anchors.get(run_id, {}).get("side") == "old":
+        source_anchor_run_id = run_id
+        prev_anchor = anchors.get(run_id)
     if not prev_anchor:
         return {"error": "previous anchor not found"}, 404
 
-    old_to_new = {
-        e.get("old_word_id"): e.get("new_word_id")
-        for e in (document_semantic_map(doc_id, run_id) or {}).get("equal_words", [])
-        if e.get("old_word_id") is not None and e.get("new_word_id") is not None
-    }
     old_ids = [int(w) for w in prev_anchor.get("word_ids", []) if isinstance(w, int) or str(w).isdigit()]
-    mapped = [old_to_new[wid] for wid in old_ids if wid in old_to_new]
     new_words = read_json(run_dir / "words.json", []) or []
-    new_ids = []
-    seen = set()
-    for wid in mapped:
-        if isinstance(wid, int) and 0 <= wid < len(new_words) and wid not in seen:
-            seen.add(wid)
-            new_ids.append(wid)
+    new_ids = map_anchor_to_current_md_anchor(prev_anchor, document_semantic_map(doc_id, run_id), new_words)
     if not new_ids:
         new_ids = find_word_sequence_by_text(new_words, prev_anchor.get("text") or review.get("text", ""))
     if not new_ids:
-        return {"error": "matching current text was not found"}, 409
-
+        new_ids = fallback_current_word_ids_from_diff(run_dir, prev_anchor, new_words)
+    if source_anchor_run_id == run_id:
+        anchors[run_side_anchor_key(run_id, "old")] = dict(prev_anchor)
     anchor = {
         "run_id": run_id,
         "side": "new",
         "word_ids": new_ids,
         "old_word_ids": [],
         "new_word_ids": new_ids,
-        "page": first_word_page(new_words, new_ids),
-        "bbox": words_bbox(new_words, new_ids),
-        "text": text_for_word_ids(new_words, new_ids),
-        "floating": False,
-        "migrated_from_run_id": prev_run_id,
+        "page": first_word_page(new_words, new_ids) if new_ids else None,
+        "bbox": words_bbox(new_words, new_ids) if new_ids else None,
+        "text": text_for_word_ids(new_words, new_ids) if new_ids else "",
+        "floating": not bool(new_ids),
+        "migrated_from_run_id": source_anchor_run_id,
         "migrated_at": utc_now(),
     }
     anchors[run_id] = anchor
@@ -1951,6 +2147,18 @@ def map_old_word_ids_to_current(old_word_ids, semantic_map):
     return [wid for wid in mapped if wid is not None]
 
 
+def map_old_word_ids_to_current_md_anchor(old_word_ids, semantic_map, new_words):
+    return current_word_ids_from_md_equal_anchor(old_word_ids, semantic_map, new_words)
+
+
+def map_anchor_to_current_md_anchor(prev_anchor, semantic_map, new_words):
+    ids = current_word_ids_from_anchor_md(prev_anchor, semantic_map, new_words)
+    if ids:
+        return ids
+    old_word_ids = prev_anchor.get("word_ids") or prev_anchor.get("old_word_ids") or prev_anchor.get("new_word_ids") or []
+    return current_word_ids_from_md_equal_anchor(old_word_ids, semantic_map, new_words)
+
+
 def segment_numbers_for_old_word_ids(old_word_ids, semantic_map):
     wanted = set(old_word_ids or [])
     nums = []
@@ -2005,7 +2213,7 @@ def build_assessment_context_pack(run_dir, review, prev_anchor, prev_section_map
     current_words = read_json(run_dir / "words.json", []) or []
 
     old_ids = list(prev_anchor.get("word_ids") or prev_anchor.get("old_word_ids") or prev_anchor.get("new_word_ids") or [])
-    current_ids = map_old_word_ids_to_current(old_ids, semantic_map)
+    current_ids = map_anchor_to_current_md_anchor(prev_anchor, semantic_map, current_words)
 
     previous_section_id = infer_section_id_for_anchor(prev_section_map, prev_anchor, prev_md)
     current_anchor = {
@@ -2383,7 +2591,7 @@ def run_ai_assessment(doc_id, run_id, review_id=None):
         item = {
             "review_id": review.get("review_id"),
             "anchor_run_id": anchor_run_id,
-            "section_id": context_pack.get("previous_section", {}).get("section_id") or anchor_section_id(prev_anchor),
+            "section_id": (context_pack.get("recognized_report_section") or {}).get("previous_section_id") or anchor_section_id(prev_anchor),
             "status": "done",
             "assessed_at": utc_now(),
             "input_summary": {

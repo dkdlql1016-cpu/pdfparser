@@ -1,0 +1,1174 @@
+[
+  {
+    "review_id": "r-ece993ad",
+    "anchor_id": "a-0d57efb8",
+    "doc_id": "84c6be9cdfaf",
+    "status": "open",
+    "created_run_id": "b833a9e3ca15",
+    "is_floating": false,
+    "text": "Management is responsible for the preparation and fair presentation of the financial statements in accordance with K-GAAP, and for such internal control as management determines is necessary to enable the preparation of financial statements that are free from material misstatement, whether due to fraud or error. In preparing the financial statements, management is responsible for assessing the Company’s ability to continue as a going concern, disclosing, as applicable, matters related to going concern and using the going concern basis of accounting unless management either intends to liquidate the Company or to cease operations, or has no realistic alternative but to do so. Those charged with governance are responsible",
+    "comments": [
+      {
+        "comment_id": "c-fb762749",
+        "author": "user",
+        "text": "213123",
+        "created_at": "2026-06-09T16:23:56.546255+00:00"
+      },
+      {
+        "comment_id": "c-115d17ed",
+        "author": "user",
+        "text": "1231231",
+        "created_at": "2026-06-09T16:24:00.397898+00:00"
+      },
+      {
+        "comment_id": "c-e1075a00",
+        "author": "user",
+        "text": "123213",
+        "created_at": "2026-06-09T16:24:09.132282+00:00"
+      },
+      {
+        "comment_id": "c-abc599c1",
+        "author": "user",
+        "text": "111111111111111111111111111111111111111111111111111111111",
+        "created_at": "2026-06-09T16:24:27.080305+00:00"
+      }
+    ],
+    "anchors": {
+      "b833a9e3ca15": {
+        "run_id": "b833a9e3ca15",
+        "side": "old",
+        "word_ids": [
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287,
+          288,
+          289,
+          290,
+          291,
+          292,
+          293,
+          294,
+          295,
+          296,
+          297,
+          298,
+          299,
+          300,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310,
+          311,
+          312,
+          313,
+          314,
+          315
+        ],
+        "old_word_ids": [
+          208,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214,
+          215,
+          216,
+          217,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239,
+          240,
+          241,
+          242,
+          243,
+          244,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265,
+          266,
+          267,
+          268,
+          269,
+          270,
+          271,
+          272,
+          273,
+          274,
+          275,
+          276,
+          277,
+          278,
+          279,
+          280,
+          281,
+          282,
+          283,
+          284,
+          285,
+          286,
+          287,
+          288,
+          289,
+          290,
+          291,
+          292,
+          293,
+          294,
+          295,
+          296,
+          297,
+          298,
+          299,
+          300,
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310,
+          311,
+          312,
+          313,
+          314,
+          315
+        ],
+        "new_word_ids": [],
+        "page": 3,
+        "bbox": [
+          57.19403076171875,
+          358.91485595703125,
+          532.6388549804688,
+          470.7756042480469
+        ],
+        "rect": [
+          62.148706531402546,
+          368.74581474958705,
+          234.48745102338998,
+          457.20286944458945
+        ],
+        "text": "Management is responsible for the preparation and fair presentation of the financial statements in accordance with K-GAAP, and for such internal control as management determines is necessary to enable the preparation of financial statements that are free from material misstatement, whether due to fraud or error. In preparing the financial statements, management is responsible for assessing the Company’s ability to continue as a going concern, disclosing, as applicable, matters related to going concern and using the going concern basis of accounting unless management either intends to liquidate the Company or to cease operations, or has no realistic alternative but to do so. Those charged with governance are responsible",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            35,
+            37,
+            39
+          ],
+          "new_lines": [
+            39,
+            41,
+            43
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 208,
+              "new_word_id": 275,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "Management"
+            },
+            {
+              "old_word_id": 209,
+              "new_word_id": 276,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "is"
+            },
+            {
+              "old_word_id": 210,
+              "new_word_id": 277,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "responsible"
+            },
+            {
+              "old_word_id": 211,
+              "new_word_id": 278,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 212,
+              "new_word_id": 279,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 213,
+              "new_word_id": 280,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "preparation"
+            },
+            {
+              "old_word_id": 214,
+              "new_word_id": 281,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 215,
+              "new_word_id": 282,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "fair"
+            },
+            {
+              "old_word_id": 216,
+              "new_word_id": 283,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "presentation"
+            },
+            {
+              "old_word_id": 217,
+              "new_word_id": 284,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 218,
+              "new_word_id": 285,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 219,
+              "new_word_id": 286,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 220,
+              "new_word_id": 287,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 221,
+              "new_word_id": 288,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 222,
+              "new_word_id": 289,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "accordance"
+            },
+            {
+              "old_word_id": 223,
+              "new_word_id": 290,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "with"
+            },
+            {
+              "old_word_id": 224,
+              "new_word_id": 291,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "K-GAAP,"
+            },
+            {
+              "old_word_id": 225,
+              "new_word_id": 292,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 226,
+              "new_word_id": 293,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 227,
+              "new_word_id": 294,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "such"
+            },
+            {
+              "old_word_id": 228,
+              "new_word_id": 295,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "internal"
+            },
+            {
+              "old_word_id": 229,
+              "new_word_id": 296,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "control"
+            },
+            {
+              "old_word_id": 230,
+              "new_word_id": 297,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 231,
+              "new_word_id": 298,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "management"
+            },
+            {
+              "old_word_id": 232,
+              "new_word_id": 299,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "determines"
+            },
+            {
+              "old_word_id": 233,
+              "new_word_id": 300,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "is"
+            },
+            {
+              "old_word_id": 234,
+              "new_word_id": 301,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "necessary"
+            },
+            {
+              "old_word_id": 235,
+              "new_word_id": 302,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 236,
+              "new_word_id": 303,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "enable"
+            },
+            {
+              "old_word_id": 237,
+              "new_word_id": 304,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 238,
+              "new_word_id": 305,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "preparation"
+            },
+            {
+              "old_word_id": 239,
+              "new_word_id": 306,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 240,
+              "new_word_id": 307,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 241,
+              "new_word_id": 308,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 242,
+              "new_word_id": 309,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "that"
+            },
+            {
+              "old_word_id": 243,
+              "new_word_id": 310,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "are"
+            },
+            {
+              "old_word_id": 244,
+              "new_word_id": 311,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "free"
+            },
+            {
+              "old_word_id": 245,
+              "new_word_id": 312,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "from"
+            },
+            {
+              "old_word_id": 246,
+              "new_word_id": 313,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 247,
+              "new_word_id": 314,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "misstatement,"
+            },
+            {
+              "old_word_id": 248,
+              "new_word_id": 315,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "whether"
+            },
+            {
+              "old_word_id": 249,
+              "new_word_id": 316,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "due"
+            },
+            {
+              "old_word_id": 250,
+              "new_word_id": 317,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 251,
+              "new_word_id": 318,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "fraud"
+            },
+            {
+              "old_word_id": 252,
+              "new_word_id": 319,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 253,
+              "new_word_id": 320,
+              "old_line": 35,
+              "new_line": 39,
+              "segment_id": null,
+              "text": "error."
+            },
+            {
+              "old_word_id": 254,
+              "new_word_id": 321,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "In"
+            },
+            {
+              "old_word_id": 255,
+              "new_word_id": 322,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "preparing"
+            },
+            {
+              "old_word_id": 256,
+              "new_word_id": 323,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 257,
+              "new_word_id": 324,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 258,
+              "new_word_id": 325,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "statements,"
+            },
+            {
+              "old_word_id": 259,
+              "new_word_id": 326,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "management"
+            },
+            {
+              "old_word_id": 260,
+              "new_word_id": 327,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "is"
+            },
+            {
+              "old_word_id": 261,
+              "new_word_id": 328,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "responsible"
+            },
+            {
+              "old_word_id": 262,
+              "new_word_id": 329,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 263,
+              "new_word_id": 330,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "assessing"
+            },
+            {
+              "old_word_id": 264,
+              "new_word_id": 331,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 265,
+              "new_word_id": 332,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "Company’s"
+            },
+            {
+              "old_word_id": 266,
+              "new_word_id": 333,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "ability"
+            },
+            {
+              "old_word_id": 267,
+              "new_word_id": 334,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 268,
+              "new_word_id": 335,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "continue"
+            },
+            {
+              "old_word_id": 269,
+              "new_word_id": 336,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 270,
+              "new_word_id": 337,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 271,
+              "new_word_id": 338,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "going"
+            },
+            {
+              "old_word_id": 272,
+              "new_word_id": 339,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "concern,"
+            },
+            {
+              "old_word_id": 273,
+              "new_word_id": 340,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "disclosing,"
+            },
+            {
+              "old_word_id": 274,
+              "new_word_id": 341,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 275,
+              "new_word_id": 342,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "applicable,"
+            },
+            {
+              "old_word_id": 276,
+              "new_word_id": 343,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "matters"
+            },
+            {
+              "old_word_id": 277,
+              "new_word_id": 344,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "related"
+            },
+            {
+              "old_word_id": 278,
+              "new_word_id": 345,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 279,
+              "new_word_id": 346,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "going"
+            },
+            {
+              "old_word_id": 280,
+              "new_word_id": 347,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "concern"
+            },
+            {
+              "old_word_id": 281,
+              "new_word_id": 348,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 282,
+              "new_word_id": 349,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "using"
+            },
+            {
+              "old_word_id": 283,
+              "new_word_id": 350,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 284,
+              "new_word_id": 351,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "going"
+            },
+            {
+              "old_word_id": 285,
+              "new_word_id": 352,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "concern"
+            },
+            {
+              "old_word_id": 286,
+              "new_word_id": 353,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "basis"
+            },
+            {
+              "old_word_id": 287,
+              "new_word_id": 354,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 288,
+              "new_word_id": 355,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "accounting"
+            },
+            {
+              "old_word_id": 289,
+              "new_word_id": 356,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "unless"
+            },
+            {
+              "old_word_id": 290,
+              "new_word_id": 357,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "management"
+            },
+            {
+              "old_word_id": 291,
+              "new_word_id": 358,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "either"
+            },
+            {
+              "old_word_id": 292,
+              "new_word_id": 359,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "intends"
+            },
+            {
+              "old_word_id": 293,
+              "new_word_id": 360,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 294,
+              "new_word_id": 361,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "liquidate"
+            },
+            {
+              "old_word_id": 295,
+              "new_word_id": 362,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 296,
+              "new_word_id": 363,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "Company"
+            },
+            {
+              "old_word_id": 297,
+              "new_word_id": 364,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 298,
+              "new_word_id": 365,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 299,
+              "new_word_id": 366,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "cease"
+            },
+            {
+              "old_word_id": 300,
+              "new_word_id": 367,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "operations,"
+            },
+            {
+              "old_word_id": 301,
+              "new_word_id": 368,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 302,
+              "new_word_id": 369,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "has"
+            },
+            {
+              "old_word_id": 303,
+              "new_word_id": 370,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "no"
+            },
+            {
+              "old_word_id": 304,
+              "new_word_id": 371,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "realistic"
+            },
+            {
+              "old_word_id": 305,
+              "new_word_id": 372,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "alternative"
+            },
+            {
+              "old_word_id": 306,
+              "new_word_id": 373,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "but"
+            },
+            {
+              "old_word_id": 307,
+              "new_word_id": 374,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 308,
+              "new_word_id": 375,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "do"
+            },
+            {
+              "old_word_id": 309,
+              "new_word_id": 376,
+              "old_line": 37,
+              "new_line": 41,
+              "segment_id": null,
+              "text": "so."
+            },
+            {
+              "old_word_id": 310,
+              "new_word_id": 377,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "Those"
+            },
+            {
+              "old_word_id": 311,
+              "new_word_id": 378,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "charged"
+            },
+            {
+              "old_word_id": 312,
+              "new_word_id": 379,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "with"
+            },
+            {
+              "old_word_id": 313,
+              "new_word_id": 380,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "governance"
+            },
+            {
+              "old_word_id": 314,
+              "new_word_id": 381,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "are"
+            },
+            {
+              "old_word_id": 315,
+              "new_word_id": 382,
+              "old_line": 39,
+              "new_line": 43,
+              "segment_id": null,
+              "text": "responsible"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          35,
+          37,
+          39
+        ],
+        "new_lines": [
+          39,
+          41,
+          43
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-09T16:23:56.546255+00:00",
+    "updated_at": "2026-06-09T16:24:27.080358+00:00"
+  }
+]
