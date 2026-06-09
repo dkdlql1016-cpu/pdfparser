@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF Diff Viewer</title>
+<style>
+:root{--red:#cf222e;--green:#2da44e;--red-bg:rgba(255,65,65,.38);--green-bg:rgba(34,197,94,.38);--blue:#2563eb}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827}.topbar{height:52px;background:#111827;color:white;display:flex;align-items:center;gap:12px;padding:8px 14px}.brand{font-size:15px;font-weight:800;white-space:nowrap}.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:auto}.fileLabel{display:flex;align-items:center;gap:5px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{max-width:170px;font-size:11px}button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}#status{font-size:12px;color:#d1d5db;min-width:70px}main{height:calc(100vh - 52px);display:grid;grid-template-columns:340px 1fr;overflow:hidden}aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:10px 8px;font-size:13px}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}.tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:800}.addStat{color:var(--green)}.delStat{color:var(--red)}#changes,#indexList,#reviewPane{overflow:auto;padding:8px}.indexItem,.change{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:12px}.indexItem:hover,.change:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:10px;color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.meta{color:#6b7280;font-size:11px;margin-bottom:4px}.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}.viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.pane{position:relative;overflow:auto;background:#e5e7eb;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:7px 10px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pages{padding:14px;display:flex;flex-direction:column;align-items:center;gap:16px}.page{position:relative;background:white;box-shadow:0 2px 12px rgba(0,0,0,.22);flex:none}.page img{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;user-select:none;-webkit-user-drag:none}.hl{position:absolute;z-index:2;border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.hl.delete{background:var(--red-bg)}.hl.add{background:var(--green-bg)}.hl.focus{outline:none!important;box-shadow:inset 0 0 0 1.5px #2563eb!important;z-index:4!important;border-radius:3px!important}.empty{padding:20px;color:#6b7280;font-size:13px}.reviewPlaceholder{color:#6b7280;line-height:1.5;font-size:13px;padding:10px}
+/* --- review / selection --- */
+.selbox{position:absolute;z-index:7;border:1.5px solid var(--blue);background:rgba(37,99,235,.12);pointer-events:none}
+.review{position:absolute;z-index:3;background:rgba(245,158,11,.30);box-shadow:inset 0 0 0 1px rgba(180,83,9,.65);border-radius:2px;cursor:pointer}
+.review.resolved{background:rgba(148,163,184,.28);box-shadow:inset 0 0 0 1px rgba(100,116,139,.6)}
+.review.active{box-shadow:inset 0 0 0 2px var(--blue);z-index:5}
+.review.preview{background:rgba(37,99,235,.22);box-shadow:inset 0 0 0 1px var(--blue);pointer-events:none}
+.reviewbadge{position:absolute;z-index:6;font-size:12px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+#reviewPopover{position:fixed;z-index:1000;width:262px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:10px;display:none}
+#reviewPopover .pvText{font-size:11px;color:#6b7280;margin-bottom:6px;max-height:54px;overflow:auto;line-height:1.4}
+#reviewPopover textarea{width:100%;height:64px;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:13px system-ui;resize:vertical}
+#reviewPopover .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+#reviewPopover button{padding:6px 10px;font-size:12px}
+#reviewPopover button.cancel{background:#e5e7eb;color:#374151}
+.reviewRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:12px}
+.reviewRow:hover{background:#fffaf0;border-color:#fcd34d}
+.reviewRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.reviewRow.resolved{opacity:.6}
+.reviewRow .rvText{color:#6b7280;margin:2px 0;font-style:italic}
+.reviewRow .rvComment{font-weight:700;margin:2px 0;color:#111827}
+.reviewRow .rvActions{display:flex;gap:6px;margin-top:6px}
+.reviewRow .rvActions button{padding:4px 8px;font-size:11px;background:#eef2ff;color:#3730a3}
+.reviewHint{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;line-height:1.5}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">PDF Diff Viewer</div>
+  <form id="uploadForm" class="uploadForm">
+    <label class="fileLabel">Old <input id="oldFile" type="file" name="old_pdf" accept="application/pdf" required></label>
+    <label class="fileLabel">New <input id="newFile" type="file" name="new_pdf" accept="application/pdf" required></label>
+    <button id="runBtn" type="submit">비교 실행</button>
+  </form>
+  <span id="status">대기</span>
+</div>
+<main>
+  <aside>
+    <div class="tabs">
+      <button class="tabBtn active" data-tab="index">Index</button>
+      <button class="tabBtn" data-tab="diff">Diff</button>
+      <button class="tabBtn" data-tab="review">Review</button>
+    </div>
+    <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">New PDF 기준 목차가 여기에 표시됩니다.</div></div></div>
+    <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changes"><div class="empty">차이내역 리스트</div></div></div>
+    <div id="tab-review" class="tabBody"><div class="reviewHint">PDF에서 <b>변경없는 텍스트</b>를 드래그하면 리뷰를 남길 수 있습니다. 변경된(추가·삭제) 단어는 한쪽에만 존재해 양쪽 매칭이 안 되므로 제외됩니다.</div><div id="exportBar" style="display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;display:flex;gap:8px"><button onclick="exportPdf('old')" style="flex:1;font-size:12px;background:#374151">Old PDF 주석 내보내기</button><button onclick="exportPdf('new')" style="flex:1;font-size:12px">New PDF 주석 내보내기</button></div><div id="reviewPane"><div class="reviewPlaceholder">아직 리뷰가 없습니다.</div></div></div>
+  </aside>
+  <section class="viewer">
+    <div id="oldPane" class="pane"><div class="paneTitle"><span id="oldTitle">Old PDF</span><span id="oldCount"></span></div><div id="oldPages" class="pages"></div></div>
+    <div id="newPane" class="pane"><div class="paneTitle"><span id="newTitle">New PDF</span><span id="newCount"></span></div><div id="newPages" class="pages"></div></div>
+  </section>
+</main>
+<div id="reviewPopover">
+  <div class="pvText" id="pvText"></div>
+  <textarea id="pvComment" placeholder="코멘트를 입력하세요"></textarea>
+  <div class="row"><button class="cancel" id="pvCancel">취소</button><button id="pvSave">리뷰 저장</button></div>
+</div>
+<div id="toast"></div>
+<script>
+const ZOOM=1.6;let DATA=null;let CURRENT_JOB_ID=null;const $=s=>document.querySelector(s);
+let WORDS={old:null,new:null};
+let EQUAL={pairs:[],newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};
+let REVIEWS=[];
+
+document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
+function activateTab(name){document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tabBody').forEach(b=>b.classList.toggle('active',b.id===`tab-${name}`));}
+
+$('#uploadForm').addEventListener('submit',async e=>{e.preventDefault();$('#runBtn').disabled=true;$('#status').textContent='업로드 중';$('#oldTitle').textContent=$('#oldFile').files[0]?.name||'Old PDF';$('#newTitle').textContent=$('#newFile').files[0]?.name||'New PDF';$('#changes').innerHTML='<div class="empty">opendataloader → diff_extract.py → PDF mapping 실행 중...</div>';$('#indexList').innerHTML='<div class="empty">Index 생성 중...</div>';const res=await fetch('/api/jobs',{method:'POST',body:new FormData($('#uploadForm'))});const data=await res.json();if(!res.ok){$('#status').textContent=data.error||'업로드 실패';$('#runBtn').disabled=false;return}CURRENT_JOB_ID=data.job_id; poll(data.job_id)});
+async function poll(jobId){const timer=setInterval(async()=>{if(jobId!==CURRENT_JOB_ID){clearInterval(timer);return}const res=await fetch('/api/jobs/'+jobId);const job=await res.json();if(jobId!==CURRENT_JOB_ID){clearInterval(timer);return}if(!res.ok){clearInterval(timer);$('#runBtn').disabled=false;$('#status').textContent='오류: '+(job.error||res.status);return}$('#status').textContent='상태: '+(job.status||'-');if(job.status==='done'){clearInterval(timer);$('#runBtn').disabled=false;DATA=job.result;draw(DATA);$('#status').textContent='완료'}if(job.status==='error'){clearInterval(timer);$('#runBtn').disabled=false;$('#status').textContent='오류: '+job.error}},900)}
+function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}function trim(s,n=160){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s}
+function draw(d){$('#oldTitle').textContent=$('#oldFile').files[0]?.name||d.old_filename||'Old PDF';$('#newTitle').textContent=$('#newFile').files[0]?.name||d.new_filename||'New PDF';const added=d.summary.added||0, deleted=d.summary.deleted||0;$('#diffStats').innerHTML=`<span class="addStat">+ ${added}</span> / <span class="delStat">-${deleted}</span>`;drawIndex(d);drawChanges(d);drawPages('old',d.old_page_count,d.old_page_sizes,d.highlights_old);drawPages('new',d.new_page_count,d.new_page_sizes,d.highlights_new);$('#oldCount').textContent=`${d.highlights_old.length}`;$('#newCount').textContent=`${d.highlights_new.length}`;setupSemantic(d)}
+function drawIndex(d){const items=d.index_items||[];if(!items.length){$('#indexList').innerHTML='<div class="empty">Index를 만들 수 없습니다.</div>';return}$('#indexList').innerHTML=items.map((it,i)=>`<div class="indexItem" data-idx="${i}" onclick="goIndex(${i})"><div class="type">${it.type==='fs'?'FINANCIAL STATEMENT':'NOTE'} · p.${it.page||'-'}</div><div>${escapeHtml(trim(it.label||it.title,180))}</div></div>`).join('')}
+function drawChanges(d){if(!d.changes.length){$('#changes').innerHTML='<div class="empty">차이 없음</div>';return}$('#changes').innerHTML=d.changes.map(c=>`<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} old p.${c.old_page||'-'} / new p.${c.new_page||'-'} · del ${c.old_highlight_ids.length} · add ${c.new_highlight_ids.length}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}</div>`).join('')}
+function drawPages(side,count,sizes,highlights){const root=side==='old'?$('#oldPages'):$('#newPages');root.innerHTML='';const byPage=new Map();for(const h of highlights){if(!byPage.has(h.page))byPage.set(h.page,[]);byPage.get(h.page).push(h)}for(let p=1;p<=count;p++){const size=sizes[p-1];const page=document.createElement('div');page.className='page';page.id=`${side}-page-${p}`;page.style.width=`${size.width*ZOOM}px`;page.style.height=`${size.height*ZOOM}px`;const img=document.createElement('img');img.loading='lazy';img.draggable=false;img.src=`/api/jobs/${DATA.job_id}/page/${side}/${p}?zoom=${ZOOM}`;page.appendChild(img);for(const h of byPage.get(p)||[]){const[x0,y0,x1,y1]=h.bbox;const el=document.createElement('div');el.className=`hl ${h.type}`;el.id=h.id;el.dataset.changeId=h.change_id;el.dataset.changeIds=(h.change_ids||[h.change_id]).join(',');el.style.left=`${x0*ZOOM}px`;el.style.top=`${y0*ZOOM}px`;el.style.width=`${Math.max(1,(x1-x0)*ZOOM)}px`;el.style.height=`${Math.max(2,(y1-y0)*ZOOM)}px`;page.appendChild(el)}root.appendChild(page)}}
+window.goIndex=function(i){const it=DATA?.index_items?.[i];if(!it)return;document.querySelectorAll('.indexItem').forEach(e=>e.classList.toggle('active',Number(e.dataset.idx)===i));scrollBboxIntoPane(document.getElementById('newPane'),'new',it.page,it.bbox||[0,0,1,1]);if(it.old_page!=null)scrollBboxIntoPane(document.getElementById('oldPane'),'old',it.old_page,it.old_bbox||[0,0,1,1])}
+window.goChange=function(id){const selectedId=Number(id);document.querySelectorAll('.change').forEach(e=>e.classList.toggle('active',Number(e.dataset.id)===selectedId));document.querySelectorAll('.hl').forEach(e=>{const ids=String(e.dataset.changeIds||e.dataset.changeId||'').split(',').map(Number).filter(x=>!Number.isNaN(x));e.classList.toggle('focus',ids.includes(selectedId))});scrollToChange('oldPane',selectedId);scrollToChange('newPane',selectedId)}
+function scrollToChange(paneId,changeId){const pane=document.getElementById(paneId);if(!pane||!DATA)return;const target=[...pane.querySelectorAll('.hl')].find(el=>{const ids=String(el.dataset.changeIds||el.dataset.changeId||'').split(',').map(Number).filter(x=>!Number.isNaN(x));return ids.includes(Number(changeId))});if(target){scrollElementIntoPane(pane,target);return}const change=DATA.changes.find(c=>Number(c.id)===Number(changeId));if(!change)return;const side=paneId.toLowerCase().includes('old')?'old':'new';const anchor=side==='old'?change.old_anchor:change.new_anchor;if(anchor&&anchor.page&&anchor.bbox)scrollBboxIntoPane(pane,side,anchor.page,anchor.bbox)}
+function scrollElementIntoPane(pane,el){const pr=pane.getBoundingClientRect();const er=el.getBoundingClientRect();pane.scrollTop+=er.top-pr.top-pane.clientHeight*.35;pane.scrollLeft+=er.left-pr.left-pane.clientWidth*.35}
+function scrollBboxIntoPane(pane,side,pageNo,bbox){if(!pane||!pageNo)return;const page=document.getElementById(`${side}-page-${pageNo}`);if(!page)return;const[x0,y0]=bbox;const pageRect=page.getBoundingClientRect();const paneRect=pane.getBoundingClientRect();pane.scrollTop+=pageRect.top+y0*ZOOM-paneRect.top-pane.clientHeight*.35;pane.scrollLeft+=pageRect.left+x0*ZOOM-paneRect.left-pane.clientWidth*.35}
+
+/* ============================================================
+   semantic_map + review (word-level, unchanged-only)
+   ============================================================ */
+function bboxOverlap(a,b){return !(a[2]<b[0]||b[2]<a[0]||a[3]<b[1]||b[3]<a[1])}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
+
+async function setupSemantic(d){
+  EQUAL=buildEqual(d.semantic_map);
+  WORDS={old:[],new:[]};
+  try{
+    const [ow,nw]=await Promise.all([
+      fetch(`/api/jobs/${d.job_id}/words/old`).then(r=>r.ok?r.json():[]),
+      fetch(`/api/jobs/${d.job_id}/words/new`).then(r=>r.ok?r.json():[])
+    ]);
+    WORDS.old=ow||[];WORDS.new=nw||[];
+  }catch(e){WORDS={old:[],new:[]}}
+  await loadReviews();
+}
+function buildEqual(sm){
+  const pairs=(sm&&sm.equal_words)||[];
+  const e={pairs,newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};
+  pairs.forEach(p=>{e.newToOld.set(p.new_word_id,p);e.oldToNew.set(p.old_word_id,p);e.newEqual.add(p.new_word_id);e.oldEqual.add(p.old_word_id)});
+  return e;
+}
+
+/* ---- drag selection on a pane ---- */
+['old','new'].forEach(setupSelection);
+function setupSelection(side){
+  const pages=side==='old'?$('#oldPages'):$('#newPages');
+  pages.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    if(e.target.closest('.review,.reviewbadge'))return;        // let marker clicks through
+    const pageEl=e.target.closest('.page');if(!pageEl)return;
+    if(!WORDS[side]||!WORDS[side].length){return}
+    e.preventDefault();
+    const r0=pageEl.getBoundingClientRect();
+    const sx=e.clientX-r0.left, sy=e.clientY-r0.top;
+    const box=document.createElement('div');box.className='selbox';pageEl.appendChild(box);
+    document.body.style.userSelect='none';
+    let rect=[sx,sy,sx,sy];
+    const move=ev=>{const rr=pageEl.getBoundingClientRect();let cx=Math.max(0,Math.min(ev.clientX-rr.left,pageEl.clientWidth)),cy=Math.max(0,Math.min(ev.clientY-rr.top,pageEl.clientHeight));rect=[Math.min(sx,cx),Math.min(sy,cy),Math.max(sx,cx),Math.max(sy,cy)];box.style.left=rect[0]+'px';box.style.top=rect[1]+'px';box.style.width=(rect[2]-rect[0])+'px';box.style.height=(rect[3]-rect[1])+'px'};
+    const up=ev=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.body.style.userSelect='';box.remove();finishSelection(side,pageEl,rect,{x:ev.clientX,y:ev.clientY})};
+    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  });
+}
+function finishSelection(side,pageEl,rectPx,xy){
+  if((rectPx[2]-rectPx[0])<3&&(rectPx[3]-rectPx[1])<3)return; // click, not a drag
+  const sel=rectPx.map(v=>v/ZOOM);
+  const pageNo=Number(pageEl.id.split('-').pop());
+  const equalSet=side==='new'?EQUAL.newEqual:EQUAL.oldEqual;
+  const ids=[];
+  (WORDS[side]||[]).forEach(w=>{if(w.page===pageNo&&equalSet.has(w.idx)&&bboxOverlap(w.bbox,sel))ids.push(w.idx)});
+  if(!ids.length){toast('변경없는 단어만 리뷰할 수 있어요. 선택 영역에 변경없는 텍스트가 없습니다.');return}
+  showPreview(side,ids);
+  openPopover(side,pageNo,sel,ids,xy);
+}
+
+/* ---- preview + popover ---- */
+function clearPreview(){document.querySelectorAll('.review.preview').forEach(e=>e.remove())}
+function showPreview(side,ids){clearPreview();(ids||[]).forEach(id=>{const w=WORDS[side][id];if(!w)return;const pg=document.getElementById(`${side}-page-${w.page}`);if(!pg)return;const[x0,y0,x1,y1]=w.bbox;const el=document.createElement('div');el.className='review preview';el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';el.style.width=Math.max(2,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';pg.appendChild(el)})}
+function openPopover(side,pageNo,sel,ids,xy){
+  const pop=$('#reviewPopover');
+  const txt=ids.map(id=>WORDS[side][id]?.text||'').join(' ');
+  $('#pvText').textContent='“'+trim(txt,140)+'”';
+  $('#pvComment').value='';
+  pop.style.display='block';
+  const w=pop.offsetWidth,h=pop.offsetHeight;
+  pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';
+  pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';
+  $('#pvComment').focus();
+  const close=()=>{pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null};
+  $('#pvCancel').onclick=close;
+  $('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);close()};
+}
+async function submitReview(side,pageNo,sel,ids,comment){
+  try{
+    const res=await fetch(`/api/jobs/${DATA.job_id}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});
+    const rev=await res.json();
+    if(!res.ok||rev.error){toast('리뷰 저장 실패: '+(rev.error||res.status));return}
+    await loadReviews();activateTab('review');focusReviewById(rev.review_id);
+  }catch(e){toast('리뷰 저장 오류')}
+}
+
+/* ---- list + markers ---- */
+async function loadReviews(){
+  if(!DATA)return;
+  try{REVIEWS=await fetch(`/api/jobs/${DATA.job_id}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}
+  drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS);
+}
+function clearReviewMarkers(){document.querySelectorAll('.review:not(.preview),.reviewbadge').forEach(e=>e.remove())}
+function drawReviewMarkers(reviews){clearReviewMarkers();reviews.forEach(rv=>{drawSideMarker('old',rv.old_word_ids,rv);drawSideMarker('new',rv.new_word_ids,rv)})}
+function drawSideMarker(side,wordIds,rv){
+  if(!wordIds||!wordIds.length||!WORDS[side]||!WORDS[side].length)return;
+  const byPage=new Map();
+  wordIds.forEach(id=>{const w=WORDS[side][id];if(w){if(!byPage.has(w.page))byPage.set(w.page,[]);byPage.get(w.page).push(w)}});
+  let badged=false;
+  byPage.forEach((ws,p)=>{
+    const pg=document.getElementById(`${side}-page-${p}`);if(!pg)return;
+    ws.forEach(w=>{const[x0,y0,x1,y1]=w.bbox;const el=document.createElement('div');el.className='review'+(rv.status==='resolved'?' resolved':'');el.dataset.reviewId=rv.review_id;el.title=rv.comment||'';el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';el.style.width=Math.max(2,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';el.onclick=()=>focusReview(rv);pg.appendChild(el)});
+    if(!badged){const w=ws[0];const b=document.createElement('div');b.className='reviewbadge';b.dataset.reviewId=rv.review_id;b.textContent='💬';b.title=rv.comment||'';b.style.left=(w.bbox[0]*ZOOM-15)+'px';b.style.top=(w.bbox[1]*ZOOM-7)+'px';b.onclick=()=>focusReview(rv);pg.appendChild(b);badged=true}
+  });
+}
+function renderReviewList(reviews){
+  const bar=$('#exportBar'); if(bar) bar.style.display=reviews.length?'flex':'none';
+  const pane=$('#reviewPane');
+  if(!reviews.length){pane.innerHTML='<div class="reviewPlaceholder">아직 리뷰가 없습니다.</div>';return}
+  pane.innerHTML=reviews.map(rv=>`<div class="reviewRow ${rv.status}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">old p.${firstPage('old',rv)} / new p.${firstPage('new',rv)} · ${rv.status}</div><div class="rvText">${escapeHtml(trim(rv.text,90))}</div><div class="rvComment">${escapeHtml(rv.comment||'(코멘트 없음)')}</div><div class="rvActions"><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${rv.status==='resolved'?'open':'resolved'}')">${rv.status==='resolved'?'다시 열기':'완료'}</button><button onclick="event.stopPropagation();deleteReview('${rv.review_id}')">삭제</button></div></div>`).join('');
+}
+function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]||!WORDS[side].length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
+function focusReview(rv){
+  if(rv.new_word_ids&&rv.new_word_ids.length){const w=WORDS.new[rv.new_word_ids[0]];if(w)scrollBboxIntoPane($('#newPane'),'new',w.page,w.bbox)}
+  if(rv.old_word_ids&&rv.old_word_ids.length){const w=WORDS.old[rv.old_word_ids[0]];if(w)scrollBboxIntoPane($('#oldPane'),'old',w.page,w.bbox)}
+  document.querySelectorAll('.review').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id));
+  document.querySelectorAll('.reviewRow').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id));
+}
+window.focusReviewById=function(id){const rv=REVIEWS.find(r=>r.review_id===id);if(rv)focusReview(rv)}
+window.toggleReview=async function(id,status){try{await fetch(`/api/jobs/${DATA.job_id}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});await loadReviews()}catch(e){toast('상태 변경 실패')}}
+window.deleteReview=async function(id){if(!confirm('이 리뷰를 삭제할까요?'))return;try{await fetch(`/api/jobs/${DATA.job_id}/reviews/${id}`,{method:'DELETE'});await loadReviews()}catch(e){toast('삭제 실패')}}
+window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('저장된 리뷰가 없습니다');return;}window.open(`/api/jobs/${DATA.job_id}/export/${side}`,'_blank')}
+</script>
+</body>
+</html>
