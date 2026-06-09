@@ -1,0 +1,90 @@
+[
+  {
+    "review_id": "r-f79cbfb6",
+    "anchor_id": "a-c7bd98c6",
+    "doc_id": "9e416a40ab2d",
+    "status": "open",
+    "created_run_id": "4893bee622b9",
+    "is_floating": false,
+    "text": "Revenue 100",
+    "comments": [
+      {
+        "comment_id": "c-f39fb7fd",
+        "author": "user",
+        "text": "r1 current",
+        "created_at": "2026-06-09T13:35:28.433297+00:00"
+      }
+    ],
+    "anchors": {
+      "4893bee622b9": {
+        "run_id": "4893bee622b9",
+        "side": "new",
+        "word_ids": [
+          0,
+          1
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          0,
+          1
+        ],
+        "page": 1,
+        "bbox": [
+          72.0,
+          60.17499923706055,
+          137.427978515625,
+          75.28900146484375
+        ],
+        "rect": null,
+        "text": "Revenue 100",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T13:35:28.433297+00:00",
+    "updated_at": "2026-06-09T13:35:28.433297+00:00"
+  },
+  {
+    "review_id": "r-aa41ea5b",
+    "anchor_id": "a-6766809e",
+    "doc_id": "9e416a40ab2d",
+    "status": "open",
+    "created_run_id": "81cb56612005",
+    "is_floating": false,
+    "text": "Revenue 120",
+    "comments": [
+      {
+        "comment_id": "c-cdaa8563",
+        "author": "user",
+        "text": "r2 current",
+        "created_at": "2026-06-09T13:35:29.085869+00:00"
+      }
+    ],
+    "anchors": {
+      "81cb56612005": {
+        "run_id": "81cb56612005",
+        "side": "new",
+        "word_ids": [
+          0,
+          1
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          0,
+          1
+        ],
+        "page": 1,
+        "bbox": [
+          72.0,
+          60.17499923706055,
+          137.427978515625,
+          75.28900146484375
+        ],
+        "rect": null,
+        "text": "Revenue 120",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T13:35:29.085869+00:00",
+    "updated_at": "2026-06-09T13:35:29.085869+00:00"
+  }
+]

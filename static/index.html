@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,36 +8,39 @@
 :root{--red:#cf222e;--green:#2da44e;--red-bg:rgba(255,65,65,.38);--green-bg:rgba(34,197,94,.38);--blue:#2563eb}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827}
 .topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:12px;padding:8px 14px;flex-wrap:wrap}.brand{font-size:15px;font-weight:800;white-space:nowrap}
-.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:auto}.fileLabel{display:flex;align-items:center;gap:5px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{max-width:180px;font-size:11px}
+.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:auto}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer}.fileName{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d1d5db}
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
-#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 58px);display:grid;grid-template-columns:340px 1fr;overflow:hidden}
+#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 58px);display:grid;grid-template-columns:260px 1fr;overflow:hidden}body.sidebarCollapsed main{grid-template-columns:0 1fr}body.sidebarCollapsed aside{border-right:0}
+#sidebarToggle{position:fixed;left:248px;top:68px;z-index:2000;width:24px;height:42px;padding:0;border-radius:0 8px 8px 0;background:#111827;color:#fff;border:1px solid #374151;box-shadow:0 2px 8px rgba(0,0,0,.25)}body.sidebarCollapsed #sidebarToggle{left:0}
 aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:10px 8px;font-size:13px}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
 .tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:800}.addStat{color:var(--green)}.delStat{color:var(--red)}
 #changes,#indexList,#reviewPane{overflow:auto;padding:8px}.indexItem,.change{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:12px}.indexItem:hover,.change:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:10px;color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
 .meta{color:#6b7280;font-size:11px;margin-bottom:4px}.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
 .viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.viewer.single{grid-template-columns:1fr}.viewer.single #oldPane{display:none}.pane{position:relative;overflow:auto;background:#e5e7eb;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:7px 10px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pages{padding:14px;display:flex;flex-direction:column;align-items:center;gap:16px}.page{position:relative;background:white;box-shadow:0 2px 12px rgba(0,0,0,.22);flex:none}.page img{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;user-select:none;-webkit-user-drag:none}.hl{position:absolute;z-index:2;border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.hl.delete{background:var(--red-bg)}.hl.add{background:var(--green-bg)}.hl.focus{outline:none!important;box-shadow:inset 0 0 0 1.5px #2563eb!important;z-index:4!important;border-radius:3px!important}
-.empty{padding:20px;color:#6b7280;font-size:13px}.reviewPlaceholder{color:#6b7280;line-height:1.5;font-size:13px;padding:10px}.selbox{position:absolute;z-index:7;border:1.5px solid var(--blue);background:rgba(37,99,235,.12);pointer-events:none}
-.review{position:absolute;z-index:3;background:rgba(245,158,11,.30);box-shadow:inset 0 0 0 1px rgba(180,83,9,.65);border-radius:2px;cursor:pointer}.review.resolved{background:rgba(148,163,184,.28);box-shadow:inset 0 0 0 1px rgba(100,116,139,.6)}.review.active{box-shadow:inset 0 0 0 2px var(--blue);z-index:5}.review.preview{background:rgba(37,99,235,.22);box-shadow:inset 0 0 0 1px var(--blue);pointer-events:none}
-.reviewbadge{position:absolute;z-index:6;font-size:12px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
-#reviewPopover{position:fixed;z-index:1000;width:262px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:10px;display:none}#reviewPopover .pvText{font-size:11px;color:#6b7280;margin-bottom:6px;max-height:54px;overflow:auto;line-height:1.4}#reviewPopover textarea{width:100%;height:64px;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:13px system-ui;resize:vertical}#reviewPopover .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#reviewPopover button{padding:6px 10px;font-size:12px}#reviewPopover button.cancel{background:#e5e7eb;color:#374151}
-.reviewRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:12px}.reviewRow:hover{background:#fffaf0;border-color:#fcd34d}.reviewRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.reviewRow.resolved{opacity:.6}.reviewRow .rvText{color:#6b7280;margin:2px 0;font-style:italic}.reviewRow .rvComment{font-weight:700;margin:2px 0;color:#111827}.reviewRow .rvActions{display:flex;gap:6px;margin-top:6px}.reviewRow .rvActions button{padding:4px 8px;font-size:11px;background:#eef2ff;color:#3730a3}
-.reviewHint{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;line-height:1.5}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
+.pages{padding:6px;display:flex;flex-direction:column;align-items:center;gap:10px}.page{position:relative;background:white;box-shadow:0 2px 12px rgba(0,0,0,.22);flex:none}.page img{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;user-select:none;-webkit-user-drag:none}.hl{position:absolute;z-index:2;border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.hl.delete{background:var(--red-bg)}.hl.add{background:var(--green-bg)}.hl.focus{outline:none!important;box-shadow:inset 0 0 0 1.5px #2563eb!important;z-index:4!important;border-radius:3px!important}
+.empty{padding:20px;color:#6b7280;font-size:13px}.reviewPlaceholder{color:#6b7280;line-height:1.5;font-size:13px;padding:10px}.selbox{display:none}.textsel{position:absolute;z-index:7;background:rgba(37,99,235,.30);border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.reviewAnchorFocus,.reviewAnchorHover{position:absolute;z-index:6;background:rgba(99,102,241,.16);box-shadow:inset 0 0 0 1.5px #4f46e5;border-radius:2px;pointer-events:none}.reviewAnchorHover{z-index:7;background:rgba(245,158,11,.24);box-shadow:inset 0 0 0 1.5px #d97706}
+.review{position:absolute;z-index:3;background:rgba(245,158,11,.30);box-shadow:inset 0 0 0 1px rgba(180,83,9,.65);border-radius:2px;cursor:pointer}.review.cleared,.review.resolved{background:rgba(148,163,184,.28);box-shadow:inset 0 0 0 1px rgba(100,116,139,.6)}.review.active{box-shadow:inset 0 0 0 2px var(--blue);z-index:5}.review.preview{background:rgba(37,99,235,.22);box-shadow:inset 0 0 0 1px var(--blue);pointer-events:none}
+.reviewNote{position:absolute;z-index:8;width:18px;height:18px;background:#fbbf24;border:1px solid #92400e;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.25);cursor:pointer}.reviewNote:after{content:"";position:absolute;right:-4px;bottom:2px;border-width:4px 0 0 4px;border-style:solid;border-color:transparent transparent transparent #92400e}.reviewNote.cleared,.reviewNote.resolved{background:#cbd5e1;border-color:#64748b}.reviewNote.active{outline:2px solid var(--blue)}
+.reviewNotePanel{position:absolute;z-index:30;width:248px;min-height:90px;background:#fffbeb;border:1px solid #d97706;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:12px;color:#111827;cursor:move;user-select:text}.reviewNotePanel.cleared,.reviewNotePanel.resolved{background:#f8fafc;border-color:#94a3b8}.noteMin{position:absolute;right:4px;top:4px;width:16px;height:16px;padding:0!important;border-radius:4px;background:#fef3c7!important;color:#92400e!important;line-height:14px;font-size:10px!important}.noteBody{padding:22px 8px 4px 8px;max-height:180px;overflow:auto;cursor:text;user-select:text}.noteThread{display:flex;flex-direction:column;gap:6px}.noteComment{background:rgba(255,255,255,.72);border-left:3px solid #f59e0b;border-radius:6px;padding:6px 7px;white-space:pre-wrap}.noteComment+.noteComment{margin-left:10px}.noteCommentMeta{margin-top:3px;color:#6b7280;font-size:10px}.noteReply{display:none;padding:4px 8px 2px 8px;cursor:default}.noteReply textarea{width:100%;height:50px;border:1px solid #d1d5db;border-radius:6px;padding:5px;font:12px system-ui;resize:vertical}.noteReplyActions{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}.noteActions{display:flex;gap:6px;padding:4px 8px 7px 8px;cursor:default;user-select:none;flex-wrap:wrap}.noteActions button,.noteReplyActions button{padding:4px 7px;font-size:11px}.noteDelete{background:#fee2e2!important;color:#991b1b!important}
+#reviewPopover{position:fixed;z-index:1000;width:262px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:10px;display:none}#reviewPopover textarea{width:100%;height:64px;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:13px system-ui;resize:vertical}#reviewPopover .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#reviewPopover button{padding:6px 10px}#reviewPopover button.cancel{background:#e5e7eb;color:#374151}
+.reviewRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:12px}.reviewRow:hover{background:#fffaf0;border-color:#fcd34d}.reviewRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.reviewRow.cleared,.reviewRow.resolved{opacity:.6}.reviewRow .rvComment{font-weight:700;margin:2px 0;color:#111827;white-space:pre-wrap}.reviewRow .rvActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.reviewRow .rvActions button{padding:4px 8px;font-size:11px;background:#eef2ff;color:#3730a3}.rvReply{display:none;margin-top:6px}.rvReply textarea{width:100%;height:48px;border:1px solid #d1d5db;border-radius:6px;padding:5px;font:12px system-ui;resize:vertical}.rvReplyActions{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}.rvReplyActions button{padding:4px 8px;font-size:11px}
+.reviewSubtabs{display:flex;border-bottom:1px solid #e5e7eb}.reviewSubtab{flex:1;border-radius:0;background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:8px;font-size:12px}.reviewSubtab.active{background:#eef2ff;color:#1d4ed8;box-shadow:inset 0 -2px 0 var(--blue)}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
 </style>
 </head>
 <body>
 <div class="topbar">
   <div class="brand">PDF Review Workspace</div>
   <form id="createForm" class="uploadForm">
-    <label class="fileLabel">최초 보고서 <input id="initialFile" type="file" name="pdf" accept="application/pdf" required></label>
-    <button id="createBtn" type="submit">문서 시작</button>
+    <label class="fileLabel">Initial Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="initialFileName" class="fileName">No file selected</span></label>
+    <button id="createBtn" type="submit">Start Document</button>
   </form>
   <form id="updateForm" class="uploadForm" style="display:none">
-    <label class="fileLabel">수정 보고서 <input id="updateFile" type="file" name="pdf" accept="application/pdf" required></label>
-    <button id="updateBtn" type="submit">업데이트 + Diff</button>
+    <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="updateFileName" class="fileName">No file selected</span></label>
+    <button id="updateBtn" type="submit">Upload Update + Diff</button>
   </form>
-  <span id="status">대기</span>
+  <span id="status">Idle</span>
 </div>
+<button id="sidebarToggle" type="button" title="Toggle sidebar">‹</button>
 <main>
   <aside>
     <div class="tabs">
@@ -45,9 +48,9 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
       <button class="tabBtn" data-tab="diff">Diff</button>
       <button class="tabBtn" data-tab="review">Review</button>
     </div>
-    <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">보고서를 업로드하면 목차가 표시됩니다.</div></div></div>
-    <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changes"><div class="empty">업데이트 보고서 diff가 여기에 표시됩니다.</div></div></div>
-    <div id="tab-review" class="tabBody"><div class="reviewHint">최초 보고서는 현재 PDF 텍스트에 리뷰를 남깁니다. Diff run에서는 양쪽에 모두 남아있는 변경없는 텍스트에 리뷰를 남깁니다.</div><div id="exportBar" style="display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px"><button id="exportOldBtn" onclick="exportPdf('old')" style="flex:1;font-size:12px;background:#374151">Old PDF 주석 내보내기</button><button onclick="exportPdf('new')" style="flex:1;font-size:12px">Current PDF 주석 내보내기</button></div><div id="reviewPane"><div class="reviewPlaceholder">아직 리뷰가 없습니다.</div></div></div>
+    <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">Upload a report to view the index.</div></div></div>
+    <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changes"><div class="empty">Upload an updated report to view the diff.</div></div></div>
+    <div id="tab-review" class="tabBody"><div id="reviewSubtabs" class="reviewSubtabs"><button id="reviewPrevTab" class="reviewSubtab" onclick="setReviewSide('old')">Previous</button><button id="reviewCurrentTab" class="reviewSubtab active" onclick="setReviewSide('new')">Current</button></div><div id="exportBar" style="display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px"><button id="exportOldBtn" onclick="exportPdf('old')" style="flex:1;font-size:12px;background:#374151">Export Previous Annotations</button><button id="exportCurrentBtn" onclick="exportPdf('new')" style="flex:1;font-size:12px">Export Current Annotations</button></div><div id="reviewPane"><div class="reviewPlaceholder">No reviews yet.</div></div></div>
   </aside>
   <section id="viewer" class="viewer single">
     <div id="oldPane" class="pane"><div class="paneTitle"><span id="oldTitle">Previous PDF</span><span id="oldCount"></span></div><div id="oldPages" class="pages"></div></div>
@@ -55,34 +58,39 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
   </section>
 </main>
 <div id="reviewPopover">
-  <div class="pvText" id="pvText"></div>
-  <textarea id="pvComment" placeholder="코멘트를 입력하세요"></textarea>
-  <div class="row"><button class="cancel" id="pvCancel">취소</button><button id="pvSave">리뷰 저장</button></div>
+  <textarea id="pvComment" placeholder="Enter a comment"></textarea>
+  <div class="row"><button class="cancel" id="pvCancel">Cancel</button><button id="pvSave">Save Review</button></div>
 </div>
 <div id="toast"></div>
 <script>
-const ZOOM=1.6;
+let ZOOM=1.15;
 const $=s=>document.querySelector(s);
 let DATA=null, DOC_ID=null, RUN_ID=null;
 let WORDS={old:[],new:[]};
+let CHARS={old:[],new:[]};
 let EQUAL={pairs:[],newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};
 let REVIEWS=[];
+let REVIEW_SIDE='new';
 
 document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
+$('#sidebarToggle').addEventListener('click',()=>{document.body.classList.toggle('sidebarCollapsed');$('#sidebarToggle').textContent=document.body.classList.contains('sidebarCollapsed')?'›':'‹';if(DATA)requestAnimationFrame(()=>draw(DATA))});
+window.addEventListener('resize',()=>{if(DATA)draw(DATA)});
+$('#initialFile').addEventListener('change',()=>{$('#initialFileName').textContent=$('#initialFile').files[0]?.name||'No file selected'});
+$('#updateFile').addEventListener('change',()=>{$('#updateFileName').textContent=$('#updateFile').files[0]?.name||'No file selected'});
 function activateTab(name){document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tabBody').forEach(b=>b.classList.toggle('active',b.id===`tab-${name}`));}
 function apiBase(){return `/api/documents/${DOC_ID}/runs/${RUN_ID}`}
 function isDiff(){return DATA?.mode==='diff'}
 function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}
 function trim(s,n=160){s=String(s||'');return s.length>n?s.slice(0,n-1)+'...':s}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
-function setBusy(busy,msg){$('#createBtn').disabled=busy;$('#updateBtn').disabled=busy;$('#status').textContent=msg||'대기'}
+function setBusy(busy,msg){$('#createBtn').disabled=busy;$('#updateBtn').disabled=busy;$('#status').textContent=msg||'Idle'}
 
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const file=$('#initialFile').files[0]; if(!file)return;
-  setBusy(true,'최초 보고서 처리 중');
-  $('#indexList').innerHTML='<div class="empty">OpenDataLoader 처리 및 Index 생성 중...</div>';
-  $('#changes').innerHTML='<div class="empty">최초 보고서는 diff가 없습니다.</div>';
+  setBusy(true,'Processing initial report');
+  $('#indexList').innerHTML='<div class="empty">Running OpenDataLoader and building the index...</div>';
+  $('#changes').innerHTML='<div class="empty">The initial report has no diff yet.</div>';
   const fd=new FormData(); fd.append('pdf',file); fd.append('title',file.name.replace(/\.pdf$/i,''));
   try{
     const res=await fetch('/api/documents',{method:'POST',body:fd});
@@ -90,46 +98,64 @@ $('#createForm').addEventListener('submit',async e=>{
     if(!res.ok)throw new Error(data.error||res.status);
     DOC_ID=data.doc_id; RUN_ID=data.run_id; DATA=data.result;
     $('#updateForm').style.display='flex';
-    draw(DATA); activateTab('review'); setBusy(false,'최초 업로드 완료');
-  }catch(err){setBusy(false,'오류: '+err.message)}
+    draw(DATA); activateTab('review'); setBusy(false,'Initial upload complete');
+  }catch(err){setBusy(false,'Error: '+err.message)}
 });
 
 $('#updateForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  if(!DOC_ID){toast('먼저 최초 보고서를 업로드하세요');return}
+  if(!DOC_ID){toast('Upload an initial report first.');return}
   const file=$('#updateFile').files[0]; if(!file)return;
-  setBusy(true,'수정 보고서 업로드 중');
+  setBusy(true,'Uploading updated report');
   const fd=new FormData(); fd.append('pdf',file);
   try{
     let res=await fetch(`/api/documents/${DOC_ID}/runs`,{method:'POST',body:fd});
     let data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
     RUN_ID=data.run_id;
-    $('#status').textContent='diff 실행 중';
+    $('#status').textContent='Running diff';
     res=await fetch(`${apiBase()}/diff`,{method:'POST'});
     data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
     DATA=data.result;
-    draw(DATA); activateTab('diff'); setBusy(false,'Diff 완료');
-  }catch(err){setBusy(false,'오류: '+err.message)}
+    draw(DATA); activateTab('diff'); setBusy(false,'Diff complete');
+  }catch(err){setBusy(false,'Error: '+err.message)}
 });
 
 function draw(d){
   $('#viewer').classList.toggle('single',!isDiff());
+  if(!isDiff())REVIEW_SIDE='new';
   $('#oldTitle').textContent=d.old_filename||'Previous PDF';
   $('#newTitle').textContent=d.new_filename||d.filename||'Current PDF';
   const added=d.summary?.added||0, deleted=d.summary?.deleted||0;
   $('#diffStats').innerHTML=`<span class="addStat">+ ${added}</span> / <span class="delStat">-${deleted}</span>`;
+  ZOOM=computeFitZoom(d);
   drawIndex(d); drawChanges(d);
   if(isDiff())drawPages('old',d.old_page_count||0,d.old_page_sizes||[],d.highlights_old||[]);
   else $('#oldPages').innerHTML='';
   drawPages('new',d.new_page_count||d.page_count||0,d.new_page_sizes||d.page_sizes||[],d.highlights_new||[]);
   $('#oldCount').textContent=isDiff()?`${(d.highlights_old||[]).length}`:'';
   $('#newCount').textContent=`${(d.highlights_new||[]).length}`;
+  $('#reviewSubtabs').style.display=isDiff()?'flex':'none';
+  updateReviewSubtabs();
   setupSemantic(d);
 }
-function drawIndex(d){const items=d.index_items||[];if(!items.length){$('#indexList').innerHTML='<div class="empty">Index를 만들 수 없습니다.</div>';return}$('#indexList').innerHTML=items.map((it,i)=>`<div class="indexItem" data-idx="${i}" onclick="goIndex(${i})"><div class="type">${it.type==='fs'?'FINANCIAL STATEMENT':it.type==='note'?'NOTE':String(it.type||'INDEX').toUpperCase()} · p.${it.page||'-'}</div><div>${escapeHtml(trim(it.label||it.title,180))}</div></div>`).join('')}
-function drawChanges(d){const changes=d.changes||[];if(!isDiff()){$('#changes').innerHTML='<div class="empty">최초 보고서는 diff가 없습니다. 수정 보고서를 업로드하면 비교 결과가 표시됩니다.</div>';return}if(!changes.length){$('#changes').innerHTML='<div class="empty">차이 없음</div>';return}$('#changes').innerHTML=changes.map(c=>`<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} old p.${c.old_page||'-'} / new p.${c.new_page||'-'} · del ${c.old_highlight_ids?.length||0} · add ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}</div>`).join('')}
+function computeFitZoom(d){
+  const pad=14;
+  const fits=[];
+  if(isDiff()&&(d.old_page_sizes||[]).length){
+    const w=Math.max(...d.old_page_sizes.map(s=>s.width||1));
+    fits.push(Math.max(.5,($('#oldPane').clientWidth-pad)/w));
+  }
+  const sizes=d.new_page_sizes||d.page_sizes||[];
+  if(sizes.length){
+    const w=Math.max(...sizes.map(s=>s.width||1));
+    fits.push(Math.max(.5,($('#newPane').clientWidth-pad)/w));
+  }
+  return Math.min(2.15,Math.max(.8,...fits));
+}
+function drawIndex(d){const items=d.index_items||[];if(!items.length){$('#indexList').innerHTML='<div class="empty">Unable to build an index.</div>';return}$('#indexList').innerHTML=items.map((it,i)=>`<div class="indexItem" data-idx="${i}" onclick="goIndex(${i})"><div class="type">${it.type==='fs'?'FINANCIAL STATEMENT':it.type==='note'?'NOTE':String(it.type||'INDEX').toUpperCase()} · p.${it.page||'-'}</div><div>${escapeHtml(trim(it.label||it.title,180))}</div></div>`).join('')}
+function drawChanges(d){const changes=d.changes||[];if(!isDiff()){$('#changes').innerHTML='<div class="empty">The initial report has no diff. Upload an updated report to compare versions.</div>';return}if(!changes.length){$('#changes').innerHTML='<div class="empty">No differences found.</div>';return}$('#changes').innerHTML=changes.map(c=>`<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} old p.${c.old_page||'-'} / new p.${c.new_page||'-'} · del ${c.old_highlight_ids?.length||0} · add ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}</div>`).join('')}
 function drawPages(side,count,sizes,highlights){const root=side==='old'?$('#oldPages'):$('#newPages');root.innerHTML='';const byPage=new Map();for(const h of highlights||[]){if(!byPage.has(h.page))byPage.set(h.page,[]);byPage.get(h.page).push(h)}for(let p=1;p<=count;p++){const size=sizes[p-1];if(!size)continue;const page=document.createElement('div');page.className='page';page.id=`${side}-page-${p}`;page.style.width=`${size.width*ZOOM}px`;page.style.height=`${size.height*ZOOM}px`;const img=document.createElement('img');img.loading='lazy';img.draggable=false;img.src=`${apiBase()}/page/${side}/${p}?zoom=${ZOOM}`;page.appendChild(img);for(const h of byPage.get(p)||[]){const[x0,y0,x1,y1]=h.bbox;const el=document.createElement('div');el.className=`hl ${h.type}`;el.id=h.id;el.dataset.changeId=h.change_id;el.dataset.changeIds=(h.change_ids||[h.change_id]).join(',');el.style.left=`${x0*ZOOM}px`;el.style.top=`${y0*ZOOM}px`;el.style.width=`${Math.max(1,(x1-x0)*ZOOM)}px`;el.style.height=`${Math.max(2,(y1-y0)*ZOOM)}px`;page.appendChild(el)}root.appendChild(page)}}
 
 window.goIndex=function(i){const it=DATA?.index_items?.[i];if(!it)return;document.querySelectorAll('.indexItem').forEach(e=>e.classList.toggle('active',Number(e.dataset.idx)===i));scrollBboxIntoPane($('#newPane'),'new',it.page,it.bbox||[0,0,1,1]);if(isDiff()&&it.old_page!=null)scrollBboxIntoPane($('#oldPane'),'old',it.old_page,it.old_bbox||[0,0,1,1])}
@@ -142,17 +168,119 @@ function bboxOverlap(a,b){return !(a[2]<b[0]||b[2]<a[0]||a[3]<b[1]||b[3]<a[1])}
 async function setupSemantic(d){
   EQUAL=buildEqual(d.semantic_map);
   WORDS={old:[],new:[]};
+  CHARS={old:[],new:[]};
   try{
-    const jobs=[fetch(`${apiBase()}/words/new`).then(r=>r.ok?r.json():[])];
-    if(isDiff())jobs.unshift(fetch(`${apiBase()}/words/old`).then(r=>r.ok?r.json():[]));
+    const jobs=[
+      fetch(`${apiBase()}/words/new`).then(r=>r.ok?r.json():[]),
+      fetch(`${apiBase()}/chars/new`).then(r=>r.ok?r.json():[])
+    ];
+    if(isDiff()){
+      jobs.unshift(fetch(`${apiBase()}/chars/old`).then(r=>r.ok?r.json():[]));
+      jobs.unshift(fetch(`${apiBase()}/words/old`).then(r=>r.ok?r.json():[]));
+    }
     const result=await Promise.all(jobs);
-    if(isDiff()){WORDS.old=result[0]||[];WORDS.new=result[1]||[]}else{WORDS.new=result[0]||[]}
-  }catch(e){WORDS={old:[],new:[]}}
+    if(isDiff()){WORDS.old=result[0]||[];CHARS.old=result[1]||[];WORDS.new=result[2]||[];CHARS.new=result[3]||[]}
+    else{WORDS.new=result[0]||[];CHARS.new=result[1]||[]}
+  }catch(e){WORDS={old:[],new:[]};CHARS={old:[],new:[]}}
   await loadReviews();
 }
 function buildEqual(sm){const pairs=(sm&&sm.equal_words)||[];const e={pairs,newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};pairs.forEach(p=>{e.newToOld.set(p.new_word_id,p);e.oldToNew.set(p.old_word_id,p);e.newEqual.add(p.new_word_id);e.oldEqual.add(p.old_word_id)});return e}
+function isCleared(rv){return rv.status==='cleared'||rv.status==='resolved'}
 
 ['old','new'].forEach(setupSelection);
+function selectableWord(side,w){return true}
+function selectableChar(side,ch){return true}
+function pageWordsInReadOrder(side,pageNo){
+  return (WORDS[side]||[])
+    .filter(w=>w.page===pageNo&&selectableWord(side,w))
+    .slice()
+    .sort((a,b)=>(a.block-b.block)||(a.line-b.line)||(a.word_no-b.word_no)||(a.bbox[1]-b.bbox[1])||(a.bbox[0]-b.bbox[0]));
+}
+function pageCharsInReadOrder(side,pageNo){
+  return (CHARS[side]||[])
+    .filter(ch=>ch.page===pageNo&&selectableChar(side,ch))
+    .slice()
+    .sort((a,b)=>((a.block??0)-(b.block??0))||((a.line??0)-(b.line??0))||((a.word_no??0)-(b.word_no??0))||((a.char_index??0)-(b.char_index??0))||(a.order-b.order)||(a.bbox[1]-b.bbox[1])||(a.bbox[0]-b.bbox[0]));
+}
+function nearestCharAt(side,pageNo,x,y){
+  const chars=pageCharsInReadOrder(side,pageNo);
+  let best=null,bestScore=Infinity;
+  for(const ch of chars){
+    const [x0,y0,x1,y1]=ch.bbox;
+    const inside=x>=x0-2&&x<=x1+2&&y>=y0-4&&y<=y1+4;
+    const cx=Math.max(x0,Math.min(x,x1)), cy=Math.max(y0,Math.min(y,y1));
+    const dist=(x-cx)*(x-cx)+(y-cy)*(y-cy);
+    const score=inside?dist:dist+900;
+    if(score<bestScore){best=ch;bestScore=score}
+  }
+  return best;
+}
+function charsFromSweep(side,pageNo,startPt,endPt,rectDoc){
+  const chars=pageCharsInReadOrder(side,pageNo);
+  if(!chars.length)return [];
+  const start=nearestCharAt(side,pageNo,startPt.x,startPt.y);
+  const end=nearestCharAt(side,pageNo,endPt.x,endPt.y);
+  if(start&&end){
+    const a=chars.findIndex(ch=>ch.idx===start.idx), b=chars.findIndex(ch=>ch.idx===end.idx);
+    if(a>=0&&b>=0){
+      const lo=Math.min(a,b), hi=Math.max(a,b);
+      return chars.slice(lo,hi+1);
+    }
+  }
+  return chars.filter(ch=>bboxOverlap(ch.bbox,rectDoc));
+}
+function wordIdsFromChars(chars){
+  const ids=[];
+  const seen=new Set();
+  chars.forEach(ch=>{if(ch.word_id!=null&&!seen.has(ch.word_id)){seen.add(ch.word_id);ids.push(ch.word_id)}});
+  return ids;
+}
+function nearestWordAt(side,pageNo,x,y){
+  const words=pageWordsInReadOrder(side,pageNo);
+  let best=null,bestScore=Infinity;
+  for(const w of words){
+    const [x0,y0,x1,y1]=w.bbox;
+    const inside=x>=x0-3&&x<=x1+3&&y>=y0-4&&y<=y1+4;
+    const cx=Math.max(x0,Math.min(x,x1)), cy=Math.max(y0,Math.min(y,y1));
+    const dist=(x-cx)*(x-cx)+(y-cy)*(y-cy);
+    const score=inside?dist:dist+900;
+    if(score<bestScore){best=w;bestScore=score}
+  }
+  return best;
+}
+function idsFromTextSweep(side,pageNo,startPt,endPt,rectDoc){
+  const chars=charsFromSweep(side,pageNo,startPt,endPt,rectDoc);
+  if(chars.length)return wordIdsFromChars(chars);
+  const words=pageWordsInReadOrder(side,pageNo);
+  if(!words.length)return [];
+  const start=nearestWordAt(side,pageNo,startPt.x,startPt.y);
+  const end=nearestWordAt(side,pageNo,endPt.x,endPt.y);
+  if(start&&end){
+    const a=words.findIndex(w=>w.idx===start.idx), b=words.findIndex(w=>w.idx===end.idx);
+    if(a>=0&&b>=0){
+      const lo=Math.min(a,b), hi=Math.max(a,b);
+      return words.slice(lo,hi+1).map(w=>w.idx);
+    }
+  }
+  return words.filter(w=>bboxOverlap(w.bbox,rectDoc)).map(w=>w.idx);
+}
+function showCharSweepPreview(side,pageNo,startPt,endPt,rectDoc){
+  clearPreview();
+  const chars=charsFromSweep(side,pageNo,startPt,endPt,rectDoc);
+  const pg=document.getElementById(`${side}-page-${pageNo}`);
+  if(!pg)return;
+  const groups=new Map();
+  chars.forEach(ch=>{const key=`${ch.block??0}:${ch.line??Math.round(ch.bbox[1])}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(ch)});
+  groups.forEach(lineChars=>{
+    const xs=[],ys=[];
+    lineChars.forEach(ch=>{const[x0,y0,x1,y1]=ch.bbox;xs.push(x0,x1);ys.push(y0,y1)});
+    const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    const el=document.createElement('div');el.className='textsel';
+    el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';
+    el.style.width=Math.max(1,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';
+    pg.appendChild(el);
+  });
+}
 function setupSelection(side){
   const pages=side==='old'?$('#oldPages'):$('#newPages');
   pages.addEventListener('mousedown',e=>{
@@ -162,40 +290,224 @@ function setupSelection(side){
     e.preventDefault();
     const r0=pageEl.getBoundingClientRect();
     const sx=e.clientX-r0.left, sy=e.clientY-r0.top;
+    const startDoc={x:sx/ZOOM,y:sy/ZOOM};
     const box=document.createElement('div');box.className='selbox';pageEl.appendChild(box);
     document.body.style.userSelect='none';
     let rect=[sx,sy,sx,sy];
-    const move=ev=>{const rr=pageEl.getBoundingClientRect();let cx=Math.max(0,Math.min(ev.clientX-rr.left,pageEl.clientWidth)),cy=Math.max(0,Math.min(ev.clientY-rr.top,pageEl.clientHeight));rect=[Math.min(sx,cx),Math.min(sy,cy),Math.max(sx,cx),Math.max(sy,cy)];box.style.left=rect[0]+'px';box.style.top=rect[1]+'px';box.style.width=(rect[2]-rect[0])+'px';box.style.height=(rect[3]-rect[1])+'px'};
-    const up=ev=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.body.style.userSelect='';box.remove();finishSelection(side,pageEl,rect,{x:ev.clientX,y:ev.clientY})};
+    const move=ev=>{const rr=pageEl.getBoundingClientRect();let cx=Math.max(0,Math.min(ev.clientX-rr.left,pageEl.clientWidth)),cy=Math.max(0,Math.min(ev.clientY-rr.top,pageEl.clientHeight));rect=[Math.min(sx,cx),Math.min(sy,cy),Math.max(sx,cx),Math.max(sy,cy)];box.style.left=rect[0]+'px';box.style.top=rect[1]+'px';box.style.width=(rect[2]-rect[0])+'px';box.style.height=(rect[3]-rect[1])+'px';showCharSweepPreview(side,Number(pageEl.id.split('-').pop()),startDoc,{x:cx/ZOOM,y:cy/ZOOM},rect.map(v=>v/ZOOM))};
+    const up=ev=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.body.style.userSelect='';box.remove();const rr=pageEl.getBoundingClientRect();const endDoc={x:Math.max(0,Math.min(ev.clientX-rr.left,pageEl.clientWidth))/ZOOM,y:Math.max(0,Math.min(ev.clientY-rr.top,pageEl.clientHeight))/ZOOM};finishSelection(side,pageEl,rect,{x:ev.clientX,y:ev.clientY},startDoc,endDoc)};
     document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
   });
 }
-function finishSelection(side,pageEl,rectPx,xy){
+function finishSelection(side,pageEl,rectPx,xy,startDoc,endDoc){
   if((rectPx[2]-rectPx[0])<3&&(rectPx[3]-rectPx[1])<3)return;
   const sel=rectPx.map(v=>v/ZOOM);
   const pageNo=Number(pageEl.id.split('-').pop());
-  const equalSet=side==='new'?EQUAL.newEqual:EQUAL.oldEqual;
-  const ids=[];
-  (WORDS[side]||[]).forEach(w=>{const allowed=!isDiff()&&side==='new'?true:equalSet.has(w.idx);if(w.page===pageNo&&allowed&&bboxOverlap(w.bbox,sel))ids.push(w.idx)});
-  if(!ids.length){toast(isDiff()?'변경없는 단어만 리뷰할 수 있어요.':'선택 영역에 텍스트가 없습니다.');return}
-  showPreview(side,ids); openPopover(side,pageNo,sel,ids,xy);
+  const ids=idsFromTextSweep(side,pageNo,startDoc,endDoc,sel);
+  if(!ids.length){toast('No text was selected.');return}
+  openPopover(side,pageNo,sel,ids,xy);
 }
-function clearPreview(){document.querySelectorAll('.review.preview').forEach(e=>e.remove())}
-function showPreview(side,ids){clearPreview();(ids||[]).forEach(id=>{const w=WORDS[side][id];if(!w)return;const pg=document.getElementById(`${side}-page-${w.page}`);if(!pg)return;const[x0,y0,x1,y1]=w.bbox;const el=document.createElement('div');el.className='review preview';el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';el.style.width=Math.max(2,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';pg.appendChild(el)})}
-function openPopover(side,pageNo,sel,ids,xy){const pop=$('#reviewPopover');const txt=ids.map(id=>WORDS[side][id]?.text||'').join(' ');$('#pvText').textContent='"'+trim(txt,140)+'"';$('#pvComment').value='';pop.style.display='block';const w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';$('#pvComment').focus();const close=()=>{pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null};$('#pvCancel').onclick=close;$('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);close()}}
-async function submitReview(side,pageNo,sel,ids,comment){try{const res=await fetch(`${apiBase()}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});const rev=await res.json();if(!res.ok||rev.error){toast('리뷰 저장 실패: '+(rev.error||res.status));return}await loadReviews();activateTab('review');focusReviewById(rev.review_id)}catch(e){toast('리뷰 저장 오류')}}
+function clearPreview(){document.querySelectorAll('.review.preview,.textsel').forEach(e=>e.remove())}
+function openPopover(side,pageNo,sel,ids,xy){const pop=$('#reviewPopover');$('#pvComment').value='';pop.style.display='block';const w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';$('#pvComment').focus();const close=()=>{pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null};$('#pvCancel').onclick=close;$('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);close()}}
+async function submitReview(side,pageNo,sel,ids,comment){try{const res=await fetch(`${apiBase()}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});const rev=await res.json();if(!res.ok||rev.error){toast('Failed to save review: '+(rev.error||res.status));return}REVIEW_SIDE=side==='old'?'old':'new';await loadReviews();activateTab('review');updateReviewSubtabs();focusReviewById(rev.review_id)}catch(e){toast('Review save failed')}}
 
 async function loadReviews(){if(!DATA)return;try{REVIEWS=await fetch(`${apiBase()}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS)}
-function clearReviewMarkers(){document.querySelectorAll('.review:not(.preview),.reviewbadge').forEach(e=>e.remove())}
+function clearReviewMarkers(){document.querySelectorAll('.review:not(.preview),.reviewNote,.reviewNotePanel,.reviewAnchorHover').forEach(e=>e.remove())}
 function drawReviewMarkers(reviews){clearReviewMarkers();reviews.forEach(rv=>{if(isDiff())drawSideMarker('old',rv.old_word_ids,rv);drawSideMarker('new',rv.new_word_ids,rv)})}
-function drawSideMarker(side,wordIds,rv){if(!wordIds||!wordIds.length||!WORDS[side]?.length)return;const byPage=new Map();wordIds.forEach(id=>{const w=WORDS[side][id];if(w){if(!byPage.has(w.page))byPage.set(w.page,[]);byPage.get(w.page).push(w)}});let badged=false;byPage.forEach((ws,p)=>{const pg=document.getElementById(`${side}-page-${p}`);if(!pg)return;ws.forEach(w=>{const[x0,y0,x1,y1]=w.bbox;const el=document.createElement('div');el.className='review'+(rv.status==='resolved'?' resolved':'');el.dataset.reviewId=rv.review_id;el.title=rv.comment||'';el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';el.style.width=Math.max(2,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';el.onclick=()=>focusReview(rv);pg.appendChild(el)});if(!badged){const w=ws[0];const b=document.createElement('div');b.className='reviewbadge';b.dataset.reviewId=rv.review_id;b.textContent='C';b.title=rv.comment||'';b.style.left=(w.bbox[0]*ZOOM-15)+'px';b.style.top=(w.bbox[1]*ZOOM-7)+'px';b.onclick=()=>focusReview(rv);pg.appendChild(b);badged=true}})}
-function renderReviewList(reviews){const bar=$('#exportBar');if(bar)bar.style.display=reviews.length?'flex':'none';$('#exportOldBtn').style.display=isDiff()?'block':'none';const pane=$('#reviewPane');if(!reviews.length){pane.innerHTML='<div class="reviewPlaceholder">아직 리뷰가 없습니다.</div>';return}pane.innerHTML=reviews.map(rv=>`<div class="reviewRow ${rv.status}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${isDiff()?`old p.${firstPage('old',rv)} / `:''}current p.${firstPage('new',rv)} · ${rv.status}</div><div class="rvText">${escapeHtml(trim(rv.text,90))}</div><div class="rvComment">${escapeHtml(rv.comment||'(코멘트 없음)')}</div><div class="rvActions"><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${rv.status==='resolved'?'open':'resolved'}')">${rv.status==='resolved'?'다시 열기':'완료'}</button><button onclick="event.stopPropagation();deleteReview('${rv.review_id}')">삭제</button></div></div>`).join('')}
+function uniqueValidWordIds(side,ids){
+  const seen=new Set(), out=[];
+  (ids||[]).forEach(id=>{if(!seen.has(id)&&WORDS[side]?.[id]){seen.add(id);out.push(id)}});
+  return out;
+}
+function reviewWordIdsForSide(rv,side){
+  const direct=uniqueValidWordIds(side,rv[side+'_word_ids']||[]);
+  if(direct.length)return direct;
+  if(side==='old'&&rv.new_word_ids?.length)return uniqueValidWordIds('old',rv.new_word_ids.map(id=>EQUAL.newToOld.get(id)?.old_word_id).filter(id=>id!=null));
+  if(side==='new'&&rv.old_word_ids?.length)return uniqueValidWordIds('new',rv.old_word_ids.map(id=>EQUAL.oldToNew.get(id)?.new_word_id).filter(id=>id!=null));
+  return [];
+}
+function scrollWordIdsIntoPane(side,ids){
+  const first=ids?.length?WORDS[side]?.[ids[0]]:null;
+  if(first)scrollBboxIntoPane($(`#${side}Pane`),side,first.page,first.bbox);
+  return !!first;
+}
+function scrollReviewChangeFallback(side,rv){
+  if(!isDiff()||!(rv.change_ids||[]).length)return false;
+  const paneId=side==='old'?'oldPane':'newPane', pane=document.getElementById(paneId);
+  if(!pane)return false;
+  const ids=new Set((rv.change_ids||[]).map(Number));
+  const target=[...pane.querySelectorAll('.hl')].find(el=>String(el.dataset.changeIds||el.dataset.changeId||'').split(',').map(Number).some(id=>ids.has(id)));
+  if(target){scrollElementIntoPane(pane,target);return true}
+  const change=(DATA?.changes||[]).find(c=>ids.has(Number(c.id)));
+  const anchor=change&&(side==='old'?change.old_anchor:change.new_anchor);
+  if(anchor?.page&&anchor?.bbox){scrollBboxIntoPane(pane,side,anchor.page,anchor.bbox);return true}
+  return false;
+}
+function showReviewHover(rv,displaySide){
+  clearAnchorHover();
+  const side=displaySide||'new';
+  const ids=reviewWordIdsForSide(rv,side);
+  if(ids.length)showAnchorFocus(side,ids,'reviewAnchorHover');
+}
+function markerPositionForBbox(pageEl,side,pageNo,bbox){
+  const pageW=pageEl.clientWidth/ZOOM,pageH=pageEl.clientHeight/ZOOM,iconW=24/ZOOM,iconH=22/ZOOM;
+  const pageWords=(WORDS[side]||[]).filter(x=>x.page===pageNo);
+  const textLeft=pageWords.length?Math.min(...pageWords.map(x=>x.bbox[0]||0)):bbox[0];
+  const textRight=pageWords.length?Math.max(...pageWords.map(x=>x.bbox[2]||0)):bbox[2];
+  const rightX=Math.min(pageW-iconW-2,Math.max(textRight+8,bbox[2]+8));
+  const leftX=Math.max(2,Math.min(textLeft-iconW-8,bbox[0]-iconW-8));
+  const lanes=[];
+  if(rightX>=2&&rightX+iconW<=pageW-2)lanes.push(rightX);
+  if(leftX>=2&&leftX+iconW<=pageW-2)lanes.push(leftX);
+  if(!lanes.length)lanes.push(Math.max(2,Math.min(pageW-iconW-2,bbox[2]+8)));
+  const used=Array.from(pageEl.querySelectorAll('.reviewNote')).map(n=>({x:(parseFloat(n.style.left)||0)/ZOOM,y:(parseFloat(n.style.top)||0)/ZOOM,w:iconW,h:iconH}));
+  const baseY=Math.max(2,Math.min(pageH-iconH-2,bbox[1]-2));
+  const step=iconH+4/ZOOM,offsets=[0,step,-step,step*2,-step*2,step*3,-step*3,step*4,-step*4,step*5,-step*5];
+  const overlaps=(a,b)=>!(a.x+a.w<b.x||b.x+b.w<a.x||a.y+a.h<b.y||b.y+b.h<a.y);
+  for(const off of offsets){
+    const y=Math.max(2,Math.min(pageH-iconH-2,baseY+off));
+    for(const x of lanes){
+      const box={x,y,w:iconW,h:iconH};
+      if(!used.some(u=>overlaps(box,u)))return {x,y};
+    }
+  }
+  return {x:lanes[0],y:baseY};
+}
+function drawSideMarker(side,wordIds,rv){
+  if(!wordIds||!wordIds.length||!WORDS[side]?.length)return;
+  const ws=wordIds.map(id=>WORDS[side][id]).filter(Boolean);
+  if(!ws.length)return;
+  const w=ws[0], pg=document.getElementById(`${side}-page-${w.page}`);if(!pg)return;
+  const bbox=ws.reduce((b,x)=>[Math.min(b[0],x.bbox[0]),Math.min(b[1],x.bbox[1]),Math.max(b[2],x.bbox[2]),Math.max(b[3],x.bbox[3])],ws[0].bbox.slice());
+  const icon=document.createElement('div');
+  icon.className='reviewNote'+(isCleared(rv)?' cleared':'');
+  icon.dataset.reviewId=rv.review_id;
+  icon.dataset.side=side;
+  const pos=markerPositionForBbox(pg,side,w.page,bbox);
+  icon.style.left=pos.x*ZOOM+'px';
+  icon.style.top=pos.y*ZOOM+'px';
+  icon.onmouseenter=()=>showReviewHover(rv,side);
+  icon.onmouseleave=clearAnchorHover;
+  icon.onclick=e=>{e.stopPropagation();toggleNotePanel(pg,rv,side,bbox)};
+  pg.appendChild(icon);
+}
+function panelPositionForBbox(pageEl,bbox){
+  const pageW=pageEl.clientWidth/ZOOM,pageH=pageEl.clientHeight/ZOOM,panelW=240/ZOOM,panelH=130/ZOOM,gap=8;
+  let x;
+  if(bbox[2]+gap+panelW<=pageW)x=bbox[2]+gap;
+  else if(bbox[0]-gap-panelW>=0)x=bbox[0]-gap-panelW;
+  else x=Math.max(2,Math.min(pageW-panelW-2,bbox[2]+gap));
+  const y=Math.max(2,Math.min(pageH-panelH-2,bbox[1]));
+  return {x,y};
+}
+function reviewComments(rv){
+  const comments=(rv.comments||[]).filter(c=>(c.text||'').trim());
+  if(comments.length)return comments;
+  return (rv.comment||'').trim()?[{text:rv.comment,created_at:rv.created_at||''}]:[];
+}
+function renderNoteThread(rv){
+  const comments=reviewComments(rv);
+  if(!comments.length)return '<div class="noteComment">(No comment)</div>';
+  return `<div class="noteThread">${comments.map(c=>`<div class="noteComment"><div>${escapeHtml(c.text||'')}</div>${c.created_at?`<div class="noteCommentMeta">${escapeHtml(String(c.created_at).slice(0,16).replace('T',' '))}</div>`:''}</div>`).join('')}</div>`;
+}
+function renderNotePanelHtml(rv){
+  return `<button type="button" class="noteMin" data-act="min">_</button><div class="noteBody">${renderNoteThread(rv)}</div><div class="noteReply"><textarea placeholder="Add a comment"></textarea><div class="noteReplyActions"><button type="button" data-act="saveComment">Add</button><button type="button" data-act="cancelComment">Cancel</button></div></div><div class="noteActions"><button type="button" data-act="add">Add Comment</button><button type="button" data-act="toggle">${isCleared(rv)?'Reopen':'Clear'}</button><button type="button" class="noteDelete" data-act="delete">Delete</button></div>`;
+}
+function toggleNotePanel(pageEl,rv,side,bbox){
+  const existing=pageEl.querySelector(`.reviewNotePanel[data-review-id="${rv.review_id}"]`);
+  if(existing){existing.remove();return}
+  const pos=panelPositionForBbox(pageEl,bbox);
+  const panel=document.createElement('div');
+  panel.className='reviewNotePanel'+(isCleared(rv)?' cleared':'');
+  panel.dataset.reviewId=rv.review_id;
+  panel.style.left=pos.x*ZOOM+'px';
+  panel.style.top=pos.y*ZOOM+'px';
+  panel.innerHTML=renderNotePanelHtml(rv);
+  panel.addEventListener('mousedown',e=>e.stopPropagation());
+  panel.addEventListener('click',e=>e.stopPropagation());
+  panel.querySelector('[data-act="min"]').onclick=e=>{e.stopPropagation();panel.remove()};
+  panel.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();showNoteReply(panel)};
+  panel.querySelector('[data-act="cancelComment"]').onclick=e=>{e.stopPropagation();hideNoteReply(panel)};
+  panel.querySelector('[data-act="saveComment"]').onclick=e=>{e.stopPropagation();saveNoteComment(panel,rv.review_id)};
+  panel.querySelector('[data-act="toggle"]').onclick=e=>{e.stopPropagation();toggleReview(rv.review_id,isCleared(rv)?'open':'cleared')};
+  panel.querySelector('[data-act="delete"]').onclick=e=>{e.stopPropagation();deleteReview(rv.review_id)};
+  makeDraggable(panel,panel,pageEl);
+  pageEl.appendChild(panel);
+  focusReview(rv,side);
+}
+function makeDraggable(panel,handle,pageEl){
+  handle.addEventListener('mousedown',e=>{
+    if(e.target.closest('button,textarea,.noteBody,.noteActions,.noteReply'))return;
+    e.preventDefault();
+    const startX=e.clientX,startY=e.clientY,startL=parseFloat(panel.style.left)||0,startT=parseFloat(panel.style.top)||0;
+    const move=ev=>{
+      const maxL=Math.max(0,pageEl.clientWidth-panel.offsetWidth-2),maxT=Math.max(0,pageEl.clientHeight-panel.offsetHeight-2);
+      panel.style.left=Math.max(0,Math.min(maxL,startL+(ev.clientX-startX)))+'px';
+      panel.style.top=Math.max(0,Math.min(maxT,startT+(ev.clientY-startY)))+'px';
+    };
+    const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up)};
+    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  });
+}
+function showNoteReply(panel){const box=panel.querySelector('.noteReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='block';ta.value='';ta.focus()}
+function hideNoteReply(panel){const box=panel.querySelector('.noteReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='none';ta.value=''}
+async function saveNoteComment(panel,id){const ta=panel.querySelector('.noteReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{const rv=await postComment(id,text);panel.querySelector('.noteBody').innerHTML=renderNoteThread(rv);hideNoteReply(panel);renderReviewList(REVIEWS)}catch(e){toast('Failed to add comment')}}
+async function postComment(id,text){
+  const res=await fetch(`${apiBase()}/reviews/${id}/comments`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  const updated=await res.json();
+  if(!res.ok||updated.error)throw new Error(updated.error||'comment_failed');
+  const idx=REVIEWS.findIndex(r=>r.review_id===id);
+  if(idx>=0){
+    REVIEWS[idx]={...REVIEWS[idx],...updated,old_word_ids:REVIEWS[idx].old_word_ids,new_word_ids:REVIEWS[idx].new_word_ids};
+    return REVIEWS[idx];
+  }
+  return updated;
+}
+function showListReply(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),box=row?.querySelector('.rvReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='block';ta.value='';ta.focus()}
+function hideListReply(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),box=row?.querySelector('.rvReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='none';ta.value=''}
+async function saveListComment(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),ta=row?.querySelector('.rvReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{await postComment(id,text);renderReviewList(REVIEWS);focusReviewById(id)}catch(e){toast('Failed to add comment')}}
+function clearAnchorFocus(){document.querySelectorAll('.reviewAnchorFocus').forEach(e=>e.remove())}
+function clearAnchorHover(){document.querySelectorAll('.reviewAnchorHover').forEach(e=>e.remove())}
+function showAnchorHover(side,wordIds){clearAnchorHover();showAnchorFocus(side,wordIds,'reviewAnchorHover')}
+function showAnchorFocus(side,wordIds,cls='reviewAnchorFocus'){
+  if(!wordIds||!wordIds.length||!WORDS[side]?.length)return;
+  const byPageLine=new Map();
+  wordIds.forEach(id=>{const w=WORDS[side][id];if(!w)return;const key=`${w.page}:${w.block??0}:${w.line??Math.round(w.bbox[1])}`;if(!byPageLine.has(key))byPageLine.set(key,{page:w.page,words:[]});byPageLine.get(key).words.push(w)});
+  byPageLine.forEach(group=>{
+    const pg=document.getElementById(`${side}-page-${group.page}`);if(!pg)return;
+    const xs=[],ys=[];group.words.forEach(w=>{const[x0,y0,x1,y1]=w.bbox;xs.push(x0,x1);ys.push(y0,y1)});
+    const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+    const el=document.createElement('div');el.className=cls;
+    el.style.left=x0*ZOOM+'px';el.style.top=y0*ZOOM+'px';
+    el.style.width=Math.max(1,(x1-x0)*ZOOM)+'px';el.style.height=Math.max(2,(y1-y0)*ZOOM)+'px';
+    pg.appendChild(el);
+  });
+}
+function reviewBelongsToSide(rv,side){return side==='old'?(rv.old_word_ids||[]).length>0:(rv.new_word_ids||[]).length>0}
+function updateReviewSubtabs(){if(!$('#reviewPrevTab'))return;$('#reviewPrevTab').classList.toggle('active',REVIEW_SIDE==='old');$('#reviewCurrentTab').classList.toggle('active',REVIEW_SIDE==='new')}
+window.setReviewSide=function(side){REVIEW_SIDE=side;updateReviewSubtabs();renderReviewList(REVIEWS)}
+function reviewPreviewText(rv){const comments=reviewComments(rv);return comments.length?comments[comments.length-1].text:(rv.comment||'(No comment)')}
+function renderReviewList(reviews){const visible=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE));const bar=$('#exportBar');if(bar)bar.style.display=visible.length?'flex':'none';$('#exportOldBtn').style.display=(isDiff()&&REVIEW_SIDE==='old')?'block':'none';$('#exportCurrentBtn').style.display=REVIEW_SIDE==='new'?'block':'none';const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">No ${REVIEW_SIDE==='old'?'previous':'current'} reviews yet.</div>`;return}pane.innerHTML=visible.map(rv=>`<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} p.${firstPage(REVIEW_SIDE,rv)} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}</div><div class="rvComment">${escapeHtml(reviewPreviewText(rv))}</div><div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Add Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button><button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Delete</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Add a comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Add</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div></div>`).join('')}
 function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]?.length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
-function focusReview(rv){if(rv.new_word_ids?.length){const w=WORDS.new[rv.new_word_ids[0]];if(w)scrollBboxIntoPane($('#newPane'),'new',w.page,w.bbox)}if(isDiff()&&rv.old_word_ids?.length){const w=WORDS.old[rv.old_word_ids[0]];if(w)scrollBboxIntoPane($('#oldPane'),'old',w.page,w.bbox)}document.querySelectorAll('.review').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id));document.querySelectorAll('.reviewRow').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id))}
-window.focusReviewById=function(id){const rv=REVIEWS.find(r=>r.review_id===id);if(rv)focusReview(rv)}
-window.toggleReview=async function(id,status){try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});await loadReviews()}catch(e){toast('상태 변경 실패')}}
-window.deleteReview=async function(id){if(!confirm('이 리뷰를 삭제할까요?'))return;try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});await loadReviews()}catch(e){toast('삭제 실패')}}
-window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('저장된 리뷰가 없습니다');return}window.open(`${apiBase()}/export/${side}`,'_blank')}
+function focusReview(rv,displaySide){
+  clearAnchorFocus();
+  const primarySide=displaySide||(reviewBelongsToSide(rv,REVIEW_SIDE)?REVIEW_SIDE:(rv.old_word_ids?.length?'old':'new'));
+  const newIds=reviewWordIdsForSide(rv,'new');
+  if(newIds.length){if(primarySide==='new')showAnchorFocus('new',newIds);scrollWordIdsIntoPane('new',newIds)}
+  else scrollReviewChangeFallback('new',rv);
+  if(isDiff()){
+    const oldIds=reviewWordIdsForSide(rv,'old');
+    if(oldIds.length){if(primarySide==='old')showAnchorFocus('old',oldIds);scrollWordIdsIntoPane('old',oldIds)}
+    else scrollReviewChangeFallback('old',rv);
+  }
+  document.querySelectorAll('.review,.reviewNote').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id&&(!e.classList.contains('reviewNote')||e.dataset.side===primarySide)));
+  document.querySelectorAll('.reviewRow').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id));
+}
+window.focusReviewById=function(id){const matches=REVIEWS.filter(r=>r.review_id===id);const rv=matches.find(r=>reviewBelongsToSide(r,REVIEW_SIDE))||matches[0];if(rv)focusReview(rv,reviewBelongsToSide(rv,REVIEW_SIDE)?REVIEW_SIDE:undefined)}
+window.toggleReview=async function(id,status){try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});await loadReviews()}catch(e){toast('Failed to update status')}}
+window.addComment=function(id){showListReply(id)}
+window.deleteReview=async function(id){try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});await loadReviews();clearAnchorFocus()}catch(e){toast('Failed to delete review')}}
+window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('No saved reviews');return}window.open(`${apiBase()}/export/${side}`,'_blank')}
 </script>
 </body>
 </html>

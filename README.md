@@ -1,35 +1,33 @@
-# PDF Diff Viewer - One Run Final
+# PDF Review Workspace
 
-## 실행
+## Run
 
 ```powershell
-cd pdf_diff_viewer_one_run
+cd pdfparser
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-# opendataloader_pdf도 같은 venv에 설치/사용 가능해야 함
 python app.py
 ```
 
-브라우저:
+Open in a browser:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## 이제 패치 파일 실행 필요 없음
+## Features
 
-이 버전은 아래 기능이 전부 app.py에 통합되어 있음.
+1. Upload an initial report and review it in a single-pane PDF viewer.
+2. Upload an updated report and run a previous/current diff.
+3. Convert PDFs to markdown with `opendataloader_pdf.convert`.
+4. Generate word-level diff output through `diff_extract.py`.
+5. Align markdown diff segments to PDF word bounding boxes.
+6. Add document-level review comments anchored to selected PDF text.
+7. Store report versions under `documents/<doc_id>/runs/<run_id>`.
+8. Export PDF annotations from saved reviews.
 
-1. old/new PDF 업로드
-2. opendataloader_pdf.convert로 markdown만 생성
-3. diff_extract.py 실행 후 result.json 생성
-4. result.json + PDF bbox alignment
-5. 서버에서 word highlight를 line chunk로 병합
-6. 선택 테두리는 inset 방식으로 표시
-7. result.json, old.md, new.md, viewer_data.json 다운로드
-
-## opendataloader 설정
+## OpenDataLoader Configuration
 
 ```python
 opendataloader_pdf.convert(

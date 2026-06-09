@@ -1,0 +1,246 @@
+[
+  {
+    "review_id": "r-34f19490",
+    "anchor_id": "a-edf8d0a9",
+    "doc_id": "baa35bea32c1",
+    "status": "open",
+    "created_run_id": "871c9f671bdc",
+    "is_floating": false,
+    "text": "opinion, except for the possible",
+    "comments": [
+      {
+        "comment_id": "c-c9ba06f9",
+        "author": "user",
+        "text": "12313213",
+        "created_at": "2026-06-09T14:16:58.497017+00:00"
+      }
+    ],
+    "anchors": {
+      "871c9f671bdc": {
+        "run_id": "871c9f671bdc",
+        "side": "new",
+        "word_ids": [
+          120,
+          121,
+          122,
+          123,
+          124
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          120,
+          121,
+          122,
+          123,
+          124
+        ],
+        "page": 3,
+        "bbox": [
+          85.09906005859375,
+          254.87265014648438,
+          216.40769958496094,
+          268.1991271972656
+        ],
+        "rect": [
+          102.6671511627907,
+          262.90697674418607,
+          215.22529069767444,
+          266.16279069767444
+        ],
+        "text": "opinion, except for the possible",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:16:58.497017+00:00",
+    "updated_at": "2026-06-09T14:16:58.497017+00:00"
+  },
+  {
+    "review_id": "r-4ebf0615",
+    "anchor_id": "a-5c8d7183",
+    "doc_id": "baa35bea32c1",
+    "status": "open",
+    "created_run_id": "871c9f671bdc",
+    "is_floating": false,
+    "text": "financial statements",
+    "comments": [
+      {
+        "comment_id": "c-7d49e8fe",
+        "author": "user",
+        "text": "1",
+        "created_at": "2026-06-09T14:17:42.052359+00:00"
+      }
+    ],
+    "anchors": {
+      "871c9f671bdc": {
+        "run_id": "871c9f671bdc",
+        "side": "new",
+        "word_ids": [
+          128,
+          129
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          128,
+          129
+        ],
+        "page": 3,
+        "bbox": [
+          280.19549560546875,
+          254.87265014648438,
+          363.28472900390625,
+          268.1991271972656
+        ],
+        "rect": [
+          311.0392441860465,
+          258.25581395348837,
+          340.80668604651163,
+          260.58139534883725
+        ],
+        "text": "financial statements",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:17:42.052359+00:00",
+    "updated_at": "2026-06-09T14:17:42.052359+00:00"
+  },
+  {
+    "review_id": "r-c4ac83e1",
+    "anchor_id": "a-f9141c70",
+    "doc_id": "baa35bea32c1",
+    "status": "open",
+    "created_run_id": "871c9f671bdc",
+    "is_floating": false,
+    "text": "matter described",
+    "comments": [],
+    "anchors": {
+      "871c9f671bdc": {
+        "run_id": "871c9f671bdc",
+        "side": "new",
+        "word_ids": [
+          132,
+          133
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          132,
+          133
+        ],
+        "page": 3,
+        "bbox": [
+          394.5412292480469,
+          254.87265014648438,
+          464.9255065917969,
+          268.1991271972656
+        ],
+        "rect": [
+          405.4578488372093,
+          262.90697674418607,
+          446.8531976744186,
+          264.7674418604651
+        ],
+        "text": "matter described",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:17:45.333640+00:00",
+    "updated_at": "2026-06-09T14:17:45.333640+00:00"
+  },
+  {
+    "review_id": "r-4119563d",
+    "anchor_id": "a-8e9444ee",
+    "doc_id": "baa35bea32c1",
+    "status": "open",
+    "created_run_id": "871c9f671bdc",
+    "is_floating": false,
+    "text": "the Basis",
+    "comments": [
+      {
+        "comment_id": "c-6d56b055",
+        "author": "user",
+        "text": "21323",
+        "created_at": "2026-06-09T14:17:52.606683+00:00"
+      }
+    ],
+    "anchors": {
+      "871c9f671bdc": {
+        "run_id": "871c9f671bdc",
+        "side": "new",
+        "word_ids": [
+          135,
+          136
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          135,
+          136
+        ],
+        "page": 3,
+        "bbox": [
+          478.7709045410156,
+          254.87265014648438,
+          515.996337890625,
+          268.1991271972656
+        ],
+        "rect": [
+          484.5276162790698,
+          256.8604651162791,
+          516.1555232558139,
+          262.4418604651163
+        ],
+        "text": "the Basis",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:17:52.606683+00:00",
+    "updated_at": "2026-06-09T14:17:52.606683+00:00"
+  },
+  {
+    "review_id": "r-85ceefc6",
+    "anchor_id": "a-981b7bd3",
+    "doc_id": "baa35bea32c1",
+    "status": "open",
+    "created_run_id": "871c9f671bdc",
+    "is_floating": false,
+    "text": "Qualified Opinion",
+    "comments": [
+      {
+        "comment_id": "c-e2831b09",
+        "author": "user",
+        "text": "213213",
+        "created_at": "2026-06-09T14:18:00.167097+00:00"
+      }
+    ],
+    "anchors": {
+      "871c9f671bdc": {
+        "run_id": "871c9f671bdc",
+        "side": "new",
+        "word_ids": [
+          69,
+          70
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          69,
+          70
+        ],
+        "page": 3,
+        "bbox": [
+          57.13429260253906,
+          181.29811096191406,
+          128.86521911621094,
+          194.69430541992188
+        ],
+        "rect": [
+          54.29505813953489,
+          190.34883720930233,
+          128.71366279069767,
+          192.2093023255814
+        ],
+        "text": "Qualified Opinion",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:18:00.167097+00:00",
+    "updated_at": "2026-06-09T14:18:00.167097+00:00"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "doc_id": "8cc969ccfbb0",
+  "title": "one",
+  "created_at": "2026-06-09T13:42:48.009861+00:00",
+  "updated_at": "2026-06-09T13:42:48.479377+00:00",
+  "runs": [
+    {
+      "run_id": "9496753ae4f3",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-09T13:42:48.009861+00:00",
+      "filename": "one.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    }
+  ]
+}

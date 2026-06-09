@@ -1025,8 +1025,8 @@ def alignment_report(segments, old_words, new_words):
 def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
     """
     Embed reviews.json into the PDF as standard annotations.
-    - 변경없는 단어 위에 하이라이트 (open=노란색 / resolved=회색)
-    - 각 리뷰의 첫 단어 옆에 sticky note (코멘트 내용 포함)
+    - Highlight reviewed words (open=yellow / cleared=gray)
+    - Add a sticky note near the first word of each review.
     Returns raw PDF bytes.
     """
     import semantic as _sem
@@ -1046,12 +1046,12 @@ def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
         if not word_ids:
             continue
 
-        comment = (rv.get("comment") or "").strip() or "(코멘트 없음)"
+        comment = (rv.get("comment") or "").strip() or "(No comment)"
         status  = rv.get("status", "open")
-        color   = [1.0, 0.84, 0.0] if status != "resolved" else [0.75, 0.75, 0.75]
+        color   = [0.75, 0.75, 0.75] if status in ("cleared", "resolved") else [1.0, 0.84, 0.0]
         title   = f"Review #{idx}  [{status}]"
 
-        # 페이지별 단어 묶기
+        # Group selected words by page.
         by_page: dict = {}
         for wid in word_ids:
             if 0 <= wid < len(words):
@@ -1063,14 +1063,14 @@ def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
             page_words = by_page[page_no]
             page = doc[page_no - 1]
 
-            # 하이라이트 (단어 전체를 한 annotation으로)
+            # Highlight all selected words as one annotation.
             rects = [fitz.Rect(w["bbox"]) for w in page_words]
             hl = page.add_highlight_annot(rects)
             hl.set_colors(stroke=color)
             hl.set_info(title=title, content=comment)
             hl.update()
 
-            # sticky note는 첫 페이지의 첫 단어 오른쪽에만
+            # Place a sticky note next to the first word only.
             if first:
                 anchor = page_words[0]["bbox"]          # [x0, y0, x1, y1]
                 pt = fitz.Point(anchor[2] + 4, anchor[1])
@@ -1227,15 +1227,45 @@ def sync_report_compat_files(run_dir: Path):
     copy_if_exists(run_dir / "report.pdf", run_dir / "new.pdf")
     copy_if_exists(run_dir / "report.md", run_dir / "new.md")
     copy_if_exists(run_dir / "words.json", run_dir / "new_words.json")
+    copy_if_exists(run_dir / "chars.json", run_dir / "new_chars.json")
     copy_if_exists(run_dir / "prev_report.pdf", run_dir / "old.pdf")
     copy_if_exists(run_dir / "prev_report.md", run_dir / "old.md")
     copy_if_exists(run_dir / "prev_words.json", run_dir / "old_words.json")
+    copy_if_exists(run_dir / "prev_chars.json", run_dir / "old_chars.json")
+
+
+def build_chars_from_words(words):
+    chars = []
+    for w in words or []:
+        text = str(w.get("text", ""))
+        if not text:
+            continue
+        x0, y0, x1, y1 = w.get("bbox", [0, 0, 0, 0])
+        width = max(0.1, x1 - x0)
+        step = width / max(1, len(text))
+        for i, ch in enumerate(text):
+            chars.append({
+                "idx": len(chars),
+                "char": ch,
+                "word_id": w.get("idx"),
+                "char_index": i,
+                "page": w.get("page"),
+                "block": w.get("block"),
+                "line": w.get("line"),
+                "word_no": w.get("word_no"),
+                "bbox": [x0 + step * i, y0, x0 + step * (i + 1), y1],
+                "order": len(chars),
+            })
+    return chars
 
 
 def process_single_document_run(run_dir: Path, pdf_path: Path, *, doc_id=None, run_id=None, filename=None):
     words, page_sizes = extract_pdf_words(pdf_path)
+    chars = build_chars_from_words(words)
     write_json(run_dir / "words.json", words)
     write_json(run_dir / "new_words.json", words)
+    write_json(run_dir / "chars.json", chars)
+    write_json(run_dir / "new_chars.json", chars)
 
     md_src = run_opendataloader_to_markdown(pdf_path, run_dir / "opendataloader_report")
     report_md = run_dir / "report.md"
@@ -1319,6 +1349,7 @@ def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
     semantic_map = semantic.build_semantic_map(diff_doc["segments"], mapped, prev_words, report_words)
     semantic.attach_index_old_side(index_items, semantic_map, prev_words, report_words)
     sync_report_compat_files(run_dir)
+    projected_reviews = document_reviews_for_run(doc_id, run_id) if doc_id else []
 
     viewer_data = {
         "doc_id": doc_id,
@@ -1342,6 +1373,7 @@ def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
         "old_filename": prev_pdf.name,
         "new_filename": report_pdf.name,
         "semantic_map": semantic_map,
+        "carried_review_count": len(projected_reviews),
     }
     write_json(run_dir / "viewer_data.json", viewer_data)
     return viewer_data
@@ -1350,6 +1382,168 @@ def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
 def document_semantic_map(doc_id, run_id):
     p = document_run_dir(doc_id, run_id) / "viewer_data.json"
     return (read_json(p, {}) or {}).get("semantic_map", {})
+
+
+def document_reviews_path(doc_id):
+    return document_dir(doc_id) / "reviews.json"
+
+
+def load_document_reviews(doc_id):
+    return read_json(document_reviews_path(doc_id), []) or []
+
+
+def save_document_reviews(doc_id, reviews):
+    write_json(document_reviews_path(doc_id), reviews)
+
+
+def words_bbox(words, word_ids):
+    selected = [words[i] for i in word_ids if isinstance(i, int) and 0 <= i < len(words)]
+    if not selected:
+        return [0, 0, 1, 1]
+    return line_bbox(selected)
+
+
+def first_word_page(words, word_ids):
+    for wid in word_ids:
+        if isinstance(wid, int) and 0 <= wid < len(words):
+            return words[wid].get("page")
+    return None
+
+
+def text_for_word_ids(words, word_ids):
+    return " ".join(str(words[i].get("text", "")) for i in word_ids if isinstance(i, int) and 0 <= i < len(words))
+
+
+def anchor_for_selection(run_dir: Path, run_id, side, word_ids, rect=None):
+    words_path = run_dir / ("prev_words.json" if side in ("old", "prev", "previous") else "words.json")
+    words = read_json(words_path, []) or []
+    ids = sorted({int(w) for w in word_ids if isinstance(w, int) or str(w).isdigit()})
+    ids = [i for i in ids if 0 <= i < len(words)]
+    if not ids:
+        return None
+    return {
+        "run_id": run_id,
+        "side": "old" if side in ("old", "prev", "previous") else "new",
+        "word_ids": ids,
+        "old_word_ids": ids if side in ("old", "prev", "previous") else [],
+        "new_word_ids": ids if side not in ("old", "prev", "previous") else [],
+        "page": first_word_page(words, ids),
+        "bbox": words_bbox(words, ids),
+        "rect": rect,
+        "text": text_for_word_ids(words, ids),
+        "floating": False,
+    }
+
+
+def review_projection_for_anchor(review, anchor_run_id, display_side=None):
+    anchor = (review.get("anchors") or {}).get(anchor_run_id)
+    if not anchor:
+        return None
+    side = display_side or anchor.get("side", "new")
+    word_ids = anchor.get("word_ids", [])
+    projected = {
+        "review_id": review.get("review_id"),
+        "anchor_id": review.get("anchor_id"),
+        "side": side,
+        "anchor_run_id": anchor_run_id,
+        "old_word_ids": word_ids if side == "old" else [],
+        "new_word_ids": word_ids if side != "old" else [],
+        "segment_ids": anchor.get("segment_ids", []),
+        "change_ids": anchor.get("change_ids", []),
+        "old_lines": anchor.get("old_lines", []),
+        "new_lines": anchor.get("new_lines", []),
+        "text": anchor.get("text") or review.get("text", ""),
+        "selection": {"page": anchor.get("page"), "rect": anchor.get("rect"), "word_ids": anchor.get("word_ids", [])},
+        "comment": "\n\n".join(c.get("text", "") for c in review.get("comments", []) if c.get("text")),
+        "comments": review.get("comments", []),
+        "status": review.get("status", "open"),
+        "created_at": review.get("created_at"),
+        "updated_at": review.get("updated_at"),
+        "floating": anchor.get("floating", False),
+    }
+    return projected
+
+
+def document_reviews_for_run(doc_id, run_id):
+    meta = load_document_meta(doc_id) or {}
+    run_meta = next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), {})
+    prev_run_id = run_meta.get("previous_run_id")
+    projected = []
+    for review in load_document_reviews(doc_id):
+        if prev_run_id and prev_run_id != run_id:
+            prev_anchor = (review.get("anchors") or {}).get(prev_run_id)
+            if prev_anchor and prev_anchor.get("side") != "old":
+                prev_projection = review_projection_for_anchor(review, prev_run_id, "old")
+                if prev_projection:
+                    projected.append(prev_projection)
+        current_projection = review_projection_for_anchor(review, run_id)
+        if current_projection:
+            projected.append(current_projection)
+    return projected
+
+
+def create_document_level_review(doc_id, run_id, run_dir: Path, data):
+    anchor = anchor_for_selection(run_dir, run_id, data.get("side", "new"), data.get("word_ids", []), data.get("rect"))
+    if not anchor:
+        return {"error": "no_word_selected"}
+    now = utc_now()
+    comment_text = data.get("comment", "")
+    review = {
+        "review_id": "r-" + uuid.uuid4().hex[:8],
+        "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "doc_id": doc_id,
+        "status": data.get("status", "open"),
+        "created_run_id": run_id,
+        "is_floating": False,
+        "text": anchor.get("text", ""),
+        "comments": ([{"comment_id": "c-" + uuid.uuid4().hex[:8], "author": data.get("author", "user"), "text": comment_text, "created_at": now}] if comment_text else []),
+        "anchors": {run_id: anchor},
+        "created_at": now,
+        "updated_at": now,
+    }
+    reviews = load_document_reviews(doc_id)
+    reviews.append(review)
+    save_document_reviews(doc_id, reviews)
+    return review_projection_for_anchor(review, run_id)
+
+
+def remap_document_reviews_to_run(doc_id, prev_run_id, run_id, run_dir: Path, semantic_map):
+    if not prev_run_id:
+        return []
+    reviews = load_document_reviews(doc_id)
+    if not reviews:
+        return []
+    old_words = read_json(run_dir / "prev_words.json", []) or []
+    now = utc_now()
+    changed = False
+    for review in reviews:
+        anchors = review.setdefault("anchors", {})
+        if run_id in anchors:
+            continue
+        prev_anchor = anchors.get(prev_run_id)
+        if not prev_anchor:
+            continue
+        if prev_anchor.get("side") == "old":
+            continue
+        old_ids = list(prev_anchor.get("word_ids") or prev_anchor.get("new_word_ids") or [])
+        anchor = {
+            "run_id": run_id,
+            "side": "old",
+            "word_ids": old_ids,
+            "old_word_ids": old_ids,
+            "new_word_ids": [],
+            "page": first_word_page(old_words, old_ids),
+            "bbox": words_bbox(old_words, old_ids),
+            "text": prev_anchor.get("text", review.get("text", "")),
+            "floating": False,
+            "previous_run_id": prev_run_id,
+        }
+        anchors[run_id] = anchor
+        review["updated_at"] = now
+        changed = True
+    if changed:
+        save_document_reviews(doc_id, reviews)
+    return document_reviews_for_run(doc_id, run_id)
 
 
 def add_single_document_review(run_dir: Path, data):
@@ -1382,6 +1576,33 @@ def add_single_document_review(run_dir: Path, data):
     reviews.append(review)
     semantic.save_reviews(run_dir, reviews)
     return review
+
+
+def carry_forward_previous_reviews(run_dir: Path, semantic_map):
+    prev_reviews = read_json(run_dir / "prev_reviews.json", []) or []
+    if not prev_reviews or semantic.load_reviews(run_dir):
+        return semantic.load_reviews(run_dir)
+
+    old_to_new = {
+        e.get("old_word_id"): e.get("new_word_id")
+        for e in (semantic_map or {}).get("equal_words", [])
+        if e.get("old_word_id") is not None and e.get("new_word_id") is not None
+    }
+    carried = []
+    for review in prev_reviews:
+        old_ids = list(review.get("new_word_ids") or review.get("old_word_ids") or [])
+        new_ids = [old_to_new[wid] for wid in old_ids if wid in old_to_new]
+        rv = dict(review)
+        rv["old_word_ids"] = old_ids
+        rv["new_word_ids"] = new_ids
+        rv["side"] = "old" if not new_ids else "new"
+        rv["migrated_from"] = review.get("review_id")
+        rv["carried_forward"] = True
+        rv["updated_at"] = utc_now()
+        carried.append(rv)
+
+    semantic.save_reviews(run_dir, carried)
+    return carried
 
 
 def update_run_meta(meta, run_id, **patch):
@@ -1474,6 +1695,64 @@ def get_document(doc_id):
     return jsonify(meta)
 
 
+@app.route("/api/documents/<doc_id>/reviews", methods=["GET"])
+def list_document_level_reviews(doc_id):
+    if not load_document_meta(doc_id):
+        return jsonify({"error": "document not found"}), 404
+    return jsonify(load_document_reviews(doc_id))
+
+
+@app.route("/api/documents/<doc_id>/reviews/<review_id>", methods=["PATCH"])
+def patch_document_level_review(doc_id, review_id):
+    patch = request.get_json(force=True) or {}
+    reviews = load_document_reviews(doc_id)
+    updated = None
+    for review in reviews:
+        if review.get("review_id") == review_id:
+            for key in ("status", "human_decision", "is_floating"):
+                if key in patch:
+                    review[key] = patch[key]
+            review["updated_at"] = utc_now()
+            updated = review
+            break
+    if not updated:
+        return jsonify({"error": "not found"}), 404
+    save_document_reviews(doc_id, reviews)
+    return jsonify(updated)
+
+
+@app.route("/api/documents/<doc_id>/reviews/<review_id>", methods=["DELETE"])
+def delete_document_level_review(doc_id, review_id):
+    reviews = load_document_reviews(doc_id)
+    kept = [r for r in reviews if r.get("review_id") != review_id]
+    if len(kept) == len(reviews):
+        return jsonify({"error": "not found"}), 404
+    save_document_reviews(doc_id, kept)
+    return jsonify({"deleted": True})
+
+
+@app.route("/api/documents/<doc_id>/reviews/<review_id>/comments", methods=["POST"])
+def add_document_level_comment(doc_id, review_id):
+    data = request.get_json(force=True) or {}
+    reviews = load_document_reviews(doc_id)
+    updated = None
+    for review in reviews:
+        if review.get("review_id") == review_id:
+            review.setdefault("comments", []).append({
+                "comment_id": "c-" + uuid.uuid4().hex[:8],
+                "author": data.get("author", "user"),
+                "text": data.get("text") or data.get("comment") or "",
+                "created_at": utc_now(),
+            })
+            review["updated_at"] = utc_now()
+            updated = review
+            break
+    if not updated:
+        return jsonify({"error": "not found"}), 404
+    save_document_reviews(doc_id, reviews)
+    return jsonify(updated)
+
+
 @app.route("/api/documents/<doc_id>/runs", methods=["POST"])
 def create_document_run(doc_id):
     meta = load_document_meta(doc_id)
@@ -1497,7 +1776,9 @@ def create_document_run(doc_id):
     copy_if_exists(prev_dir / "report.pdf", run_dir / "prev_report.pdf")
     copy_if_exists(prev_dir / "report.md", run_dir / "prev_report.md")
     copy_if_exists(prev_dir / "words.json", run_dir / "prev_words.json")
+    copy_if_exists(prev_dir / "chars.json", run_dir / "prev_chars.json")
     copy_if_exists(prev_dir / "section_map.json", run_dir / "prev_section_map.json")
+    copy_if_exists(prev_dir / "reviews.json", run_dir / "prev_reviews.json")
 
     report_pdf = run_dir / "report.pdf"
     uploaded.save(report_pdf)
@@ -1593,9 +1874,25 @@ def document_words(doc_id, run_id, side):
     return send_file(p, mimetype="application/json")
 
 
+@app.route("/api/documents/<doc_id>/runs/<run_id>/chars/<side>")
+def document_chars(doc_id, run_id, side):
+    if side in ("new", "report", "current"):
+        name = "chars.json"
+    elif side in ("old", "prev", "previous"):
+        name = "prev_chars.json"
+    else:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    p = document_run_dir(doc_id, run_id) / name
+    if not p.exists():
+        return jsonify({"error": "not found"}), 404
+    return send_file(p, mimetype="application/json")
+
+
 @app.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["GET"])
 def list_document_reviews(doc_id, run_id):
-    return jsonify(semantic.load_reviews(document_run_dir(doc_id, run_id)))
+    reviews = document_reviews_for_run(doc_id, run_id)
+    semantic.save_reviews(document_run_dir(doc_id, run_id), reviews)
+    return jsonify(reviews)
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["POST"])
@@ -1604,44 +1901,30 @@ def create_document_review(doc_id, run_id):
     if not run_dir.exists():
         return jsonify({"error": "run not found"}), 404
     data = request.get_json(force=True) or {}
-    viewer = read_json(run_dir / "viewer_data.json", {}) or {}
-    if viewer.get("mode") == "single":
-        rev = add_single_document_review(run_dir, data)
-    else:
-        rev = semantic.add_review(run_dir, document_semantic_map(doc_id, run_id), data)
+    rev = create_document_level_review(doc_id, run_id, run_dir, data)
+    semantic.save_reviews(run_dir, document_reviews_for_run(doc_id, run_id))
     return jsonify(rev), (400 if rev.get("error") else 201)
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["PATCH"])
 def patch_document_review(doc_id, run_id, review_id):
-    r = semantic.update_review(document_run_dir(doc_id, run_id), review_id, request.get_json(force=True) or {})
-    return (jsonify(r), 200) if r else (jsonify({"error": "not found"}), 404)
+    response = patch_document_level_review(doc_id, review_id)
+    semantic.save_reviews(document_run_dir(doc_id, run_id), document_reviews_for_run(doc_id, run_id))
+    return response
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["DELETE"])
 def remove_document_review(doc_id, run_id, review_id):
-    ok = semantic.delete_review(document_run_dir(doc_id, run_id), review_id)
-    return (jsonify({"deleted": True}), 200) if ok else (jsonify({"error": "not found"}), 404)
+    response = delete_document_level_review(doc_id, review_id)
+    semantic.save_reviews(document_run_dir(doc_id, run_id), document_reviews_for_run(doc_id, run_id))
+    return response
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>/comments", methods=["POST"])
 def add_document_review_comment(doc_id, run_id, review_id):
-    # Full comment threads are Phase 4. For Phase 2, append text to the existing single comment field.
-    data = request.get_json(force=True) or {}
-    reviews = semantic.load_reviews(document_run_dir(doc_id, run_id))
-    updated = None
-    for review in reviews:
-        if review.get("review_id") == review_id:
-            existing = (review.get("comment") or "").strip()
-            addition = (data.get("text") or data.get("comment") or "").strip()
-            review["comment"] = "\n\n".join(x for x in (existing, addition) if x)
-            review["updated_at"] = utc_now()
-            updated = review
-            break
-    if not updated:
-        return jsonify({"error": "not found"}), 404
-    semantic.save_reviews(document_run_dir(doc_id, run_id), reviews)
-    return jsonify(updated)
+    response = add_document_level_comment(doc_id, review_id)
+    semantic.save_reviews(document_run_dir(doc_id, run_id), document_reviews_for_run(doc_id, run_id))
+    return response
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/export/<side>")
@@ -1653,9 +1936,10 @@ def export_document_pdf(doc_id, run_id, side):
     else:
         return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
     run_dir = document_run_dir(doc_id, run_id)
-    reviews = semantic.load_reviews(run_dir)
+    reviews = document_reviews_for_run(doc_id, run_id)
+    semantic.save_reviews(run_dir, reviews)
     if not reviews:
-        return jsonify({"error": "저장된 리뷰가 없습니다"}), 400
+        return jsonify({"error": "No saved reviews"}), 400
     try:
         pdf_bytes = export_annotated_pdf(run_dir, compat_side)
     except FileNotFoundError as e:
@@ -1678,12 +1962,12 @@ def document_workspace(doc_id):
     runs = []
     for run in reversed(meta.get("runs", [])[-5:]):
         run_dir = document_run_dir(doc_id, run["run_id"])
-        reviews = semantic.load_reviews(run_dir)
+        reviews = document_reviews_for_run(doc_id, run["run_id"])
         runs.append({
             **run,
             "review_count": len(reviews),
             "open_reviews": sum(1 for r in reviews if r.get("status", "open") == "open"),
-            "closed_reviews": sum(1 for r in reviews if r.get("status") in ("closed", "resolved")),
+            "closed_reviews": sum(1 for r in reviews if r.get("status") in ("closed", "cleared", "resolved")),
             "has_diff": bool((run_dir / "result.json").exists()),
             "has_ai_assessment": bool((run_dir / "ai_assessment.json").exists()),
         })
@@ -1785,7 +2069,7 @@ def export_pdf(job_id, side):
     run_dir = _run_dir(job_id)
     reviews = semantic.load_reviews(run_dir)
     if not reviews:
-        return jsonify({"error": "저장된 리뷰가 없습니다"}), 400
+        return jsonify({"error": "No saved reviews"}), 400
     try:
         pdf_bytes = export_annotated_pdf(run_dir, side)
     except FileNotFoundError as e:

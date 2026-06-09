@@ -1,239 +1,292 @@
 ---
-description: "PDF diff viewer 단계별 구현 플랜 — doc/run 구조, 섹션 마커(라인 기준), reviews 스키마, AI Assessment(forced tool_use), 리뷰 이관. Phase 단위로 끊어서 실행하며 각 Phase 종료 시 앱이 깨지지 않아야 함."
+description: "PDF review workspace 단계별 구현 플랜 — 섹션 마커, doc/run 구조, document-level reviews, 글자 단위 선택 UX, AI 판정, anchor 재매핑, workspace."
 ---
 
 # AI Comment Resolution Tracker — 단계별 구현 플랜
 
-> **실행 원칙 (반드시 준수)**
-> - **한 번에 전체를 갈아엎지 않는다.** 아래 Phase 단위로만 진행한다.
-> - **각 Phase 종료 시점에 앱이 실행 가능하고 기존 기능이 깨지지 않아야 한다.**
-> - 한 Phase가 끝나면 멈추고 사용자 확인을 받은 뒤 다음 Phase로 넘어간다.
-> - 새 함수를 "있다고 가정"하지 말고, 실제 `app.py`의 기존 함수/데이터 구조를 먼저 읽고 맞춘다.
-> - 데모 목적이므로 기존 `runs/<job_id>` 데이터는 버려도 되지만, **기존 라우트는 해당 Phase에서 교체가 끝나기 전까지 살려둔다.**
+## 실행 원칙
+- 한 번에 전체를 갈아엎지 않는다.
+- 아래 Phase 단위로만 진행한다.
+- 각 Phase가 끝날 때 앱은 실행 가능해야 한다.
+- 한 Phase가 끝나면 멈추고 사용자 확인을 받은 뒤 다음 Phase로 넘어간다.
+- 새 함수나 데이터 구조를 있다고 가정하지 말고, 실제 `app.py`와 프론트 코드를 먼저 확인한다.
+- 기존 `runs/<job_id>` 및 `/api/jobs` 흐름은 완전 대체가 끝날 때까지 보존한다.
+
+## 현재 기준점
+
+백엔드:
+- PDF 2개(old/new) 업로드, OpenDataLoader markdown 변환, word-level diff 생성.
+- unchanged word 기반 `semantic_map` 생성.
+- PDF annotation export, Index 탭, Review 탭, Diff 탭 기본 기능.
+
+프론트엔드:
+- 최초 보고서 단일 pane.
+- 업데이트 보고서 diff 후 previous/current 2-pane.
+- PDF 이미지 위 bbox 기반 하이라이트/리뷰 marker.
+
+기존 재사용 함수:
+- `extract_pdf_words`
+- `render_pdf_page`
+- `run_opendataloader_to_markdown`
+- `build_new_pdf_index`
+- `semantic.build_semantic_map`
 
 ---
 
-## 0. 현재 상태 (기준점)
+## Phase 1 — Markdown 섹션 마커 + section_map.json
 
-### 구현 완료
-**백엔드 (app.py + diff_extract.py + semantic.py)**
-- PDF 2개(old/new) 업로드 → OpenDataLoader → markdown 변환 → word 단위 diff 생성
-- `semantic_map`: equal(변경없는) 단어를 old/new 양쪽 PDF 좌표에 동시 매핑
-- `reviews.json`: 드래그 선택한 equal word chunk에 comment 저장 (word_ids / segment_ids / bbox)
-- PDF annotation export, Index 탭(note/FS heading)
-- `/api/jobs/<id>/words/<side>`, `/api/jobs/<id>/reviews` CRUD, `/api/jobs/<id>/export/<side>`
+목표:
+OpenDataLoader가 만든 markdown에 섹션 마커를 삽입하고 `section_map.json`을 생성한다.
 
-**관련 기존 함수 (재사용 대상)**
-- `extract_pdf_words`, `render_pdf_page`, `run_opendataloader_to_markdown`
-- `build_new_pdf_index` → `index_items` 생성 (type: `cover`/`contents`/`fs`/`note`, note는 `note_no`/`page_hint`/`page`, fs는 `label`/`page`)
-- 페이지 구분자: md에 `--- 5 ---` 형식 (`markdown_page_separator="--- %page-number% ---"`). 파싱 regex는 app.py에 이미 존재.
+원칙:
+- 페이지 단위로 섹션을 자르지 않는다.
+- md heading line을 직접 찾아 `start_line`으로 삼는다.
+- 다음 섹션 heading 직전까지를 `end_line`으로 삼는다.
+- `cover`, `contents`는 섹션 마커 대상에서 제외한다.
 
-### 현재 한계
-- job 단위 1회성, 버전 간 연결 없음 / 단일 보고서 리뷰 불가
-- review comment 단일 string / md에 섹션 구분자 없음 / workspace 없음
+section_id 규칙:
+- note N -> `note_{N}`
+- Financial Position -> `fs_position`
+- Income / Comprehensive Income / Profit or Loss -> `fs_income`
+- Changes in Equity -> `fs_equity`
+- Cash Flows -> `fs_cashflow`
+- 매칭 실패 시 `fs_{slug(label)}`로 fallback.
 
----
-
-## 실행 단계 (Phase)
-
-각 Phase는 독립적으로 완결되고 테스트 가능해야 한다.
-
-### Phase 1 — md 섹션 마커 + section_map.json
-**목표:** OpenDataLoader가 만든 md에 섹션 마커를 삽입하고 `section_map.json`을 생성한다. 기존 플로우에 **추가만** 하고 아무것도 제거하지 않는다.
-
-**선행 확인 (코드 먼저 읽기):**
-- `build_new_pdf_index`가 반환하는 `index_items`의 실제 필드 (`note_no`, `page_hint`, `page`, `type`, `label`, `title`)
-- md 페이지 구분자 파싱 regex 위치/형태
-- md 라인 ↔ 페이지 매핑을 이미 하는 코드가 있는지
-
-**경계 산정 — 페이지가 아니라 md 라인/heading 기준으로:**
-- 페이지 단위(`다음 item page - 1`)는 **금지**. 같은 페이지에 여러 섹션(fs_position+fs_income)이 있거나 섹션이 페이지 중간에서 끝나면 틀린다.
-- 각 섹션의 **heading 라인**을 md에서 직접 찾아 `start_line`으로, **다음 섹션 heading 직전 라인**을 `end_line`으로 잡는다.
-- heading 매칭: note는 `note_no` + title, fs는 label 텍스트로 md 라인 검색.
-
-**section_id 규칙 (type별 분기 정확히):**
-| index item type | section_id | 비고 |
-|---|---|---|
-| `note` (note_no=N) | `note_{N}` | |
-| `fs` | `fs_position`/`fs_income`/`fs_equity`/`fs_cashflow` | **label→표준ID 매핑 테이블 필요** |
-| `cover`/`contents` | 섹션화 제외 | 마커 안 넣음 |
-
-> FS label 매핑 예: "Financial Position"→`fs_position`, "Comprehensive Income"/"Profit or Loss"→`fs_income`, "Changes in Equity"→`fs_equity`, "Cash Flows"→`fs_cashflow`. 못 맞추면 `fs_{slug(label)}`로 폴백.
-
-**산출물:**
-- `inject_section_markers(md_path, index_items) -> section_map` — 마커 삽입 + 라인범위 계산
-- `read_md_lines(md_path)` 헬퍼 (신규, 미존재)
-- 마커 형식:
-```markdown
---- 5 ---
-
-<!-- SECTION_START:fs_position -->
-## Statements of Financial Position
-...
-<!-- SECTION_END:fs_position -->
+산출물:
+```text
+report.md 또는 new.md
+section_map.json
 ```
-- `section_map.json`:
-```jsonc
+
+마커 예시:
+```markdown
+<!-- SECTION_START:note_5 -->
+## Note 5. Revenue
+...
+<!-- SECTION_END:note_5 -->
+```
+
+완료 기준:
+- 기존 업로드/diff 흐름이 깨지지 않는다.
+- `section_map.json`이 생성된다.
+- markdown에 `SECTION_START` / `SECTION_END`가 들어간다.
+
+---
+
+## Phase 2 — document/run 저장 구조 + API
+
+목표:
+기존 job 1회성 구조 옆에 문서/버전 구조를 추가한다.
+
+저장 구조:
+```text
+documents/<doc_id>/
+  meta.json
+  reviews.json
+  runs/<run_id>/
+    report.pdf
+    report.md
+    words.json
+    chars.json
+    section_map.json
+    viewer_data.json
+
+    # diff run일 때
+    prev_report.pdf
+    prev_report.md
+    prev_words.json
+    prev_chars.json
+    prev_section_map.json
+    result.json
+    ai_assessment.json
+```
+
+API:
+- `POST /api/documents`
+- `GET /api/documents/<doc_id>`
+- `POST /api/documents/<doc_id>/runs`
+- `POST /api/documents/<doc_id>/runs/<run_id>/diff`
+- `GET /api/documents/<doc_id>/runs/<run_id>`
+- `GET /api/documents/<doc_id>/workspace`
+
+완료 기준:
+- 최초 보고서 업로드 시 document와 initial run이 생성된다.
+- 업데이트 보고서 업로드 시 새 run이 생성된다.
+- 새 run에서 diff를 실행할 수 있다.
+- 기존 `/api/jobs` 흐름은 유지된다.
+
+---
+
+## Phase 3 — 프론트엔드 document API 전환
+
+목표:
+프론트엔드를 `/api/jobs`에서 `/api/documents` 기반으로 전환한다.
+
+동작:
+- 최초 보고서 업로드 -> 단일 pane current report viewer.
+- 수정 보고서 업로드 + diff -> previous/current 2-pane viewer.
+- Index, Review, Diff 탭은 계속 동작한다.
+
+완료 기준:
+- UI에서 최초 업로드, 리뷰 생성, 업데이트 업로드, diff 실행이 가능하다.
+- 프론트의 기본 경로가 document/run API가 된다.
+
+---
+
+## Phase 4 — document-level reviews + 자연스러운 선택 UX
+
+목표:
+리뷰를 run이 아니라 `documents/<doc_id>/reviews.json`에 저장한다.
+각 run에는 리뷰 객체를 복사하지 않고, 하나의 document review가 run별 anchor를 가진다.
+선택 UX는 글자를 긁는 느낌에 가깝게 만들고, 저장은 word/chunk anchor 단위로 한다.
+
+핵심 원칙:
+- 리뷰의 canonical 저장 위치는 `documents/<doc_id>/reviews.json`.
+- `runs/<run_id>/reviews.json`는 정본이 아니라 projection/cache로만 사용한다.
+- comment/status는 문서 단위로 유지한다.
+- 위치 정보는 `anchors[run_id]`에 저장한다.
+- diff run에서 previous/current는 서로 다른 review side로 관리한다.
+- previous pane에서 남긴 리뷰는 Review 탭의 Previous 하위 탭에 표시한다.
+- current pane에서 남긴 리뷰는 Review 탭의 Current 하위 탭에 표시한다.
+- 리뷰 생성은 equal/unchanged text로 제한하지 않는다. changed/equal 여부와 무관하게 선택한 PDF 텍스트에 리뷰를 남길 수 있다.
+- run이 여러 번 쌓여도 review record나 anchor를 자동으로 증식시키지 않는다.
+- 새 diff run에서 Previous 탭은 `previous_run_id`에 이미 존재하는 anchor를 previous side projection으로 보여준다.
+- 새 diff run에서 Current 탭은 현재 `run_id`에 새로 생성된 anchor만 보여준다.
+- previous -> current 리뷰 이동은 자동으로 하지 않는다. 이후 별도 migrate/reattach 기능으로 제공한다.
+- 텍스트가 새 버전에서 사라지면 해당 run anchor는 `floating: true`가 된다.
+
+선택 UX:
+- `chars.json`을 생성한다.
+- char는 최소 `{page, char, bbox, word_id, order}`를 가진다.
+- 드래그 중에는 char range preview를 표시한다.
+- mouseup 시 선택된 char들의 `word_id`를 모아 chunk anchor로 저장한다.
+
+리뷰 스키마:
+```json
 {
-  "sections": {
-    "note_5": {
-      "title": "Revenue", "type": "note", "note_no": 5,
-      "start_line": 210, "end_line": 267,
-      "page_start": 12, "page_end": 13
+  "review_id": "r-001",
+  "doc_id": "d-001",
+  "status": "open",
+  "created_run_id": "run_v1",
+  "is_floating": false,
+  "comments": [
+    {
+      "comment_id": "c-001",
+      "author": "user",
+      "text": "Please verify this disclosure.",
+      "created_at": "2026-06-09T10:00:00Z"
+    }
+  ],
+  "anchors": {
+    "run_v1": {
+      "side": "new",
+      "word_ids": [0, 1, 3],
+      "page": 1,
+      "bbox": [50, 100, 295, 115],
+      "text": "Revenue recognition",
+      "section_id": "note_5",
+      "lines": [90, 91],
+      "floating": false
     }
   }
 }
 ```
 
-**완료 기준:** 기존 업로드 플로우 실행 시 md에 마커가 정상 삽입되고 `section_map.json`이 생성된다. 기존 diff/뷰어 기능은 그대로 동작.
+API:
+- `GET /api/documents/<doc_id>/reviews`
+- `PATCH /api/documents/<doc_id>/reviews/<review_id>`
+- `POST /api/documents/<doc_id>/reviews/<review_id>/comments`
+- `GET /api/documents/<doc_id>/runs/<run_id>/reviews`
+- `POST /api/documents/<doc_id>/runs/<run_id>/reviews`
+
+완료 기준:
+- 최초 run에 단 리뷰가 update/diff 후에도 같은 document review로 유지된다.
+- 새 diff run에서는 기존 리뷰가 복사/증식되지 않고 Previous 하위 탭에 projection으로 표시된다.
+- 왼쪽(previous) PDF에서 만든 리뷰는 Previous 하위 탭에 표시된다.
+- 오른쪽(current) PDF에서 만든 리뷰는 Current 하위 탭에 표시된다.
+- Current 하위 탭은 담당자가 현재 보고서에 직접 남긴 리뷰만 보여준다.
+- 리뷰 생성은 equal text에 제한되지 않는다.
+- 선택은 글자 단위로 긁는 느낌에 가까워진다.
+- 저장은 word/chunk 단위 anchor로 유지된다.
 
 ---
 
-### Phase 2 — doc/run 데이터 구조 + API (기존 라우트 유지)
-**목표:** 새 `documents/<doc_id>/runs/<run_id>` 구조와 신규 API를 **추가**한다. 기존 `/api/jobs/...`는 이 Phase에서는 **남겨둔다**(프론트가 아직 의존).
+## Phase 5 — AI Assessment Agent
 
-**새 데이터 구조:**
+목표:
+이전 run의 open review가 새 보고서에서 해결됐는지 AI가 판단한다.
+
+원칙:
+- 전체 markdown을 한 번에 보내지 않는다.
+- 리뷰를 section 단위로 그룹핑한다.
+- old/new section text와 section diff context를 제공한다.
+- 필요한 경우 tool로 추가 section/context를 조회한다.
+- 자유 텍스트 verdict parsing은 금지한다.
+- `submit_verdict` tool을 강제해 structured JSON으로 받는다.
+
+운영 디테일:
+- `ANTHROPIC_API_KEY`는 환경변수에서 읽는다.
+- 모델명은 상수 또는 환경변수로 관리한다.
+- 기존 background job 패턴과 동일하게 상태를 polling할 수 있게 한다.
+- timeout과 tool-call limit을 둔다.
+
+산출물:
+```text
+ai_assessment.json
 ```
-documents/<doc_id>/
-  meta.json                 ← doc_id, title, created_at, runs[] 순서
-  runs/<run_id>/
-    report.pdf / report.md(마커) / words.json / section_map.json
-    viewer_data.json / reviews.json
-    ← diff run일 때만 →
-    prev_report.pdf / prev_report.md / prev_words.json / prev_section_map.json
-    result.json / ai_assessment.json
-```
 
-**신규 API:**
-| Method | Endpoint | 설명 |
-|---|---|---|
-| POST | `/api/documents` | 최초 단일 보고서 업로드, doc_id 생성 |
-| GET  | `/api/documents/<doc_id>` | doc 메타 + runs 목록 |
-| POST | `/api/documents/<doc_id>/runs` | 업데이트 보고서 업로드 |
-| POST | `/api/documents/<doc_id>/runs/<run_id>/diff` | diff 실행 |
-| GET  | `/api/documents/<doc_id>/runs/<run_id>` | run 데이터(viewer_data) |
-| GET/POST | `/api/documents/<doc_id>/runs/<run_id>/reviews` | 리뷰 목록/생성 |
-| POST | `/api/documents/<doc_id>/runs/<run_id>/reviews/<rid>/comments` | comment 추가 |
-| PATCH| `/api/documents/<doc_id>/runs/<run_id>/reviews/<rid>` | 상태 변경 |
-| POST | `/api/documents/<doc_id>/runs/<run_id>/assess` | AI 판정 (Phase 5) |
-| PATCH| `/api/documents/<doc_id>/runs/<run_id>/assess/<rid>` | human_decision 저장 |
-| POST | `/api/documents/<doc_id>/runs/<run_id>/migrate` | 리뷰 이관 (Phase 6) |
-| GET  | `/api/documents/<doc_id>/workspace` | 최근 5 runs |
-| GET  | `/api/documents/<doc_id>/runs/<run_id>/export/<side>` | PDF annotation 내보내기 |
-
-**완료 기준:** 단일 업로드→run 생성, diff 실행이 새 API로 동작. 기존 `/api/jobs`도 여전히 동작.
+완료 기준:
+- Review 탭에 `cleared`, `partial`, `unclear` verdict badge가 표시된다.
+- AI reasoning이 표시된다.
+- 사람이 final decision을 저장할 수 있다.
 
 ---
 
-### Phase 3 — 프론트 단일 pane + 신규 API 전환
-**목표:** 프론트엔드를 새 API로 전환. 최초 업로드는 **단일 pane**, diff 후 **2-pane split**.
+## Phase 6 — anchor 재매핑 품질 + floating review UX
 
-- 최초 업로드 완료 → 단일 pane 뷰어, Review 탭 활성
-- 업데이트 업로드 + diff 완료 → 2-pane split, Diff 탭 활성
-- 전환 끝나면 **이때 기존 `/api/jobs/...` 라우트 제거** 가능.
+목표:
+버전 변경 시 리뷰 anchor 재매핑 품질을 높이고, 못 찾은 리뷰를 floating review로 관리한다.
 
-**완료 기준:** UI에서 단일 업로드→리뷰→업데이트 업로드→diff까지 끊김 없이 동작.
+원칙:
+- closed review도 document-level 기록은 보존한다.
+- open/keep_open review는 새 run에서 재매핑을 시도한다.
+- 재매핑은 semantic_map, text search, section context를 함께 사용한다.
+- 찾으면 `anchors[run_id]`를 추가한다.
+- 못 찾으면 `floating: true` anchor를 추가한다.
 
----
-
-### Phase 4 — Comment thread (string → array)
-**목표:** review comment를 단일 string에서 스레드 배열로 변경. + `anchor.section_id` 자동 계산.
-
-**선행 확인:** `semantic_map`에 word_id ↔ md line 매핑이 있는지. 없으면 word_id→line 매핑부터 만든다 (section_id 자동계산의 전제).
-
-**reviews.json 스키마:**
-```jsonc
-{
-  "review_id": "r-001",
-  "anchor": {
-    "word_ids": [0,1,3], "page": 1, "bbox": [50,100,295,115],
-    "text": "Revenue is control",
-    "section_id": "note_5",      // section_map으로 라인→섹션 매핑하여 자동
-    "old_lines": [88,89], "new_lines": [90,91]
-  },
-  "status": "open",              // open | closed
-  "migrated_from": null, "migrated_to": null,
-  "is_floating": false,
-  "comments": [
-    {"comment_id":"c-001","author":"김감사","text":"...","created_at":"2026-06-09T10:00:00Z"}
-  ]
-}
-```
-- export sticky note = comment thread 전체를 시간순 텍스트로.
-
-**완료 기준:** follow-up comment 추가 가능, 저장 시 section_id 자동 계산.
+완료 기준:
+- floating review가 Review 탭 별도 영역에 표시된다.
+- 사용자가 floating review를 새 텍스트에 다시 붙일 수 있다.
 
 ---
 
-### Phase 5 — AI Assessment agent (forced tool_use)
-**목표:** 이전 run 리뷰들이 새 버전에서 해결됐는지 AI가 판정.
+## Phase 7 — Workspace
 
-**핵심 원칙:**
-- 전체 md를 한 번에 던지지 않는다. 리뷰를 **섹션(anchor.section_id) 단위로 그룹핑**해 전달.
-- AI가 필요하면 tool로 추가 섹션을 동적 호출. comment thread는 전체를 전달.
-- **verdict는 자유 텍스트 파싱 금지.** AI가 `submit_verdict` tool을 호출해 **구조화된 JSON으로 반환**하게 강제(forced tool_use). `parse_verdicts` 방식 폐기.
+목표:
+문서별 최근 run 목록을 보여주는 workspace를 만든다.
 
-**운영 디테일 (반드시 반영):**
-- API 키는 환경변수 `ANTHROPIC_API_KEY`에서 읽는다. 없으면 명확한 에러.
-- 모델명은 상수/환경변수로 분리(하드코딩 금지).
-- 기존 `JOBS` threading 패턴과 동일하게 백그라운드 잡으로 실행 + 상태 폴링.
-- 타임아웃/예외 처리, tool 호출 횟수 상한.
+표시 항목:
+- 최근 run 5개.
+- 업로드 날짜.
+- open/closed review 수.
+- diff 여부.
+- AI assessment 여부.
 
-**tool 세트:** `get_section(section_id, version)`, `search_text(query, version, context_lines)`, `get_diff_for_section(section_id)`, `submit_verdict(...)`.
-
-**ai_assessment.json:**
-```jsonc
-{
-  "assessed_at": "...", "model": "<env>",
-  "results": [
-    {"review_id":"r-001","verdict":"cleared",   // cleared|unclear|partial
-     "reasoning":"...","ref_section_ids":["note_5","note_12"],
-     "ref_segment_ids":["seg-12"],"tools_called":["get_section(note_12,new)"],
-     "human_decision":null}                       // null|closed|keep_open
-  ]
-}
-```
-
-**tool 구현 참고 (run_dir 기준 파일 슬라이스):**
-```python
-def get_section(run_dir, section_id, version):
-    map_path = run_dir / ("section_map.json" if version=="new" else "prev_section_map.json")
-    md_path  = run_dir / ("report.md" if version=="new" else "prev_report.md")
-    sm = json.loads(map_path.read_text(encoding="utf-8"))
-    sec = sm["sections"].get(section_id)
-    if not sec:
-        return f"섹션 {section_id} 없음. 사용 가능: {list(sm['sections'])}"
-    lines = read_md_lines(md_path)
-    return "\n".join(lines[sec["start_line"]-1:sec["end_line"]])
-```
-
-**완료 기준:** 섹션 그룹별 판정 → `ai_assessment.json` 저장 → Review 탭에 verdict badge(🟢cleared/🔴unclear/🟡partial) → 사람이 closed/keep_open 결정.
+완료 기준:
+- 사용자가 workspace에서 특정 run을 열 수 있다.
 
 ---
 
-### Phase 6 — 리뷰 이관 + floating
-```
-이전 run reviews 순회
-→ human_decision == "closed" → 이관 안 함 (해당 run에 기록 보존)
-→ keep_open / 미결정 →
-    새 run semantic_map에서 anchor.text 검색
-    찾음 → 새 word_ids로 복사, migrated_from/to 기록
-    못 찾음 → 팝업 확인 → 삭제 or is_floating=true (anchor 없이 thread만 보존)
-```
-**완료 기준:** 이관 후 새 run 단일 pane, floating 리뷰 별도 영역 표시.
-
----
-
-### Phase 7 — Workspace (선택)
-- doc_id 최근 run 5개 목록: 날짜 / 리뷰수(open·closed) / diff 여부 / AI 판정 여부
-- run 클릭 → 해당 run 뷰어
-
----
-
-## 의존성 추가
-```
-anthropic>=0.40.0    ← tool_use 지원 (Phase 5에서만 필요)
+## 의존성
+```text
+anthropic>=0.40.0
 ```
 
-## 구현 우선순위 = Phase 순서
-1 섹션 마커 → 2 doc/run+API → 3 프론트 전환 → 4 comment thread → 5 AI 판정 → 6 이관 → 7 workspace
+## 구현 순서
+1. 섹션 마커
+2. document/run API
+3. 프론트 document API 전환
+4. document-level reviews + 글자 선택 UX
+5. AI assessment
+6. anchor 재매핑 + floating UX
+7. workspace

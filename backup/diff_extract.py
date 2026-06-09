@@ -90,13 +90,13 @@ def remap(raw, old_tokens, new_tokens):
 
 def remove_page_marker_segments(segments):
     """
-    result.json segment 단계에서 page marker diff 제거.
+    Remove page marker diffs at the result.json segment stage.
 
-    제거 대상:
+    Patterns to remove:
       equal --- / delete 30 / add 31 / equal ---
       equal -   / delete 30 / add 31 / equal -
       delete --- 30 --- / add --- 31 ---
-      단독 delete/add 숫자가 주변 ---와 붙은 경우
+      standalone delete/add numbers attached to surrounding dash tokens
     """
     def txt(i):
         if i < 0 or i >= len(segments):
@@ -120,13 +120,13 @@ def remove_page_marker_segments(segments):
         t = str(s.get("text", "")).strip()
         st = s.get("type")
 
-        # delete/add 숫자이고 양옆이 dash token이면 page marker 숫자로 판단
-        # 예: equal --- / delete 30 / add 31 / equal ---
+        # Treat delete/add numbers surrounded by dash tokens as page marker numbers.
+        # Example: equal --- / delete 30 / add 31 / equal ---
         if st in ("delete", "add") and is_page_num_token(t):
             left_dash = is_dash_token(txt(i - 1))
             right_dash = is_dash_token(txt(i + 1)) or is_dash_token(txt(i + 2))
 
-            # 같은 위치에 delete/add 숫자가 붙어 있는 경우
+            # Paired delete/add numbers at the same location.
             pair_num = (
                 (typ(i - 1) in ("delete", "add") and is_page_num_token(txt(i - 1)))
                 or
@@ -136,7 +136,7 @@ def remove_page_marker_segments(segments):
             if left_dash and (right_dash or pair_num):
                 remove.add(i)
 
-                # 주변 dash도 page marker 일부면 제거
+                # Remove nearby dash tokens when they are part of the page marker.
                 if is_dash_token(txt(i - 1)):
                     remove.add(i - 1)
                 if is_dash_token(txt(i + 1)):
@@ -144,7 +144,7 @@ def remove_page_marker_segments(segments):
                 if is_dash_token(txt(i + 2)):
                     remove.add(i + 2)
 
-        # dash token 자체가 page marker 주변이면 제거
+        # Remove dash tokens near page marker numbers.
         if is_dash_token(t):
             near_page_num = any(
                 typ(j) in ("delete", "add", "equal") and is_page_num_token(txt(j))

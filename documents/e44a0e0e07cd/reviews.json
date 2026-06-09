@@ -1,0 +1,87 @@
+[
+  {
+    "review_id": "r-e2caacad",
+    "anchor_id": "a-1765dd08",
+    "doc_id": "e44a0e0e07cd",
+    "status": "open",
+    "created_run_id": "f67c15ddf9b7",
+    "is_floating": false,
+    "text": "Our objectives are to obtain reasonable assurance about whether the financial statements as a whole are free from material misstatement,",
+    "comments": [
+      {
+        "comment_id": "c-53b49f4e",
+        "author": "user",
+        "text": "ttst",
+        "created_at": "2026-06-09T13:44:06.497915+00:00"
+      }
+    ],
+    "anchors": {
+      "f67c15ddf9b7": {
+        "run_id": "f67c15ddf9b7",
+        "side": "new",
+        "word_ids": [
+          439,
+          440,
+          441,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453,
+          454,
+          455,
+          456,
+          457,
+          458
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          439,
+          440,
+          441,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453,
+          454,
+          455,
+          456,
+          457,
+          458
+        ],
+        "page": 4,
+        "bbox": [
+          57.12994384765625,
+          155.98788452148438,
+          530.3272705078125,
+          181.43569946289062
+        ],
+        "rect": [
+          53.720703125,
+          163.90625,
+          143.095703125,
+          176.40625
+        ],
+        "text": "Our objectives are to obtain reasonable assurance about whether the financial statements as a whole are free from material misstatement,",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T13:44:06.497915+00:00",
+    "updated_at": "2026-06-09T13:44:06.497915+00:00"
+  }
+]

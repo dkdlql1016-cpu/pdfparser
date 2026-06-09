@@ -1,0 +1,37 @@
+{
+  "doc_id": "9e416a40ab2d",
+  "title": "one",
+  "created_at": "2026-06-09T13:35:27.998866+00:00",
+  "updated_at": "2026-06-09T13:35:29.785148+00:00",
+  "runs": [
+    {
+      "run_id": "4893bee622b9",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-09T13:35:27.998866+00:00",
+      "filename": "one.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "81cb56612005",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-09T13:35:28.461833+00:00",
+      "filename": "two.pdf",
+      "previous_run_id": "4893bee622b9",
+      "has_diff": true,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "f2cbd0bc0f0e",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-09T13:35:29.115091+00:00",
+      "filename": "three.pdf",
+      "previous_run_id": "81cb56612005",
+      "has_diff": true,
+      "has_ai_assessment": false
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+[
+  {
+    "review_id": "r-85cd2d59",
+    "anchor_id": "a-643bb972",
+    "doc_id": "3d98f2daa515",
+    "status": "open",
+    "created_run_id": "b04e1efacfbb",
+    "is_floating": false,
+    "text": "Revenue 100",
+    "comments": [
+      {
+        "comment_id": "c-0d82a2e7",
+        "author": "user",
+        "text": "initial current review",
+        "created_at": "2026-06-09T13:33:20.880138+00:00"
+      }
+    ],
+    "anchors": {
+      "b04e1efacfbb": {
+        "run_id": "b04e1efacfbb",
+        "side": "new",
+        "word_ids": [
+          0,
+          1
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          0,
+          1
+        ],
+        "page": 1,
+        "bbox": [
+          72.0,
+          60.17499923706055,
+          137.427978515625,
+          75.28900146484375
+        ],
+        "rect": null,
+        "text": "Revenue 100",
+        "floating": false
+      },
+      "ee110d4eea77": {
+        "run_id": "ee110d4eea77",
+        "side": "old",
+        "word_ids": [
+          0,
+          1
+        ],
+        "old_word_ids": [
+          0,
+          1
+        ],
+        "new_word_ids": [],
+        "page": 1,
+        "bbox": [
+          72.0,
+          60.17499923706055,
+          137.427978515625,
+          75.28900146484375
+        ],
+        "text": "Revenue 100",
+        "floating": false,
+        "previous_run_id": "b04e1efacfbb"
+      }
+    },
+    "created_at": "2026-06-09T13:33:20.880138+00:00",
+    "updated_at": "2026-06-09T13:33:21.506417+00:00"
+  },
+  {
+    "review_id": "r-7b0ed039",
+    "anchor_id": "a-5a98e654",
+    "doc_id": "3d98f2daa515",
+    "status": "open",
+    "created_run_id": "ee110d4eea77",
+    "is_floating": false,
+    "text": "Revenue 120",
+    "comments": [
+      {
+        "comment_id": "c-50e62e89",
+        "author": "user",
+        "text": "current review",
+        "created_at": "2026-06-09T13:33:21.518659+00:00"
+      }
+    ],
+    "anchors": {
+      "ee110d4eea77": {
+        "run_id": "ee110d4eea77",
+        "side": "new",
+        "word_ids": [
+          0,
+          1
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          0,
+          1
+        ],
+        "page": 1,
+        "bbox": [
+          72.0,
+          60.17499923706055,
+          137.427978515625,
+          75.28900146484375
+        ],
+        "rect": null,
+        "text": "Revenue 120",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T13:33:21.518659+00:00",
+    "updated_at": "2026-06-09T13:33:21.518659+00:00"
+  }
+]

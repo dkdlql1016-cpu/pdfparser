@@ -1,0 +1,177 @@
+[
+  {
+    "review_id": "r-358f3af4",
+    "anchor_id": "a-81f58306",
+    "doc_id": "a77428fdf2e0",
+    "status": "open",
+    "created_run_id": "7510a0056a66",
+    "is_floating": false,
+    "text": "Qualified Opinion",
+    "comments": [
+      {
+        "comment_id": "c-451b2d80",
+        "author": "user",
+        "text": "change opinion",
+        "created_at": "2026-06-09T14:00:57.824888+00:00"
+      }
+    ],
+    "anchors": {
+      "7510a0056a66": {
+        "run_id": "7510a0056a66",
+        "side": "new",
+        "word_ids": [
+          69,
+          70
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          69,
+          70
+        ],
+        "page": 3,
+        "bbox": [
+          57.13429260253906,
+          181.29811096191406,
+          128.86521911621094,
+          194.69430541992188
+        ],
+        "rect": [
+          50.39402173913044,
+          179.4021739130435,
+          139.0896739130435,
+          191.57608695652175
+        ],
+        "text": "Qualified Opinion",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:00:57.824888+00:00",
+    "updated_at": "2026-06-09T14:00:57.824888+00:00"
+  },
+  {
+    "review_id": "r-e61cc18e",
+    "anchor_id": "a-c386f686",
+    "doc_id": "a77428fdf2e0",
+    "status": "open",
+    "created_run_id": "7510a0056a66",
+    "is_floating": false,
+    "text": "with K-GAAP, and for such internal control as management determines is necessary to enable the preparation",
+    "comments": [
+      {
+        "comment_id": "c-4ef71f83",
+        "author": "user",
+        "text": "chagne",
+        "created_at": "2026-06-09T14:01:07.312742+00:00"
+      }
+    ],
+    "anchors": {
+      "7510a0056a66": {
+        "run_id": "7510a0056a66",
+        "side": "new",
+        "word_ids": [
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          223,
+          224,
+          225,
+          226,
+          227,
+          228,
+          229,
+          230,
+          231,
+          232,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238
+        ],
+        "page": 3,
+        "bbox": [
+          57.2039794921875,
+          358.91485595703125,
+          532.3201293945312,
+          384.482177734375
+        ],
+        "rect": [
+          477.35054347826093,
+          367.22826086956525,
+          516.4809782608696,
+          373.3152173913044
+        ],
+        "text": "with K-GAAP, and for such internal control as management determines is necessary to enable the preparation",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:01:07.312742+00:00",
+    "updated_at": "2026-06-09T14:01:07.312742+00:00"
+  },
+  {
+    "review_id": "r-a0f5f4d1",
+    "anchor_id": "a-1f6ff444",
+    "doc_id": "a77428fdf2e0",
+    "status": "open",
+    "created_run_id": "4fa60ba6ec6d",
+    "is_floating": false,
+    "text": "InvesteeCo GreenTech",
+    "comments": [
+      {
+        "comment_id": "c-07455933",
+        "author": "user",
+        "text": "dd",
+        "created_at": "2026-06-09T14:04:16.681873+00:00"
+      }
+    ],
+    "anchors": {
+      "4fa60ba6ec6d": {
+        "run_id": "4fa60ba6ec6d",
+        "side": "old",
+        "word_ids": [
+          6774,
+          6775
+        ],
+        "old_word_ids": [
+          6774,
+          6775
+        ],
+        "new_word_ids": [],
+        "page": 20,
+        "bbox": [
+          84.95999908447266,
+          590.0210571289062,
+          176.47349548339844,
+          603.3475341796875
+        ],
+        "rect": [
+          89.08967391304348,
+          596.0597826086957,
+          169.9592391304348,
+          607.3641304347826
+        ],
+        "text": "InvesteeCo GreenTech",
+        "floating": false
+      }
+    },
+    "created_at": "2026-06-09T14:04:16.681873+00:00",
+    "updated_at": "2026-06-09T14:04:16.681873+00:00"
+  }
+]
