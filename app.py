@@ -7,6 +7,8 @@ import subprocess
 import sys
 import threading
 import uuid
+import importlib
+import importlib.util
 import semantic
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +19,8 @@ import flask.cli
 from flask import Flask, Response, jsonify, request, send_file
 
 BASE_DIR = Path(__file__).resolve().parent
+if importlib.util.find_spec("dotenv"):
+    importlib.import_module("dotenv").load_dotenv(BASE_DIR / ".env")
 RUNS_DIR = BASE_DIR / "runs"
 DOCUMENTS_DIR = BASE_DIR / "documents"
 RUNS_DIR.mkdir(exist_ok=True)
@@ -1193,6 +1197,14 @@ def document_run_dir(doc_id, run_id):
     return document_dir(doc_id) / "runs" / run_id
 
 
+def document_snapshots_dir(doc_id):
+    return document_dir(doc_id) / "snapshots"
+
+
+def document_snapshot_dir(doc_id, snapshot_id):
+    return document_snapshots_dir(doc_id) / snapshot_id
+
+
 def document_meta_path(doc_id):
     return document_dir(doc_id) / "meta.json"
 
@@ -1606,6 +1618,172 @@ def carry_forward_previous_reviews(run_dir: Path, semantic_map):
     return carried
 
 
+def find_word_sequence_by_text(words, text):
+    tokens = [norm_token(t) for t in str(text or "").split()]
+    tokens = [t for t in tokens if t]
+    if not tokens:
+        return []
+    norms = [w.get("norm") or norm_token(w.get("text", "")) for w in words]
+    max_len = min(len(tokens), 80)
+    for length in range(max_len, 0, -1):
+        needle = tokens[:length]
+        for start in range(0, max(0, len(norms) - length + 1)):
+            if norms[start:start + length] == needle:
+                return [words[i].get("idx", i) for i in range(start, start + length)]
+    return []
+
+
+def migrate_previous_review_to_current(doc_id, run_id, review_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return {"error": "document not found"}, 404
+    run_meta = update_run_meta(meta, run_id)
+    if not run_meta:
+        return {"error": "run not found"}, 404
+    prev_run_id = run_meta.get("previous_run_id")
+    if not prev_run_id:
+        return {"error": "migration requires a diff run"}, 400
+    run_dir = document_run_dir(doc_id, run_id)
+    if not run_dir.exists():
+        return {"error": "run not found"}, 404
+
+    reviews = load_document_reviews(doc_id)
+    review = next((r for r in reviews if r.get("review_id") == review_id), None)
+    if not review:
+        return {"error": "review not found"}, 404
+    anchors = review.setdefault("anchors", {})
+    if anchors.get(run_id) and anchors[run_id].get("side") == "new":
+        return {"review": review_projection_for_anchor(review, run_id), "already_current": True}, 200
+
+    prev_anchor = anchors.get(prev_run_id)
+    if not prev_anchor:
+        return {"error": "previous anchor not found"}, 404
+
+    old_to_new = {
+        e.get("old_word_id"): e.get("new_word_id")
+        for e in (document_semantic_map(doc_id, run_id) or {}).get("equal_words", [])
+        if e.get("old_word_id") is not None and e.get("new_word_id") is not None
+    }
+    old_ids = [int(w) for w in prev_anchor.get("word_ids", []) if isinstance(w, int) or str(w).isdigit()]
+    mapped = [old_to_new[wid] for wid in old_ids if wid in old_to_new]
+    new_words = read_json(run_dir / "words.json", []) or []
+    new_ids = []
+    seen = set()
+    for wid in mapped:
+        if isinstance(wid, int) and 0 <= wid < len(new_words) and wid not in seen:
+            seen.add(wid)
+            new_ids.append(wid)
+    if not new_ids:
+        new_ids = find_word_sequence_by_text(new_words, prev_anchor.get("text") or review.get("text", ""))
+    if not new_ids:
+        return {"error": "matching current text was not found"}, 409
+
+    anchor = {
+        "run_id": run_id,
+        "side": "new",
+        "word_ids": new_ids,
+        "old_word_ids": [],
+        "new_word_ids": new_ids,
+        "page": first_word_page(new_words, new_ids),
+        "bbox": words_bbox(new_words, new_ids),
+        "text": text_for_word_ids(new_words, new_ids),
+        "floating": False,
+        "migrated_from_run_id": prev_run_id,
+        "migrated_at": utc_now(),
+    }
+    anchors[run_id] = anchor
+    review["updated_at"] = utc_now()
+    save_document_reviews(doc_id, reviews)
+    semantic.save_reviews(run_dir, document_reviews_for_run(doc_id, run_id))
+    return {"review": review_projection_for_anchor(review, run_id), "already_current": False}, 200
+
+
+SNAPSHOT_LIMIT = 10
+
+
+def snapshot_file_names():
+    return [
+        "viewer_data.json", "result.json", "ai_assessment.json", "reviews.json",
+        "report.pdf", "report.md", "words.json", "chars.json", "section_map.json",
+        "prev_report.pdf", "prev_report.md", "prev_words.json", "prev_chars.json", "prev_section_map.json",
+        "new.pdf", "new.md", "new_words.json", "new_chars.json", "old.pdf", "old.md", "old_words.json", "old_chars.json",
+    ]
+
+
+def snapshot_counts(reviews):
+    return {
+        "review_count": len(reviews or []),
+        "open_reviews": sum(1 for r in reviews or [] if r.get("status", "open") == "open"),
+        "closed_reviews": sum(1 for r in reviews or [] if r.get("status") in ("closed", "cleared", "resolved")),
+    }
+
+
+def prune_document_snapshots(doc_id, meta):
+    snapshots = sorted(meta.get("snapshots", []), key=lambda s: s.get("created_at", ""))
+    while len(snapshots) > SNAPSHOT_LIMIT:
+        old = snapshots.pop(0)
+        shutil.rmtree(document_snapshot_dir(doc_id, old.get("snapshot_id", "")), ignore_errors=True)
+    meta["snapshots"] = snapshots
+
+
+def create_run_snapshot(doc_id, run_id, label=""):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return {"error": "document not found"}, 404
+    run_meta = run_meta_for(meta, run_id)
+    if not run_meta:
+        return {"error": "run not found"}, 404
+    run_dir = document_run_dir(doc_id, run_id)
+    viewer_data = read_json(run_dir / "viewer_data.json", None)
+    if not viewer_data:
+        return {"error": "run data not found"}, 404
+
+    snapshot_id = "snap-" + uuid.uuid4().hex[:10]
+    snap_dir = document_snapshot_dir(doc_id, snapshot_id)
+    snap_dir.mkdir(parents=True, exist_ok=True)
+    reviews = document_reviews_for_run(doc_id, run_id)
+    semantic.save_reviews(run_dir, reviews)
+    for name in snapshot_file_names():
+        copy_if_exists(run_dir / name, snap_dir / name)
+    write_json(snap_dir / "reviews.json", reviews)
+    if not (snap_dir / "viewer_data.json").exists():
+        write_json(snap_dir / "viewer_data.json", viewer_data)
+
+    created_at = utc_now()
+    snapshot_meta = {
+        "snapshot_id": snapshot_id,
+        "doc_id": doc_id,
+        "run_id": run_id,
+        "created_at": created_at,
+        "filename": run_meta.get("filename"),
+        "label": str(label or "").strip()[:120],
+        "mode": viewer_data.get("mode"),
+        "has_diff": bool((snap_dir / "result.json").exists()),
+        "has_ai_assessment": bool((snap_dir / "ai_assessment.json").exists()),
+        **snapshot_counts(reviews),
+    }
+    write_json(snap_dir / "snapshot.json", snapshot_meta)
+    meta.setdefault("snapshots", []).append(snapshot_meta)
+    prune_document_snapshots(doc_id, meta)
+    save_document_meta(meta)
+    return snapshot_meta, 201
+
+
+def snapshot_meta_for(doc_id, snapshot_id):
+    meta = load_document_meta(doc_id) or {}
+    return next((s for s in meta.get("snapshots", []) if s.get("snapshot_id") == snapshot_id), None)
+
+
+def snapshot_side_file(side, kind):
+    if kind == "pdf":
+        return "report.pdf" if side in ("new", "report", "current") else "prev_report.pdf"
+    if kind == "words":
+        return "words.json" if side in ("new", "report", "current") else "prev_words.json"
+    if kind == "chars":
+        return "chars.json" if side in ("new", "report", "current") else "prev_chars.json"
+    return None
+
+
 def update_run_meta(meta, run_id, **patch):
     for run in meta.get("runs", []):
         if run.get("run_id") == run_id:
@@ -1614,8 +1792,9 @@ def update_run_meta(meta, run_id, **patch):
     return None
 
 
-AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL", "claude-3-5-sonnet-latest")
+AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL") or "claude-3-5-sonnet-latest"
 AI_CONTEXT_CHARS = 9000
+AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "ai_assessment_system.md"
 
 
 def ai_assessment_path(doc_id, run_id):
@@ -1633,6 +1812,15 @@ def save_ai_assessment(doc_id, run_id, assessment):
     write_json(ai_assessment_path(doc_id, run_id), assessment)
 
 
+def load_ai_system_prompt():
+    if AI_ASSESSMENT_SYSTEM_PROMPT_PATH.exists():
+        return AI_ASSESSMENT_SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").strip()
+    return (
+        "You are an expert financial report review assistant. "
+        "Use the available markdown tools before calling submit_verdict."
+    )
+
+
 def run_meta_for(meta, run_id):
     return next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), None)
 
@@ -1645,13 +1833,20 @@ def norm_space(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
+def section_entries(section_map):
+    raw = (section_map or {}).get("sections", section_map or {})
+    if isinstance(raw, dict):
+        return [{"section_id": sid, **(meta or {})} for sid, meta in raw.items()]
+    return raw if isinstance(raw, list) else []
+
+
 def section_context_from_markdown(md_path: Path, section_map, section_id=None, fallback_text=""):
     if not md_path.exists():
         return ""
     lines = read_md_lines(md_path)
     chosen = None
     if section_id:
-        chosen = next((s for s in section_map or [] if s.get("section_id") == section_id), None)
+        chosen = next((s for s in section_entries(section_map) if s.get("section_id") == section_id), None)
     if chosen:
         start = max(0, int(chosen.get("start_line", 1)) - 1)
         end = min(len(lines), int(chosen.get("end_line", len(lines))))
@@ -1690,16 +1885,205 @@ def assessment_reviews_for_run(doc_id, run_id, review_id=None):
     return reviews
 
 
-def build_assessment_prompt(review, prev_anchor, old_context, new_context):
-    comments = "\n".join(f"- {c.get('text', '')}" for c in review.get("comments", []) if c.get("text"))
+def available_assessment_sections(prev_section_map, current_section_map):
+    rows = []
+    for file_key, section_map in (("previous", prev_section_map), ("current", current_section_map)):
+        for section in section_entries(section_map):
+            rows.append({
+                "file": file_key,
+                "section_id": section.get("section_id"),
+                "title": section.get("title", ""),
+                "type": section.get("type", ""),
+                "note_no": section.get("note_no"),
+                "page_start": section.get("page_start"),
+                "page_end": section.get("page_end"),
+            })
+    return rows
+
+
+def infer_section_id_for_anchor(section_map, anchor, md_path=None):
+    explicit = anchor_section_id(anchor)
+    if explicit:
+        return explicit
+    page = anchor.get("page")
+    text = norm_space(anchor.get("text", ""))
+    candidates = []
+    for section in section_entries(section_map):
+        start = section.get("page_start")
+        end = section.get("page_end") or start
+        if page and start and end and int(start) <= int(page) <= int(end):
+            candidates.append(section)
+    if not candidates:
+        return None
+    if text and md_path and md_path.exists():
+        needle = text[:120].lower()
+        for section in candidates:
+            body = norm_space(section_context_from_markdown(md_path, section_map, section.get("section_id"))).lower()
+            if needle and needle in body:
+                return section.get("section_id")
+    return candidates[0].get("section_id")
+
+
+def review_thread_for_prompt(review):
+    comments = []
+    for idx, comment in enumerate(review.get("comments", []), start=1):
+        text = str(comment.get("text", "")).strip()
+        if not text:
+            continue
+        comments.append({
+            "index": idx,
+            "author": comment.get("author", "user"),
+            "created_at": comment.get("created_at", ""),
+            "text": text,
+        })
+    if not comments and review.get("comment"):
+        comments.append({"index": 1, "author": "user", "created_at": review.get("created_at", ""), "text": review.get("comment", "")})
+    return comments
+
+
+def map_old_word_ids_to_current(old_word_ids, semantic_map):
+    by_old = {
+        item.get("old_word_id"): item
+        for item in (semantic_map or {}).get("equal_words", [])
+        if item.get("old_word_id") is not None and item.get("new_word_id") is not None
+    }
+    mapped = [by_old[wid].get("new_word_id") for wid in old_word_ids if wid in by_old]
+    return [wid for wid in mapped if wid is not None]
+
+
+def segment_numbers_for_old_word_ids(old_word_ids, semantic_map):
+    wanted = set(old_word_ids or [])
+    nums = []
+    for item in (semantic_map or {}).get("equal_words", []):
+        if item.get("old_word_id") in wanted:
+            seg_id = item.get("segment_id")
+            m = re.search(r"(\d+)$", str(seg_id or ""))
+            if m:
+                nums.append(int(m.group(1)))
+    return nums
+
+
+def related_diff_changes_for_review(viewer_data, prev_anchor, semantic_map, limit=8):
+    changes = (viewer_data or {}).get("changes", []) or []
+    old_ids = list(prev_anchor.get("word_ids") or prev_anchor.get("old_word_ids") or prev_anchor.get("new_word_ids") or [])
+    seg_nums = segment_numbers_for_old_word_ids(old_ids, semantic_map)
+    anchor_page = prev_anchor.get("page")
+    scored = []
+    for change in changes:
+        seg_start = change.get("seg_start")
+        seg_end = change.get("seg_end")
+        seg_score = 999999
+        if seg_nums and seg_start is not None and seg_end is not None:
+            seg_score = min(0 if seg_start <= n <= seg_end else min(abs(n - seg_start), abs(n - seg_end)) for n in seg_nums)
+        page_score = 0 if anchor_page and change.get("old_page") == anchor_page else 50
+        if not seg_nums and page_score:
+            continue
+        scored.append((seg_score + page_score, change))
+    scored.sort(key=lambda x: (x[0], x[1].get("id", 0)))
+    return [
+        {
+            "change_id": change.get("id"),
+            "previous_page": change.get("old_page"),
+            "current_page": change.get("new_page"),
+            "removed_text": trim_for_prompt(change.get("old_text", ""), 1800),
+            "added_text": trim_for_prompt(change.get("new_text", ""), 1800),
+        }
+        for _score, change in scored[:limit]
+        if change.get("old_text") or change.get("new_text")
+    ]
+
+
+def trim_for_prompt(value, limit):
+    text = str(value or "")
+    return text if len(text) <= limit else text[:limit - 20] + "\n...[truncated]"
+
+
+def build_assessment_context_pack(run_dir, review, prev_anchor, prev_section_map, current_section_map, viewer_data, semantic_map):
+    prev_md = run_dir / "prev_report.md"
+    current_md = run_dir / "report.md"
+    prev_words = read_json(run_dir / "prev_words.json", []) or []
+    current_words = read_json(run_dir / "words.json", []) or []
+
+    old_ids = list(prev_anchor.get("word_ids") or prev_anchor.get("old_word_ids") or prev_anchor.get("new_word_ids") or [])
+    current_ids = map_old_word_ids_to_current(old_ids, semantic_map)
+
+    previous_section_id = infer_section_id_for_anchor(prev_section_map, prev_anchor, prev_md)
+    current_anchor = {
+        "word_ids": current_ids,
+        "page": first_word_page(current_words, current_ids),
+        "bbox": words_bbox(current_words, current_ids) if current_ids else None,
+        "text": text_for_word_ids(current_words, current_ids) if current_ids else "",
+    }
+    current_section_id = infer_section_id_for_anchor(current_section_map, current_anchor, current_md)
+
+    return {
+        "review_id": review.get("review_id"),
+        "review_status": review.get("status", "open"),
+        "review_thread": review_thread_for_prompt(review),
+        "recognized_report_section": {
+            "previous_section_id": previous_section_id,
+            "current_section_id": current_section_id,
+        },
+        "selected_previous_anchor": {
+            "page": prev_anchor.get("page"),
+            "bbox": prev_anchor.get("bbox"),
+            "text": prev_anchor.get("text") or review.get("text", ""),
+            "word_ids_count": len(old_ids),
+        },
+        "matched_current_anchor": {
+            "page": current_anchor.get("page"),
+            "bbox": current_anchor.get("bbox"),
+            "text": current_anchor.get("text"),
+            "word_ids_count": len(current_ids),
+        },
+        "matching_diff_add_delete": related_diff_changes_for_review(viewer_data, prev_anchor, semantic_map),
+    }
+
+
+def assessment_group_key(entry):
+    pack = entry.get("context_pack", {})
+    section = pack.get("recognized_report_section") or {}
+    prev_section_id = section.get("previous_section_id")
+    if prev_section_id:
+        return f"previous_section:{prev_section_id}"
+    current_section_id = section.get("current_section_id")
+    if current_section_id:
+        return f"current_section:{current_section_id}"
+    page = (pack.get("selected_previous_anchor") or {}).get("page")
+    if page:
+        return f"previous_page:{page}"
+    return f"review:{entry.get('item', {}).get('review_id')}"
+
+
+def group_assessment_entries_by_report_section(entries):
+    grouped = {}
+    for entry in entries:
+        key = assessment_group_key(entry)
+        grouped.setdefault(key, []).append(entry)
+    return list(grouped.items())
+
+
+def build_assessment_prompt(review, prev_anchor, available_sections, context_pack):
+    suggested_section_id = (context_pack.get("recognized_report_section") or {}).get("previous_section_id")
     return (
-        "You are reviewing whether a report update resolved a prior review comment.\n"
-        "Use the submit_verdict tool exactly once.\n"
-        "verdict must be one of: cleared, partial, unclear, not_cleared.\n\n"
-        f"Review text:\n{prev_anchor.get('text') or review.get('text', '')}\n\n"
-        f"Reviewer comments:\n{comments or '(No comment)'}\n\n"
-        f"Previous report context:\n{old_context}\n\n"
-        f"Current report context:\n{new_context}\n"
+        "Assess this prior review comment against the current report.\n\n"
+        "Input package:\n"
+        f"{json.dumps(context_pack, ensure_ascii=False, indent=2)[:50000]}\n\n"
+        f"Suggested section_id:\n{suggested_section_id or '(unknown)'}\n\n"
+        "Available markdown files for exceptional extra lookup only: previous, current.\n"
+        f"Available sections:\n{json.dumps(available_sections, ensure_ascii=False)[:12000]}\n"
+    )
+
+
+def build_batch_assessment_prompt(context_packs, available_sections):
+    return (
+        "Assess this group of prior review bundles against the current report. "
+        "These reviews are grouped because they belong to the same inferred report section or nearby fallback page.\n"
+        "Return exactly one verdict for every review_id by calling submit_verdicts.\n\n"
+        "Review bundles:\n"
+        f"{json.dumps(context_packs, ensure_ascii=False, indent=2)}\n\n"
+        "Available markdown files for exceptional extra lookup only: previous, current.\n"
+        f"Available sections:\n{json.dumps(available_sections, ensure_ascii=False)[:12000]}\n"
     )
 
 
@@ -1716,7 +2100,125 @@ def normalize_assessment_payload(data):
     }
 
 
-def call_ai_assessment(prompt):
+def normalize_batch_assessment_payload(data):
+    items = data.get("items") or []
+    if not isinstance(items, list):
+        raise ValueError("items must be a list")
+    out = {}
+    for raw in items:
+        review_id = str((raw or {}).get("review_id", "")).strip()
+        if not review_id:
+            continue
+        payload = normalize_assessment_payload(raw or {})
+        payload["review_id"] = review_id
+        out[review_id] = payload
+    if not out:
+        raise ValueError("no verdict items returned")
+    return out
+
+
+def search_markdown_context(md_path: Path, query, limit=4):
+    if not md_path.exists() or not query:
+        return []
+    lines = strip_section_markers(read_md_lines(md_path))
+    query_norm = norm_space(query).lower()
+    hits = []
+    for idx, line in enumerate(lines):
+        if query_norm and query_norm in norm_space(line).lower():
+            start = max(0, idx - 8)
+            end = min(len(lines), idx + 9)
+            hits.append({
+                "line": idx + 1,
+                "context": "\n".join(lines[start:end])[:5000],
+            })
+            if len(hits) >= limit:
+                break
+    return hits
+
+
+def assessment_tool_definitions(batch=False):
+    submit_tool = {
+        "name": "submit_verdict",
+        "description": "Submit the structured assessment verdict.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                "reasoning": {"type": "string"},
+                "evidence_old": {"type": "string"},
+                "evidence_new": {"type": "string"},
+            },
+            "required": ["verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
+            "additionalProperties": False,
+        },
+    }
+    if batch:
+        submit_tool = {
+            "name": "submit_verdicts",
+            "description": "Submit one structured assessment verdict for each review_id in the batch.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "review_id": {"type": "string"},
+                                "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
+                                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                                "reasoning": {"type": "string"},
+                                "evidence_old": {"type": "string"},
+                                "evidence_new": {"type": "string"},
+                            },
+                            "required": ["review_id", "verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
+                            "additionalProperties": False,
+                        },
+                    }
+                },
+                "required": ["items"],
+                "additionalProperties": False,
+            },
+        }
+    return [
+        {
+            "name": "read_section",
+            "description": "Read one markdown section from the previous or current report.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "section_id": {"type": "string"},
+                },
+                "required": ["file", "section_id"],
+                "additionalProperties": False,
+            },
+        },
+        {
+            "name": "search_markdown",
+            "description": "Search a markdown report and return small context windows around matches.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "query": {"type": "string"},
+                },
+                "required": ["file", "query"],
+                "additionalProperties": False,
+            },
+        },
+        submit_tool,
+    ]
+
+
+def content_block_to_dict(block):
+    if hasattr(block, "model_dump"):
+        return block.model_dump(exclude_none=True)
+    return block
+
+
+def call_ai_assessment(prompt, tool_context):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is not set")
@@ -1725,33 +2227,112 @@ def call_ai_assessment(prompt):
     except Exception as e:
         raise RuntimeError("anthropic package is not installed") from e
     client = Anthropic(api_key=api_key)
-    msg = client.messages.create(
-        model=AI_ASSESSMENT_MODEL,
-        max_tokens=800,
-        temperature=0,
-        tools=[{
-            "name": "submit_verdict",
-            "description": "Submit the structured assessment verdict.",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
-                    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-                    "reasoning": {"type": "string"},
-                    "evidence_old": {"type": "string"},
-                    "evidence_new": {"type": "string"},
-                },
-                "required": ["verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
-                "additionalProperties": False,
-            },
-        }],
-        tool_choice={"type": "tool", "name": "submit_verdict"},
-        messages=[{"role": "user", "content": prompt}],
-    )
-    for block in msg.content:
-        if getattr(block, "type", "") == "tool_use" and getattr(block, "name", "") == "submit_verdict":
-            return normalize_assessment_payload(block.input)
-    raise ValueError("submit_verdict tool was not called")
+    messages = [{"role": "user", "content": prompt}]
+    system_prompt = load_ai_system_prompt()
+    tool_trace = []
+    for _ in range(8):
+        msg = client.messages.create(
+            model=AI_ASSESSMENT_MODEL,
+            max_tokens=1200,
+            temperature=0,
+            system=system_prompt,
+            tools=assessment_tool_definitions(),
+            messages=messages,
+        )
+        messages.append({"role": "assistant", "content": [content_block_to_dict(block) for block in msg.content]})
+        tool_results = []
+        for block in msg.content:
+            if getattr(block, "type", "") != "tool_use":
+                continue
+            name = getattr(block, "name", "")
+            args = getattr(block, "input", {}) or {}
+            if name == "submit_verdict":
+                payload = normalize_assessment_payload(args)
+                payload["tool_trace"] = tool_trace
+                return payload
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": getattr(block, "id"),
+                "content": json.dumps(result, ensure_ascii=False),
+            })
+        if not tool_results:
+            messages.append({"role": "user", "content": "Use read_section or search_markdown, then call submit_verdict."})
+        else:
+            messages.append({"role": "user", "content": tool_results})
+    raise ValueError("AI assessment reached the tool-call limit")
+
+
+def call_ai_assessment_batch(context_packs, available_sections, tool_context):
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    try:
+        from anthropic import Anthropic
+    except Exception as e:
+        raise RuntimeError("anthropic package is not installed") from e
+    client = Anthropic(api_key=api_key)
+    messages = [{"role": "user", "content": build_batch_assessment_prompt(context_packs, available_sections)}]
+    system_prompt = load_ai_system_prompt()
+    tool_trace = []
+    for _ in range(8):
+        msg = client.messages.create(
+            model=AI_ASSESSMENT_MODEL,
+            max_tokens=3000,
+            temperature=0,
+            system=system_prompt,
+            tools=assessment_tool_definitions(batch=True),
+            messages=messages,
+        )
+        messages.append({"role": "assistant", "content": [content_block_to_dict(block) for block in msg.content]})
+        tool_results = []
+        for block in msg.content:
+            if getattr(block, "type", "") != "tool_use":
+                continue
+            name = getattr(block, "name", "")
+            args = getattr(block, "input", {}) or {}
+            if name == "submit_verdicts":
+                payloads = normalize_batch_assessment_payload(args)
+                for payload in payloads.values():
+                    payload["tool_trace"] = tool_trace
+                return payloads
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": getattr(block, "id"),
+                "content": json.dumps(result, ensure_ascii=False),
+            })
+        if not tool_results:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_verdicts with one item per review_id."})
+        else:
+            messages.append({"role": "user", "content": tool_results})
+    raise ValueError("AI batch assessment reached the tool-call limit")
 
 
 def run_ai_assessment(doc_id, run_id, review_id=None):
@@ -1767,6 +2348,13 @@ def run_ai_assessment(doc_id, run_id, review_id=None):
     run_dir = document_run_dir(doc_id, run_id)
     prev_section_map = read_json(run_dir / "prev_section_map.json", []) or []
     current_section_map = read_json(run_dir / "section_map.json", []) or []
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    semantic_map = viewer_data.get("semantic_map", {}) or {}
+    tool_context = {
+        "previous": (run_dir / "prev_report.md", prev_section_map),
+        "current": (run_dir / "report.md", current_section_map),
+    }
+    available_sections = available_assessment_sections(prev_section_map, current_section_map)
     targets = assessment_reviews_for_run(doc_id, run_id, review_id=review_id)
     if review_id and not targets:
         return None, ("review is not assessable for previous run", 404)
@@ -1774,29 +2362,69 @@ def run_ai_assessment(doc_id, run_id, review_id=None):
         return None, ("ANTHROPIC_API_KEY is not set", 400)
     previous = load_ai_assessment(doc_id, run_id)
     replacing = {review.get("review_id") for review, _, _ in targets}
-    items = [] if not review_id else [item for item in previous.get("items", []) if item.get("review_id") not in replacing]
+    previous_items = previous.get("items", []) or []
+    previous_done = {
+        item.get("review_id")
+        for item in previous_items
+        if item.get("review_id") and item.get("status") == "done" and item.get("verdict")
+    }
+    skipped_existing_count = 0
+    if review_id:
+        items = [item for item in previous_items if item.get("review_id") not in replacing]
+    else:
+        before_skip = len(targets)
+        targets = [(review, prev_anchor, anchor_run_id) for review, prev_anchor, anchor_run_id in targets if review.get("review_id") not in previous_done]
+        skipped_existing_count = before_skip - len(targets)
+        items = list(previous_items)
     started_at = utc_now()
+    prepared = []
     for review, prev_anchor, anchor_run_id in targets:
-        section_id = anchor_section_id(prev_anchor)
-        old_context = section_context_from_markdown(run_dir / "prev_report.md", prev_section_map, section_id, prev_anchor.get("text", ""))
-        new_context = section_context_from_markdown(run_dir / "report.md", current_section_map, section_id, prev_anchor.get("text", ""))
+        context_pack = build_assessment_context_pack(run_dir, review, prev_anchor, prev_section_map, current_section_map, viewer_data, semantic_map)
         item = {
             "review_id": review.get("review_id"),
             "anchor_run_id": anchor_run_id,
-            "section_id": section_id,
+            "section_id": context_pack.get("previous_section", {}).get("section_id") or anchor_section_id(prev_anchor),
             "status": "done",
             "assessed_at": utc_now(),
+            "input_summary": {
+                "previous_section_id": (context_pack.get("recognized_report_section") or {}).get("previous_section_id"),
+                "current_section_id": (context_pack.get("recognized_report_section") or {}).get("current_section_id"),
+                "diff_count": len(context_pack.get("matching_diff_add_delete", [])),
+                "comment_count": len(context_pack.get("review_thread", [])),
+            },
         }
-        try:
-            item.update(call_ai_assessment(build_assessment_prompt(review, prev_anchor, old_context, new_context)))
-        except Exception as e:
-            item.update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": ""})
-        items.append(item)
+        prepared.append({"review": review, "prev_anchor": prev_anchor, "item": item, "context_pack": context_pack})
+
+    if review_id:
+        for entry in prepared:
+            try:
+                entry["item"].update(call_ai_assessment(build_assessment_prompt(entry["review"], entry["prev_anchor"], available_sections, entry["context_pack"]), tool_context))
+            except Exception as e:
+                entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": ""})
+            items.append(entry["item"])
+    else:
+        for group_index, (group_key, batch) in enumerate(group_assessment_entries_by_report_section(prepared), start=1):
+            try:
+                verdicts = call_ai_assessment_batch([entry["context_pack"] for entry in batch], available_sections, tool_context)
+                for entry in batch:
+                    rid = entry["item"].get("review_id")
+                    if rid in verdicts:
+                        entry["item"].update(verdicts[rid])
+                    else:
+                        entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": "AI did not return a verdict for this review_id", "evidence_old": "", "evidence_new": ""})
+                    entry["item"]["batch_index"] = group_index
+                    entry["item"]["batch_key"] = group_key
+                    items.append(entry["item"])
+            except Exception as e:
+                for entry in batch:
+                    entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": "", "batch_index": group_index, "batch_key": group_key})
+                    items.append(entry["item"])
     assessment = {
         "status": "done",
         "model": AI_ASSESSMENT_MODEL,
         "started_at": started_at,
         "completed_at": utc_now(),
+        "skipped_existing_count": skipped_existing_count,
         "items": items,
     }
     save_ai_assessment(doc_id, run_id, assessment)
@@ -2166,6 +2794,93 @@ def document_workspace(doc_id):
     return jsonify({"doc_id": doc_id, "title": meta.get("title"), "runs": runs})
 
 
+@app.route("/api/documents/<doc_id>/snapshots")
+def list_document_snapshots(doc_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    snapshots = sorted(meta.get("snapshots", []), key=lambda s: s.get("created_at", ""), reverse=True)
+    return jsonify({"doc_id": doc_id, "snapshots": snapshots[:SNAPSHOT_LIMIT]})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/snapshots", methods=["POST"])
+def save_document_run_snapshot(doc_id, run_id):
+    data = request.get_json(silent=True) or {}
+    payload, status = create_run_snapshot(doc_id, run_id, label=data.get("label", ""))
+    return jsonify(payload), status
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>")
+def get_document_snapshot(doc_id, snapshot_id):
+    snap_dir = document_snapshot_dir(doc_id, snapshot_id)
+    if not snap_dir.exists():
+        return jsonify({"error": "snapshot not found"}), 404
+    viewer_data = read_json(snap_dir / "viewer_data.json", None)
+    if not viewer_data:
+        return jsonify({"error": "snapshot data not found"}), 404
+    return jsonify({"snapshot": read_json(snap_dir / "snapshot.json", {}), "result": viewer_data})
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/page/<side>/<int:page_no>")
+def snapshot_page_image(doc_id, snapshot_id, side, page_no):
+    zoom = float(request.args.get("zoom", "1.6"))
+    name = snapshot_side_file(side, "pdf")
+    if not name:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    pdf_path = document_snapshot_dir(doc_id, snapshot_id) / name
+    if not pdf_path.exists():
+        return jsonify({"error": "pdf not found"}), 404
+    return Response(render_pdf_page(pdf_path, page_no, zoom), mimetype="image/png")
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/words/<side>")
+def snapshot_words(doc_id, snapshot_id, side):
+    name = snapshot_side_file(side, "words")
+    if not name:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    p = document_snapshot_dir(doc_id, snapshot_id) / name
+    if not p.exists():
+        return jsonify({"error": "not found"}), 404
+    return send_file(p, mimetype="application/json")
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/chars/<side>")
+def snapshot_chars(doc_id, snapshot_id, side):
+    name = snapshot_side_file(side, "chars")
+    if not name:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    p = document_snapshot_dir(doc_id, snapshot_id) / name
+    if not p.exists():
+        return jsonify({"error": "not found"}), 404
+    return send_file(p, mimetype="application/json")
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/reviews")
+def snapshot_reviews(doc_id, snapshot_id):
+    return jsonify(read_json(document_snapshot_dir(doc_id, snapshot_id) / "reviews.json", []) or [])
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/assess")
+def snapshot_assessment(doc_id, snapshot_id):
+    return jsonify(read_json(document_snapshot_dir(doc_id, snapshot_id) / "ai_assessment.json", {"items": []}) or {"items": []})
+
+
+@app.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/export/<side>")
+def export_snapshot_pdf(doc_id, snapshot_id, side):
+    compat_side = "new" if side in ("new", "report", "current") else "old"
+    snap_dir = document_snapshot_dir(doc_id, snapshot_id)
+    if not snap_dir.exists():
+        return jsonify({"error": "snapshot not found"}), 404
+    try:
+        pdf_bytes = export_annotated_pdf(snap_dir, compat_side)
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    filename = f"snapshot_{side}_{snapshot_id}.pdf"
+    return Response(pdf_bytes, mimetype="application/pdf", headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
 @app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["POST"])
 def assess_document_run(doc_id, run_id):
     assessment, error = run_ai_assessment(doc_id, run_id)
@@ -2215,7 +2930,12 @@ def assess_single_document_review(doc_id, run_id, review_id):
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/migrate", methods=["POST"])
 def migrate_document_reviews(doc_id, run_id):
-    return jsonify({"error": "review migration is planned for Phase 6"}), 501
+    data = request.get_json(force=True) or {}
+    review_id = data.get("review_id")
+    if not review_id:
+        return jsonify({"error": "review_id is required"}), 400
+    payload, status = migrate_previous_review_to_current(doc_id, run_id, review_id)
+    return jsonify(payload), status
 
 
 @app.route("/api/jobs", methods=["POST"])

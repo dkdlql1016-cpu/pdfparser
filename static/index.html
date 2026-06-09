@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PDF Review Workspace</title>
+<title>Report Review Workspace</title>
 <style>
 :root{--red:#cf222e;--green:#2da44e;--red-bg:rgba(255,65,65,.38);--green-bg:rgba(34,197,94,.38);--blue:#2563eb}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827}
-.topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:12px;padding:8px 14px;flex-wrap:wrap}.brand{font-size:15px;font-weight:800;white-space:nowrap}
+.topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap}.brand{font-size:15px;font-weight:800;white-space:nowrap}
 .uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:auto}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer}.fileName{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d1d5db}
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
-#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 58px);display:grid;grid-template-columns:260px 1fr;overflow:hidden}body.sidebarCollapsed main{grid-template-columns:0 1fr}body.sidebarCollapsed aside{border-right:0}
-#sidebarToggle{position:fixed;left:248px;top:68px;z-index:2000;width:24px;height:42px;padding:0;border-radius:0 8px 8px 0;background:#111827;color:#fff;border:1px solid #374151;box-shadow:0 2px 8px rgba(0,0,0,.25)}body.sidebarCollapsed #sidebarToggle{left:0}
-aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:10px 8px;font-size:13px}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
+#status{font-size:12px;color:#d1d5db;min-width:90px}.topActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.topActions button{font-size:12px;padding:6px 9px}.modeBadge,.dirtyBadge{border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}.modeBadge{background:#dbeafe;color:#1e40af}.dirtyBadge{background:#fef3c7;color:#92400e}main{height:calc(100vh - 58px);display:grid;grid-template-columns:320px 1fr;overflow:hidden}body.sidebarCollapsed main{grid-template-columns:0 1fr}body.sidebarCollapsed aside{border-right:0}
+#sidebarToggle{position:fixed;left:308px;top:68px;z-index:2000;width:24px;height:42px;padding:0;border-radius:0 8px 8px 0;background:#111827;color:#fff;border:1px solid #374151;box-shadow:0 2px 8px rgba(0,0,0,.25)}body.sidebarCollapsed #sidebarToggle{left:0}
+aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:10px 6px;font-size:12px}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
 .tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:800}.addStat{color:var(--green)}.delStat{color:var(--red)}
-#changes,#indexList,#reviewPane{overflow:auto;padding:8px}.indexItem,.change{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:12px}.indexItem:hover,.change:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:10px;color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+#changes,#indexList,#reviewPane,#snapshotPane{overflow:auto;padding:8px}.indexItem,.change,.snapshotRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:12px}.indexItem:hover,.change:hover,.snapshotRow:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:10px;color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.snapshotBar{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border-bottom:1px solid #e5e7eb}.snapshotBar input{min-width:0;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:12px system-ui}.snapshotBar button{font-size:12px}.readonlyBadge{background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}.moreMenu{position:relative;display:inline-block}.moreMenu summary{list-style:none;background:#eef2ff;color:#3730a3;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:800;cursor:pointer}.moreMenu summary::-webkit-details-marker{display:none}.moreMenu[open] .morePanel{position:absolute;right:0;top:24px;z-index:50;display:flex;flex-direction:column;gap:4px;min-width:132px;background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.18)}.morePanel button{text-align:left;background:#eef2ff;color:#3730a3}.morePanel .danger{background:#fee2e2!important;color:#991b1b!important}
 .meta{color:#6b7280;font-size:11px;margin-bottom:4px}.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
 .viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.viewer.single{grid-template-columns:1fr}.viewer.single #oldPane{display:none}.pane{position:relative;overflow:auto;background:#e5e7eb;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:7px 10px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pages{padding:6px;display:flex;flex-direction:column;align-items:center;gap:10px}.page{position:relative;background:white;box-shadow:0 2px 12px rgba(0,0,0,.22);flex:none}.page img{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;user-select:none;-webkit-user-drag:none}.hl{position:absolute;z-index:2;border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.hl.delete{background:var(--red-bg)}.hl.add{background:var(--green-bg)}.hl.focus{outline:none!important;box-shadow:inset 0 0 0 1.5px #2563eb!important;z-index:4!important;border-radius:3px!important}
@@ -24,33 +24,41 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
 .reviewNotePanel{position:absolute;z-index:30;width:248px;min-height:90px;background:#fffbeb;border:1px solid #d97706;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:12px;color:#111827;cursor:move;user-select:text}.reviewNotePanel.cleared,.reviewNotePanel.resolved{background:#f8fafc;border-color:#94a3b8}.noteMin{position:absolute;right:4px;top:4px;width:16px;height:16px;padding:0!important;border-radius:4px;background:#fef3c7!important;color:#92400e!important;line-height:14px;font-size:10px!important}.noteBody{padding:22px 8px 4px 8px;max-height:180px;overflow:auto;cursor:text;user-select:text}.noteThread{display:flex;flex-direction:column;gap:6px}.noteComment{background:rgba(255,255,255,.72);border-left:3px solid #f59e0b;border-radius:6px;padding:6px 7px;white-space:pre-wrap}.noteComment+.noteComment{margin-left:10px}.noteCommentMeta{margin-top:3px;color:#6b7280;font-size:10px}.noteReply{display:none;padding:4px 8px 2px 8px;cursor:default}.noteReply textarea{width:100%;height:50px;border:1px solid #d1d5db;border-radius:6px;padding:5px;font:12px system-ui;resize:vertical}.noteReplyActions{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}.noteActions{display:flex;gap:6px;padding:4px 8px 7px 8px;cursor:default;user-select:none;flex-wrap:wrap}.noteActions button,.noteReplyActions button{padding:4px 7px;font-size:11px}.noteDelete{background:#fee2e2!important;color:#991b1b!important}
 #reviewPopover{position:fixed;z-index:1000;width:262px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:10px;display:none}#reviewPopover textarea{width:100%;height:64px;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:13px system-ui;resize:vertical}#reviewPopover .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#reviewPopover button{padding:6px 10px}#reviewPopover button.cancel{background:#e5e7eb;color:#374151}
 .reviewRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:12px}.reviewRow:hover{background:#fffaf0;border-color:#fcd34d}.reviewRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.reviewRow.cleared,.reviewRow.resolved{opacity:.6}.reviewRow .rvComment{font-weight:700;margin:2px 0;color:#111827;white-space:pre-wrap}.reviewRow .rvActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.reviewRow .rvActions button{padding:4px 8px;font-size:11px;background:#eef2ff;color:#3730a3}.rvReply{display:none;margin-top:6px}.rvReply textarea{width:100%;height:48px;border:1px solid #d1d5db;border-radius:6px;padding:5px;font:12px system-ui;resize:vertical}.rvReplyActions{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}.rvReplyActions button{padding:4px 8px;font-size:11px}.aiBar{display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px}.aiBar button{flex:1;font-size:12px;background:#7c3aed}.aiBadge{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:800;background:#e5e7eb;color:#374151}.aiBadge.cleared{background:#dcfce7;color:#166534}.aiBadge.partial{background:#fef3c7;color:#92400e}.aiBadge.unclear{background:#e0e7ff;color:#3730a3}.aiBadge.not_cleared{background:#fee2e2;color:#991b1b}.aiReason{margin-top:5px;padding:6px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px;line-height:1.35}
-.reviewSubtabs{display:flex;border-bottom:1px solid #e5e7eb}.reviewSubtab{flex:1;border-radius:0;background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:8px;font-size:12px}.reviewSubtab.active{background:#eef2ff;color:#1d4ed8;box-shadow:inset 0 -2px 0 var(--blue)}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
+.reviewSubtabs{display:flex;border-bottom:1px solid #e5e7eb}.reviewSubtab{flex:1;border-radius:0;background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:8px;font-size:12px}.reviewSubtab.active{background:#eef2ff;color:#1d4ed8;box-shadow:inset 0 -2px 0 var(--blue)}.confirmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:2500;display:none;align-items:center;justify-content:center}.confirmBox{width:310px;background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.32);padding:14px}.confirmMsg{font-size:13px;line-height:1.45;color:#111827;margin-bottom:12px}.confirmActions{display:flex;gap:8px;justify-content:flex-end}.confirmActions button{padding:6px 12px}.confirmActions .cancel{background:#e5e7eb;color:#374151}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">PDF Review Workspace</div>
+  <div class="brand">Report Review Workspace</div>
   <form id="createForm" class="uploadForm">
-    <label class="fileLabel">Initial Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="initialFileName" class="fileName">No file selected</span></label>
-    <button id="createBtn" type="submit">Start Document</button>
+    <label class="fileLabel">Base Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="initialFileName" class="fileName">No file selected</span></label>
+    <button id="createBtn" type="submit">Create Workspace</button>
   </form>
   <form id="updateForm" class="uploadForm" style="display:none">
     <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="updateFileName" class="fileName">No file selected</span></label>
-    <button id="updateBtn" type="submit">Upload Update + Diff</button>
+    <button id="updateBtn" type="submit">Compare Update</button>
   </form>
+  <div class="topActions">
+    <button id="topSaveSnapshotBtn" class="secondary" type="button" onclick="saveSnapshot()">Save Snapshot</button>
+    <button id="backLiveBtn" class="secondary" type="button" onclick="backToLiveRun()" style="display:none">Back to Live Run</button>
+    <span id="modeBadge" class="modeBadge">Live Run</span>
+    <span id="dirtyBadge" class="dirtyBadge" style="display:none">Unsaved changes</span>
+  </div>
   <span id="status">Idle</span>
 </div>
 <button id="sidebarToggle" type="button" title="Toggle sidebar">‹</button>
 <main>
   <aside>
     <div class="tabs">
-      <button class="tabBtn active" data-tab="index">Index</button>
-      <button class="tabBtn" data-tab="diff">Diff</button>
-      <button class="tabBtn" data-tab="review">Review</button>
+      <button class="tabBtn active" data-tab="index">Outline</button>
+      <button class="tabBtn" data-tab="diff">Changes</button>
+      <button class="tabBtn" data-tab="review">Comments</button>
+      <button class="tabBtn" data-tab="snapshot">History</button>
     </div>
-    <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">Upload a report to view the index.</div></div></div>
-    <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changes"><div class="empty">Upload an updated report to view the diff.</div></div></div>
-    <div id="tab-review" class="tabBody"><div id="reviewSubtabs" class="reviewSubtabs"><button id="reviewPrevTab" class="reviewSubtab" onclick="setReviewSide('old')">Previous</button><button id="reviewCurrentTab" class="reviewSubtab active" onclick="setReviewSide('new')">Current</button></div><div id="aiBar" class="aiBar"><button id="runAiBtn" onclick="runAiAssessment()">Run AI Assessment</button></div><div id="exportBar" style="display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px"><button id="exportOldBtn" onclick="exportPdf('old')" style="flex:1;font-size:12px;background:#374151">Export Previous Annotations</button><button id="exportCurrentBtn" onclick="exportPdf('new')" style="flex:1;font-size:12px">Export Current Annotations</button></div><div id="reviewPane"><div class="reviewPlaceholder">No reviews yet.</div></div></div>
+    <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">Upload a report to view the outline.</div></div></div>
+    <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changes"><div class="empty">Upload an updated report to compare changes.</div></div></div>
+    <div id="tab-review" class="tabBody"><div id="reviewSubtabs" class="reviewSubtabs"><button id="reviewPrevTab" class="reviewSubtab" onclick="setReviewSide('old')">Previous</button><button id="reviewCurrentTab" class="reviewSubtab active" onclick="setReviewSide('new')">Current</button></div><div id="aiBar" class="aiBar"><button id="runAiBtn" onclick="runAiAssessment()">Check All Previous Comments</button></div><div id="exportBar" style="display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px"><button id="exportOldBtn" onclick="exportPdf('old')" style="flex:1;font-size:12px;background:#374151">Export Previous Comments</button><button id="exportCurrentBtn" onclick="exportPdf('new')" style="flex:1;font-size:12px">Export Current Comments</button></div><div id="reviewPane"><div class="reviewPlaceholder">No comments yet.</div></div></div>
+    <div id="tab-snapshot" class="tabBody"><div class="snapshotBar"><input id="snapshotLabel" placeholder="Optional snapshot label"><button onclick="saveSnapshot()">Save Snapshot</button></div><div id="snapshotPane"><div class="empty">Save a snapshot to preserve the current review state.</div></div></div>
   </aside>
   <section id="viewer" class="viewer single">
     <div id="oldPane" class="pane"><div class="paneTitle"><span id="oldTitle">Previous PDF</span><span id="oldCount"></span></div><div id="oldPages" class="pages"></div></div>
@@ -59,13 +67,19 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
 </main>
 <div id="reviewPopover">
   <textarea id="pvComment" placeholder="Enter a comment"></textarea>
-  <div class="row"><button class="cancel" id="pvCancel">Cancel</button><button id="pvSave">Save Review</button></div>
+  <div class="row"><button class="cancel" id="pvCancel">Cancel</button><button id="pvSave">Save Comment</button></div>
+</div>
+<div id="confirmDialog" class="confirmBackdrop">
+  <div class="confirmBox">
+    <div id="confirmMsg" class="confirmMsg"></div>
+    <div class="confirmActions"><button id="confirmNo" class="cancel" type="button">Cancel</button><button id="confirmYes" type="button">Yes</button></div>
+  </div>
 </div>
 <div id="toast"></div>
 <script>
 let ZOOM=1.15;
 const $=s=>document.querySelector(s);
-let DATA=null, DOC_ID=null, RUN_ID=null;
+let DATA=null, DOC_ID=null, RUN_ID=null, LIVE_RUN_ID=null, SNAPSHOT_ID=null, READ_ONLY=false, DIRTY=false;
 let WORDS={old:[],new:[]};
 let CHARS={old:[],new:[]};
 let EQUAL={pairs:[],newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};
@@ -78,34 +92,36 @@ $('#sidebarToggle').addEventListener('click',()=>{document.body.classList.toggle
 window.addEventListener('resize',()=>{if(DATA)draw(DATA)});
 $('#initialFile').addEventListener('change',()=>{$('#initialFileName').textContent=$('#initialFile').files[0]?.name||'No file selected'});
 $('#updateFile').addEventListener('change',()=>{$('#updateFileName').textContent=$('#updateFile').files[0]?.name||'No file selected'});
-function activateTab(name){document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tabBody').forEach(b=>b.classList.toggle('active',b.id===`tab-${name}`));}
-function apiBase(){return `/api/documents/${DOC_ID}/runs/${RUN_ID}`}
+function activateTab(name){document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tabBody').forEach(b=>b.classList.toggle('active',b.id===`tab-${name}`));if(name==='snapshot')loadSnapshots()}
+function apiBase(){return SNAPSHOT_ID?`/api/documents/${DOC_ID}/snapshots/${SNAPSHOT_ID}`:`/api/documents/${DOC_ID}/runs/${RUN_ID}`}
 function isDiff(){return DATA?.mode==='diff'}
 function escapeHtml(s){return String(s||'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}
 function trim(s,n=160){s=String(s||'');return s.length>n?s.slice(0,n-1)+'...':s}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
 function setBusy(busy,msg){$('#createBtn').disabled=busy;$('#updateBtn').disabled=busy;$('#status').textContent=msg||'Idle'}
+function setDirty(value=true){DIRTY=!!value;updateModeUi()}
+function updateModeUi(){const mode=$('#modeBadge'),dirty=$('#dirtyBadge'),back=$('#backLiveBtn');mode.textContent=READ_ONLY?'Snapshot View':'Live Run';mode.style.background=READ_ONLY?'#fef3c7':'#dbeafe';mode.style.color=READ_ONLY?'#92400e':'#1e40af';dirty.style.display=(!READ_ONLY&&DIRTY)?'inline-block':'none';back.style.display=READ_ONLY?'inline-block':'none'}
 
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const file=$('#initialFile').files[0]; if(!file)return;
-  setBusy(true,'Processing initial report');
-  $('#indexList').innerHTML='<div class="empty">Running OpenDataLoader and building the index...</div>';
-  $('#changes').innerHTML='<div class="empty">The initial report has no diff yet.</div>';
+  setBusy(true,'Processing base report');
+  $('#indexList').innerHTML='<div class="empty">Running OpenDataLoader and building the outline...</div>';
+  $('#changes').innerHTML='<div class="empty">The base report has no comparison yet.</div>';
   const fd=new FormData(); fd.append('pdf',file); fd.append('title',file.name.replace(/\.pdf$/i,''));
   try{
     const res=await fetch('/api/documents',{method:'POST',body:fd});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
-    DOC_ID=data.doc_id; RUN_ID=data.run_id; DATA=data.result;
+    DOC_ID=data.doc_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
     $('#updateForm').style.display='flex';
-    draw(DATA); activateTab('review'); setBusy(false,'Initial upload complete');
+    draw(DATA); loadSnapshots(); activateTab('review'); setBusy(false,'Base report ready');
   }catch(err){setBusy(false,'Error: '+err.message)}
 });
 
 $('#updateForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  if(!DOC_ID){toast('Upload an initial report first.');return}
+  if(!DOC_ID){toast('Upload a base report first.');return}
   const file=$('#updateFile').files[0]; if(!file)return;
   setBusy(true,'Uploading updated report');
   const fd=new FormData(); fd.append('pdf',file);
@@ -113,19 +129,21 @@ $('#updateForm').addEventListener('submit',async e=>{
     let res=await fetch(`/api/documents/${DOC_ID}/runs`,{method:'POST',body:fd});
     let data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
-    RUN_ID=data.run_id;
-    $('#status').textContent='Running diff';
+    RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false);
+    $('#status').textContent='Comparing reports';
     res=await fetch(`${apiBase()}/diff`,{method:'POST'});
     data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
     DATA=data.result;
-    draw(DATA); activateTab('diff'); setBusy(false,'Diff complete');
+    draw(DATA); loadSnapshots(); activateTab('diff'); setBusy(false,'Comparison complete');
   }catch(err){setBusy(false,'Error: '+err.message)}
 });
 
 function draw(d){
   $('#viewer').classList.toggle('single',!isDiff());
   if(!isDiff())REVIEW_SIDE='new';
+  updateModeUi();
+  if(READ_ONLY)$('#status').innerHTML='<span class="readonlyBadge">Snapshot</span>';
   $('#oldTitle').textContent=d.old_filename||'Previous PDF';
   $('#newTitle').textContent=d.new_filename||d.filename||'Current PDF';
   const added=d.summary?.added||0, deleted=d.summary?.deleted||0;
@@ -155,8 +173,8 @@ function computeFitZoom(d){
   }
   return Math.min(2.15,Math.max(.8,...fits));
 }
-function drawIndex(d){const items=d.index_items||[];if(!items.length){$('#indexList').innerHTML='<div class="empty">Unable to build an index.</div>';return}$('#indexList').innerHTML=items.map((it,i)=>`<div class="indexItem" data-idx="${i}" onclick="goIndex(${i})"><div class="type">${it.type==='fs'?'FINANCIAL STATEMENT':it.type==='note'?'NOTE':String(it.type||'INDEX').toUpperCase()} · p.${it.page||'-'}</div><div>${escapeHtml(trim(it.label||it.title,180))}</div></div>`).join('')}
-function drawChanges(d){const changes=d.changes||[];if(!isDiff()){$('#changes').innerHTML='<div class="empty">The initial report has no diff. Upload an updated report to compare versions.</div>';return}if(!changes.length){$('#changes').innerHTML='<div class="empty">No differences found.</div>';return}$('#changes').innerHTML=changes.map(c=>`<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} old p.${c.old_page||'-'} / new p.${c.new_page||'-'} · del ${c.old_highlight_ids?.length||0} · add ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}</div>`).join('')}
+function drawIndex(d){const items=d.index_items||[];if(!items.length){$('#indexList').innerHTML='<div class="empty">Unable to build an outline.</div>';return}$('#indexList').innerHTML=items.map((it,i)=>`<div class="indexItem" data-idx="${i}" onclick="goIndex(${i})"><div class="type">${it.type==='fs'?'FINANCIAL STATEMENT':it.type==='note'?'NOTE':String(it.type||'SECTION').toUpperCase()} · p.${it.page||'-'}</div><div>${escapeHtml(trim(it.label||it.title,180))}</div></div>`).join('')}
+function drawChanges(d){const changes=d.changes||[];if(!isDiff()){$('#changes').innerHTML='<div class="empty">The base report has no comparison yet. Upload an updated report to compare versions.</div>';return}if(!changes.length){$('#changes').innerHTML='<div class="empty">No changes found.</div>';return}$('#changes').innerHTML=changes.map(c=>`<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} previous p.${c.old_page||'-'} / current p.${c.new_page||'-'} · removed ${c.old_highlight_ids?.length||0} · added ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}</div>`).join('')}
 function drawPages(side,count,sizes,highlights){const root=side==='old'?$('#oldPages'):$('#newPages');root.innerHTML='';const byPage=new Map();for(const h of highlights||[]){if(!byPage.has(h.page))byPage.set(h.page,[]);byPage.get(h.page).push(h)}for(let p=1;p<=count;p++){const size=sizes[p-1];if(!size)continue;const page=document.createElement('div');page.className='page';page.id=`${side}-page-${p}`;page.style.width=`${size.width*ZOOM}px`;page.style.height=`${size.height*ZOOM}px`;const img=document.createElement('img');img.loading='lazy';img.draggable=false;img.src=`${apiBase()}/page/${side}/${p}?zoom=${ZOOM}`;page.appendChild(img);for(const h of byPage.get(p)||[]){const[x0,y0,x1,y1]=h.bbox;const el=document.createElement('div');el.className=`hl ${h.type}`;el.id=h.id;el.dataset.changeId=h.change_id;el.dataset.changeIds=(h.change_ids||[h.change_id]).join(',');el.style.left=`${x0*ZOOM}px`;el.style.top=`${y0*ZOOM}px`;el.style.width=`${Math.max(1,(x1-x0)*ZOOM)}px`;el.style.height=`${Math.max(2,(y1-y0)*ZOOM)}px`;page.appendChild(el)}root.appendChild(page)}}
 
 window.goIndex=function(i){const it=DATA?.index_items?.[i];if(!it)return;document.querySelectorAll('.indexItem').forEach(e=>e.classList.toggle('active',Number(e.dataset.idx)===i));scrollBboxIntoPane($('#newPane'),'new',it.page,it.bbox||[0,0,1,1]);if(isDiff()&&it.old_page!=null)scrollBboxIntoPane($('#oldPane'),'old',it.old_page,it.old_bbox||[0,0,1,1])}
@@ -285,6 +303,7 @@ function showCharSweepPreview(side,pageNo,startPt,endPt,rectDoc){
 function setupSelection(side){
   const pages=side==='old'?$('#oldPages'):$('#newPages');
   pages.addEventListener('mousedown',e=>{
+    if(READ_ONLY)return;
     if(e.button!==0||e.target.closest('.review,.reviewbadge'))return;
     if(side==='old'&&!isDiff())return;
     const pageEl=e.target.closest('.page');if(!pageEl||!WORDS[side]?.length)return;
@@ -310,10 +329,15 @@ function finishSelection(side,pageEl,rectPx,xy,startDoc,endDoc){
 }
 function clearPreview(){document.querySelectorAll('.review.preview,.textsel').forEach(e=>e.remove())}
 function openPopover(side,pageNo,sel,ids,xy){const pop=$('#reviewPopover');$('#pvComment').value='';pop.style.display='block';const w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';$('#pvComment').focus();const close=()=>{pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null};$('#pvCancel').onclick=close;$('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);close()}}
-async function submitReview(side,pageNo,sel,ids,comment){try{const res=await fetch(`${apiBase()}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});const rev=await res.json();if(!res.ok||rev.error){toast('Failed to save review: '+(rev.error||res.status));return}REVIEW_SIDE=side==='old'?'old':'new';await loadReviews();activateTab('review');updateReviewSubtabs();focusReviewById(rev.review_id)}catch(e){toast('Review save failed')}}
+async function submitReview(side,pageNo,sel,ids,comment){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});const rev=await res.json();if(!res.ok||rev.error){toast('Failed to save comment: '+(rev.error||res.status));return}setDirty(true);REVIEW_SIDE=side==='old'?'old':'new';await loadReviews();activateTab('review');updateReviewSubtabs();focusReviewById(rev.review_id)}catch(e){toast('Comment save failed')}}
 
 async function loadAssessment(){if(!DATA||!isDiff()){AI_ASSESSMENT={items:[]};return}try{AI_ASSESSMENT=await fetch(`${apiBase()}/assess`).then(r=>r.ok?r.json():{items:[]})}catch(e){AI_ASSESSMENT={items:[]}}}
 async function loadReviews(){if(!DATA)return;try{REVIEWS=await fetch(`${apiBase()}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}await loadAssessment();drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS)}
+async function loadSnapshots(){if(!DOC_ID)return;try{const data=await fetch(`/api/documents/${DOC_ID}/snapshots`).then(r=>r.ok?r.json():{snapshots:[]});renderSnapshots(data.snapshots||[])}catch(e){renderSnapshots([])}}
+function renderSnapshots(items){const pane=$('#snapshotPane');if(!items.length){pane.innerHTML='<div class="empty">Save a snapshot to preserve the current review state.</div>';return}pane.innerHTML=items.map(s=>`<div class="snapshotRow"><div class="meta">${escapeHtml((s.created_at||'').slice(0,19).replace('T',' '))} · ${s.mode||'-'} · ${s.has_ai_assessment?'AI checked':'No AI check'}</div><div>${escapeHtml(s.label||s.filename||s.snapshot_id)}</div><div class="meta">${s.open_reviews||0} open / ${s.closed_reviews||0} closed</div><div class="rvActions"><button onclick="event.stopPropagation();openSnapshot('${s.snapshot_id}')">Open</button></div></div>`).join('')}
+window.saveSnapshot=async function(){if(!DOC_ID||!RUN_ID||SNAPSHOT_ID){toast('Open a live run before saving a snapshot.');return}try{const label=$('#snapshotLabel')?.value||'';const res=await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/snapshots`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Snapshot save failed');return}if($('#snapshotLabel'))$('#snapshotLabel').value='';setDirty(false);await loadSnapshots();toast('Snapshot saved')}catch(e){toast('Snapshot save failed')}}
+window.openSnapshot=async function(id){try{const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`);const data=await res.json();if(!res.ok||data.error){toast(data.error||'Snapshot open failed');return}SNAPSHOT_ID=id;RUN_ID=data.snapshot?.run_id||RUN_ID;if(!LIVE_RUN_ID)LIVE_RUN_ID=RUN_ID;READ_ONLY=true;DATA=data.result;draw(DATA);activateTab('review');toast('Snapshot opened')}catch(e){toast('Snapshot open failed')}}
+window.backToLiveRun=async function(){if(!DOC_ID||!LIVE_RUN_ID){toast('No live run is available.');return}try{const res=await fetch(`/api/documents/${DOC_ID}/runs/${LIVE_RUN_ID}`);const data=await res.json();if(!res.ok||data.error){toast(data.error||'Live run open failed');return}RUN_ID=LIVE_RUN_ID;SNAPSHOT_ID=null;READ_ONLY=false;DATA=data;draw(DATA);$('#status').textContent='Live run ready';activateTab('review');toast('Live run opened')}catch(e){toast('Live run open failed')}}
 function clearReviewMarkers(){document.querySelectorAll('.review:not(.preview),.reviewNote,.reviewNotePanel,.reviewAnchorHover').forEach(e=>e.remove())}
 function drawReviewMarkers(reviews){clearReviewMarkers();reviews.forEach(rv=>{if(isDiff())drawSideMarker('old',rv.old_word_ids,rv);drawSideMarker('new',rv.new_word_ids,rv)})}
 function uniqueValidWordIds(side,ids){
@@ -413,11 +437,13 @@ function renderNoteThread(rv){
   return `<div class="noteThread">${comments.map(c=>`<div class="noteComment"><div>${escapeHtml(c.text||'')}</div>${c.created_at?`<div class="noteCommentMeta">${escapeHtml(String(c.created_at).slice(0,16).replace('T',' '))}</div>`:''}</div>`).join('')}</div>`;
 }
 function renderNotePanelHtml(rv){
-  return `<button type="button" class="noteMin" data-act="min">_</button><div class="noteBody">${renderNoteThread(rv)}</div><div class="noteReply"><textarea placeholder="Comment"></textarea><div class="noteReplyActions"><button type="button" data-act="saveComment">Comment</button><button type="button" data-act="cancelComment">Cancel</button></div></div><div class="noteActions"><button type="button" data-act="add">Comment</button><button type="button" data-act="toggle">${isCleared(rv)?'Reopen':'Clear'}</button><button type="button" class="noteDelete" data-act="delete">Delete</button></div>`;
+  const actions=READ_ONLY?'':`<div class="noteReply"><textarea placeholder="Comment"></textarea><div class="noteReplyActions"><button type="button" data-act="saveComment">Comment</button><button type="button" data-act="cancelComment">Cancel</button></div></div><div class="noteActions"><button type="button" data-act="add">Comment</button><button type="button" data-act="toggle">${isCleared(rv)?'Reopen':'Clear'}</button><button type="button" class="noteDelete" data-act="delete">Delete</button></div>`;
+  return `<button type="button" class="noteMin" data-act="min">_</button><div class="noteBody">${renderNoteThread(rv)}</div>${actions}`;
 }
 function toggleNotePanel(pageEl,rv,side,bbox){
   const existing=pageEl.querySelector(`.reviewNotePanel[data-review-id="${rv.review_id}"]`);
   if(existing){existing.remove();return}
+  document.querySelectorAll('.reviewNotePanel').forEach(e=>e.remove());
   const pos=panelPositionForBbox(pageEl,bbox);
   const panel=document.createElement('div');
   panel.className='reviewNotePanel'+(isCleared(rv)?' cleared':'');
@@ -428,11 +454,13 @@ function toggleNotePanel(pageEl,rv,side,bbox){
   panel.addEventListener('mousedown',e=>e.stopPropagation());
   panel.addEventListener('click',e=>e.stopPropagation());
   panel.querySelector('[data-act="min"]').onclick=e=>{e.stopPropagation();panel.remove()};
-  panel.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();showNoteReply(panel)};
-  panel.querySelector('[data-act="cancelComment"]').onclick=e=>{e.stopPropagation();hideNoteReply(panel)};
-  panel.querySelector('[data-act="saveComment"]').onclick=e=>{e.stopPropagation();saveNoteComment(panel,rv.review_id)};
-  panel.querySelector('[data-act="toggle"]').onclick=e=>{e.stopPropagation();toggleReview(rv.review_id,isCleared(rv)?'open':'cleared')};
-  panel.querySelector('[data-act="delete"]').onclick=e=>{e.stopPropagation();deleteReview(rv.review_id)};
+  if(!READ_ONLY){
+    panel.querySelector('[data-act="add"]').onclick=e=>{e.stopPropagation();showNoteReply(panel)};
+    panel.querySelector('[data-act="cancelComment"]').onclick=e=>{e.stopPropagation();hideNoteReply(panel)};
+    panel.querySelector('[data-act="saveComment"]').onclick=e=>{e.stopPropagation();saveNoteComment(panel,rv.review_id)};
+    panel.querySelector('[data-act="toggle"]').onclick=e=>{e.stopPropagation();toggleReview(rv.review_id,isCleared(rv)?'open':'cleared')};
+    panel.querySelector('[data-act="delete"]').onclick=e=>{e.stopPropagation();deleteReview(rv.review_id)};
+  }
   makeDraggable(panel,panel,pageEl);
   pageEl.appendChild(panel);
   focusReview(rv,side);
@@ -453,7 +481,7 @@ function makeDraggable(panel,handle,pageEl){
 }
 function showNoteReply(panel){const box=panel.querySelector('.noteReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='block';ta.value='';ta.focus()}
 function hideNoteReply(panel){const box=panel.querySelector('.noteReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='none';ta.value=''}
-async function saveNoteComment(panel,id){const ta=panel.querySelector('.noteReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{const rv=await postComment(id,text);panel.querySelector('.noteBody').innerHTML=renderNoteThread(rv);hideNoteReply(panel);renderReviewList(REVIEWS)}catch(e){toast('Failed to add comment')}}
+async function saveNoteComment(panel,id){const ta=panel.querySelector('.noteReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{const rv=await postComment(id,text);setDirty(true);panel.querySelector('.noteBody').innerHTML=renderNoteThread(rv);hideNoteReply(panel);renderReviewList(REVIEWS)}catch(e){toast('Failed to add comment')}}
 async function postComment(id,text){
   const res=await fetch(`${apiBase()}/reviews/${id}/comments`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
   const updated=await res.json();
@@ -467,7 +495,8 @@ async function postComment(id,text){
 }
 function showListReply(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),box=row?.querySelector('.rvReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='block';ta.value='';ta.focus()}
 function hideListReply(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),box=row?.querySelector('.rvReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='none';ta.value=''}
-async function saveListComment(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),ta=row?.querySelector('.rvReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{await postComment(id,text);renderReviewList(REVIEWS);focusReviewById(id)}catch(e){toast('Failed to add comment')}}
+async function saveListComment(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),ta=row?.querySelector('.rvReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{await postComment(id,text);setDirty(true);renderReviewList(REVIEWS);focusReviewById(id)}catch(e){toast('Failed to add comment')}}
+function askConfirm(message){return new Promise(resolve=>{const dlg=$('#confirmDialog'),msg=$('#confirmMsg'),yes=$('#confirmYes'),no=$('#confirmNo');msg.textContent=message;dlg.style.display='flex';const done=v=>{dlg.style.display='none';yes.onclick=null;no.onclick=null;resolve(v)};yes.onclick=()=>done(true);no.onclick=()=>done(false)})}
 function clearAnchorFocus(){document.querySelectorAll('.reviewAnchorFocus').forEach(e=>e.remove())}
 function clearAnchorHover(){document.querySelectorAll('.reviewAnchorHover').forEach(e=>e.remove())}
 function showAnchorHover(side,wordIds){clearAnchorHover();showAnchorFocus(side,wordIds,'reviewAnchorHover')}
@@ -492,7 +521,7 @@ function reviewPreviewText(rv){const comments=reviewComments(rv);return comments
 function aiItemForReview(id){return (AI_ASSESSMENT.items||[]).find(x=>x.review_id===id)}
 function renderAiBadge(item){if(!item)return '';const v=item.verdict||'unclear';return `<span class="aiBadge ${escapeHtml(v)}">${escapeHtml(v.replace('_',' '))}</span>`}
 function renderAiReason(item){if(!item?.reasoning)return '';return `<div class="aiReason">${escapeHtml(item.reasoning)}</div>`}
-function renderReviewList(reviews){const visible=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE));const bar=$('#exportBar');if(bar)bar.style.display=visible.length?'flex':'none';$('#exportOldBtn').style.display=(isDiff()&&REVIEW_SIDE==='old')?'block':'none';$('#exportCurrentBtn').style.display=REVIEW_SIDE==='new'?'block':'none';const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">No ${REVIEW_SIDE==='old'?'previous':'current'} reviews yet.</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} p.${firstPage(REVIEW_SIDE,rv)} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${renderAiBadge(ai)}</div><div class="rvComment">${escapeHtml(reviewPreviewText(rv))}</div>${renderAiReason(ai)}<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:''}${ai?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept AI</button>`:''}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Delete</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div></div>`}).join('')}
+function renderReviewList(reviews){const visible=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE));const bar=$('#exportBar');if(bar)bar.style.display=visible.length?'flex':'none';$('#exportOldBtn').style.display=(isDiff()&&REVIEW_SIDE==='old')?'block':'none';$('#exportCurrentBtn').style.display=REVIEW_SIDE==='new'?'block':'none';const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">No ${REVIEW_SIDE==='old'?'previous':'current'} comments yet. Drag text on the report to add one.</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const more=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Move to Current</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">Check This</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button><details class="moreMenu" onclick="event.stopPropagation()"><summary>More</summary><div class="morePanel">${more}${ai?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept AI</button>`:''}<button class="danger" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Delete</button></div></details></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} p.${firstPage(REVIEW_SIDE,rv)} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${renderAiBadge(ai)}</div><div class="rvComment">${escapeHtml(reviewPreviewText(rv))}</div>${renderAiReason(ai)}${actions}</div>`}).join('')}
 function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]?.length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
 function focusReview(rv,displaySide){
   clearAnchorFocus();
@@ -509,13 +538,14 @@ function focusReview(rv,displaySide){
   document.querySelectorAll('.reviewRow').forEach(e=>e.classList.toggle('active',e.dataset.reviewId===rv.review_id));
 }
 window.focusReviewById=function(id){const matches=REVIEWS.filter(r=>r.review_id===id);const rv=matches.find(r=>reviewBelongsToSide(r,REVIEW_SIDE))||matches[0];if(rv)focusReview(rv,reviewBelongsToSide(rv,REVIEW_SIDE)?REVIEW_SIDE:undefined)}
-window.toggleReview=async function(id,status){try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});await loadReviews()}catch(e){toast('Failed to update status')}}
-window.addComment=function(id){showListReply(id)}
-window.deleteReview=async function(id){try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});await loadReviews();clearAnchorFocus()}catch(e){toast('Failed to delete review')}}
-window.runAiAssessment=async function(){if(!isDiff()){toast('Run a diff before AI assessment.');return}const btn=$('#runAiBtn');btn.disabled=true;btn.textContent='Assessing...';try{const res=await fetch(`${apiBase()}/assess`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI assessment failed');return}AI_ASSESSMENT=data;renderReviewList(REVIEWS);toast('AI assessment complete')}catch(e){toast('AI assessment failed')}finally{btn.disabled=false;btn.textContent='Run AI Assessment'}}
-window.runReviewAiAssessment=async function(id){try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI assessment failed');return}AI_ASSESSMENT=data;renderReviewList(REVIEWS);focusReviewById(id);toast('AI assessment complete')}catch(e){toast('AI assessment failed')}}
-window.saveAssessmentDecision=async function(id,decision){try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({human_decision:decision})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Failed to save decision');return}const item=aiItemForReview(id);if(item){item.human_decision=decision;item.human_updated_at=data.human_updated_at}toast('Decision saved')}catch(e){toast('Failed to save decision')}}
-window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('No saved reviews');return}window.open(`${apiBase()}/export/${side}`,'_blank')}
+window.toggleReview=async function(id,status){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});setDirty(true);await loadReviews()}catch(e){toast('Failed to update status')}}
+window.addComment=function(id){if(READ_ONLY){toast('Snapshot is read-only');return}showListReply(id)}
+window.deleteReview=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});setDirty(true);await loadReviews();clearAnchorFocus()}catch(e){toast('Failed to delete review')}}
+window.moveReviewToCurrent=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}const ok=await askConfirm('Move this previous review to Current?');if(!ok)return;try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:id})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Move failed');return}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();focusReviewById(id);toast(data.already_current?'Already in Current':'Moved to Current')}catch(e){toast('Move failed')}}
+window.runAiAssessment=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}if(!isDiff()){toast('Compare reports before checking previous comments.');return}const btn=$('#runAiBtn');btn.disabled=true;btn.textContent='Checking...';try{const res=await fetch(`${apiBase()}/assess`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Previous comment check failed');return}AI_ASSESSMENT=data;setDirty(true);renderReviewList(REVIEWS);toast('Previous comments checked')}catch(e){toast('Previous comment check failed')}finally{btn.disabled=false;btn.textContent='Check All Previous Comments'}}
+window.runReviewAiAssessment=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI check failed');return}AI_ASSESSMENT=data;setDirty(true);renderReviewList(REVIEWS);focusReviewById(id);toast('AI check complete')}catch(e){toast('AI check failed')}}
+window.saveAssessmentDecision=async function(id,decision){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({human_decision:decision})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Failed to save decision');return}const item=aiItemForReview(id);if(item){item.human_decision=decision;item.human_updated_at=data.human_updated_at}setDirty(true);toast('Decision saved')}catch(e){toast('Failed to save decision')}}
+window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('No saved comments');return}window.open(`${apiBase()}/export/${side}`,'_blank')}
 </script>
 </body>
 </html>
