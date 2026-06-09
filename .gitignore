@@ -1,4 +1,3 @@
-    
 # Python
 __pycache__/
 *.py[cod]
@@ -7,8 +6,7 @@ __pycache__/
 .Python
 .venv/
 venv/
-.env/
-env/
+.env
 
 # OS / IDE
 .DS_Store
@@ -19,4 +17,11 @@ Thumbs.db
 # Cache
 .cache/
 .pytest_cache/
+.mypy_cache/
+
+# Project specific
+runs/
+*.pdf
+_cache/
+.mypy_cache/_cache/
 .mypy_cache/
