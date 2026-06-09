@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -1613,6 +1614,197 @@ def update_run_meta(meta, run_id, **patch):
     return None
 
 
+AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL", "claude-3-5-sonnet-latest")
+AI_CONTEXT_CHARS = 9000
+
+
+def ai_assessment_path(doc_id, run_id):
+    return document_run_dir(doc_id, run_id) / "ai_assessment.json"
+
+
+def load_ai_assessment(doc_id, run_id):
+    return read_json(ai_assessment_path(doc_id, run_id), {"doc_id": doc_id, "run_id": run_id, "items": []}) or {"doc_id": doc_id, "run_id": run_id, "items": []}
+
+
+def save_ai_assessment(doc_id, run_id, assessment):
+    assessment["doc_id"] = doc_id
+    assessment["run_id"] = run_id
+    assessment["updated_at"] = utc_now()
+    write_json(ai_assessment_path(doc_id, run_id), assessment)
+
+
+def run_meta_for(meta, run_id):
+    return next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), None)
+
+
+def anchor_section_id(anchor):
+    return anchor.get("section_id") or anchor.get("section") or None
+
+
+def norm_space(value):
+    return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def section_context_from_markdown(md_path: Path, section_map, section_id=None, fallback_text=""):
+    if not md_path.exists():
+        return ""
+    lines = read_md_lines(md_path)
+    chosen = None
+    if section_id:
+        chosen = next((s for s in section_map or [] if s.get("section_id") == section_id), None)
+    if chosen:
+        start = max(0, int(chosen.get("start_line", 1)) - 1)
+        end = min(len(lines), int(chosen.get("end_line", len(lines))))
+        text = "\n".join(strip_section_markers(lines[start:end])).strip()
+    else:
+        raw = "\n".join(strip_section_markers(lines))
+        needle = norm_space(fallback_text)
+        idx = norm_space(raw).find(needle[:80]) if needle else -1
+        if idx >= 0:
+            start = max(0, idx - AI_CONTEXT_CHARS // 3)
+            text = raw[start:start + AI_CONTEXT_CHARS].strip()
+        else:
+            text = raw[:AI_CONTEXT_CHARS].strip()
+    return text[:AI_CONTEXT_CHARS]
+
+
+def review_anchor_for_run(review, run_id):
+    return (review.get("anchors") or {}).get(run_id)
+
+
+def assessment_reviews_for_run(doc_id, run_id, review_id=None):
+    meta = load_document_meta(doc_id) or {}
+    run_meta = run_meta_for(meta, run_id) or {}
+    prev_run_id = run_meta.get("previous_run_id")
+    if not prev_run_id:
+        return []
+    reviews = []
+    for review in load_document_reviews(doc_id):
+        if review_id and review.get("review_id") != review_id:
+            continue
+        if review.get("status", "open") not in ("open", "partial", "unclear"):
+            continue
+        prev_anchor = review_anchor_for_run(review, prev_run_id)
+        if prev_anchor:
+            reviews.append((review, prev_anchor, prev_run_id))
+    return reviews
+
+
+def build_assessment_prompt(review, prev_anchor, old_context, new_context):
+    comments = "\n".join(f"- {c.get('text', '')}" for c in review.get("comments", []) if c.get("text"))
+    return (
+        "You are reviewing whether a report update resolved a prior review comment.\n"
+        "Use the submit_verdict tool exactly once.\n"
+        "verdict must be one of: cleared, partial, unclear, not_cleared.\n\n"
+        f"Review text:\n{prev_anchor.get('text') or review.get('text', '')}\n\n"
+        f"Reviewer comments:\n{comments or '(No comment)'}\n\n"
+        f"Previous report context:\n{old_context}\n\n"
+        f"Current report context:\n{new_context}\n"
+    )
+
+
+def normalize_assessment_payload(data):
+    verdict = data.get("verdict")
+    if verdict not in ("cleared", "partial", "unclear", "not_cleared"):
+        raise ValueError("invalid verdict")
+    return {
+        "verdict": verdict,
+        "confidence": data.get("confidence"),
+        "reasoning": str(data.get("reasoning", ""))[:2000],
+        "evidence_old": str(data.get("evidence_old", ""))[:1200],
+        "evidence_new": str(data.get("evidence_new", ""))[:1200],
+    }
+
+
+def call_ai_assessment(prompt):
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    try:
+        from anthropic import Anthropic
+    except Exception as e:
+        raise RuntimeError("anthropic package is not installed") from e
+    client = Anthropic(api_key=api_key)
+    msg = client.messages.create(
+        model=AI_ASSESSMENT_MODEL,
+        max_tokens=800,
+        temperature=0,
+        tools=[{
+            "name": "submit_verdict",
+            "description": "Submit the structured assessment verdict.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
+                    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                    "reasoning": {"type": "string"},
+                    "evidence_old": {"type": "string"},
+                    "evidence_new": {"type": "string"},
+                },
+                "required": ["verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
+                "additionalProperties": False,
+            },
+        }],
+        tool_choice={"type": "tool", "name": "submit_verdict"},
+        messages=[{"role": "user", "content": prompt}],
+    )
+    for block in msg.content:
+        if getattr(block, "type", "") == "tool_use" and getattr(block, "name", "") == "submit_verdict":
+            return normalize_assessment_payload(block.input)
+    raise ValueError("submit_verdict tool was not called")
+
+
+def run_ai_assessment(doc_id, run_id, review_id=None):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return None, ("document not found", 404)
+    run_meta = run_meta_for(meta, run_id)
+    if not run_meta:
+        return None, ("run not found", 404)
+    prev_run_id = run_meta.get("previous_run_id")
+    if not prev_run_id:
+        return None, ("AI assessment requires a diff run", 400)
+    run_dir = document_run_dir(doc_id, run_id)
+    prev_section_map = read_json(run_dir / "prev_section_map.json", []) or []
+    current_section_map = read_json(run_dir / "section_map.json", []) or []
+    targets = assessment_reviews_for_run(doc_id, run_id, review_id=review_id)
+    if review_id and not targets:
+        return None, ("review is not assessable for previous run", 404)
+    if targets and not os.environ.get("ANTHROPIC_API_KEY"):
+        return None, ("ANTHROPIC_API_KEY is not set", 400)
+    previous = load_ai_assessment(doc_id, run_id)
+    replacing = {review.get("review_id") for review, _, _ in targets}
+    items = [] if not review_id else [item for item in previous.get("items", []) if item.get("review_id") not in replacing]
+    started_at = utc_now()
+    for review, prev_anchor, anchor_run_id in targets:
+        section_id = anchor_section_id(prev_anchor)
+        old_context = section_context_from_markdown(run_dir / "prev_report.md", prev_section_map, section_id, prev_anchor.get("text", ""))
+        new_context = section_context_from_markdown(run_dir / "report.md", current_section_map, section_id, prev_anchor.get("text", ""))
+        item = {
+            "review_id": review.get("review_id"),
+            "anchor_run_id": anchor_run_id,
+            "section_id": section_id,
+            "status": "done",
+            "assessed_at": utc_now(),
+        }
+        try:
+            item.update(call_ai_assessment(build_assessment_prompt(review, prev_anchor, old_context, new_context)))
+        except Exception as e:
+            item.update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": ""})
+        items.append(item)
+    assessment = {
+        "status": "done",
+        "model": AI_ASSESSMENT_MODEL,
+        "started_at": started_at,
+        "completed_at": utc_now(),
+        "items": items,
+    }
+    save_ai_assessment(doc_id, run_id, assessment)
+    update_run_meta(meta, run_id, has_ai_assessment=True)
+    save_document_meta(meta)
+    return assessment, None
+
+
 # =========================================================
 # Routes
 # =========================================================
@@ -1976,12 +2168,49 @@ def document_workspace(doc_id):
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["POST"])
 def assess_document_run(doc_id, run_id):
-    return jsonify({"error": "AI assessment is planned for Phase 5"}), 501
+    assessment, error = run_ai_assessment(doc_id, run_id)
+    if error:
+        message, status = error
+        return jsonify({"error": message}), status
+    return jsonify(assessment)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["GET"])
+def get_document_assessment(doc_id, run_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    if not run_meta_for(meta, run_id):
+        return jsonify({"error": "run not found"}), 404
+    return jsonify(load_ai_assessment(doc_id, run_id))
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/assess/<review_id>", methods=["PATCH"])
 def patch_document_assessment(doc_id, run_id, review_id):
-    return jsonify({"error": "AI assessment decisions are planned for Phase 5"}), 501
+    patch = request.get_json(force=True) or {}
+    assessment = load_ai_assessment(doc_id, run_id)
+    updated = None
+    for item in assessment.get("items", []):
+        if item.get("review_id") == review_id:
+            for key in ("human_decision", "human_note"):
+                if key in patch:
+                    item[key] = patch[key]
+            item["human_updated_at"] = utc_now()
+            updated = item
+            break
+    if not updated:
+        return jsonify({"error": "assessment item not found"}), 404
+    save_ai_assessment(doc_id, run_id, assessment)
+    return jsonify(updated)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/assess/<review_id>", methods=["POST"])
+def assess_single_document_review(doc_id, run_id, review_id):
+    assessment, error = run_ai_assessment(doc_id, run_id, review_id=review_id)
+    if error:
+        message, status = error
+        return jsonify({"error": message}), status
+    return jsonify(assessment)
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/migrate", methods=["POST"])
