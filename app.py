@@ -1,11 +1,13 @@
 import json
 import logging
 import re
+import shutil
 import subprocess
 import sys
 import threading
 import uuid
 import semantic
+from datetime import datetime, timezone
 from pathlib import Path
 from difflib import SequenceMatcher
 
@@ -15,7 +17,9 @@ from flask import Flask, Response, jsonify, request, send_file
 
 BASE_DIR = Path(__file__).resolve().parent
 RUNS_DIR = BASE_DIR / "runs"
+DOCUMENTS_DIR = BASE_DIR / "documents"
 RUNS_DIR.mkdir(exist_ok=True)
+DOCUMENTS_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 JOBS = {}
@@ -426,6 +430,192 @@ def normalize_title_for_index(title):
     title = re.sub(r"\s+", " ", title).strip()
     title = re.sub(r"[,.;:]+$", "", title).strip()
     return title
+
+
+SECTION_MARKER_RE = re.compile(r"^\s*<!--\s*SECTION_(?:START|END):[^>]+-->\s*$", re.I)
+FS_SECTION_PATTERNS = [
+    (re.compile(r"financial\s+position", re.I), "fs_position"),
+    (re.compile(r"(?:comprehensive\s+)?income|profit\s+or\s+loss", re.I), "fs_income"),
+    (re.compile(r"changes\s+in\s+equity", re.I), "fs_equity"),
+    (re.compile(r"cash\s+flows?", re.I), "fs_cashflow"),
+]
+
+
+def read_md_lines(md_path: Path):
+    return Path(md_path).read_text(encoding="utf-8", errors="replace").splitlines()
+
+
+def strip_section_markers(lines):
+    return [line for line in lines if not SECTION_MARKER_RE.match(str(line or "").strip())]
+
+
+def slug_for_section_id(value):
+    slug = re.sub(r"[^a-z0-9]+", "_", clean_structural_text(value).lower()).strip("_")
+    return slug or "unknown"
+
+
+def fs_section_id(label):
+    label = clean_structural_text(label)
+    for pattern, section_id in FS_SECTION_PATTERNS:
+        if pattern.search(label):
+            return section_id
+    return f"fs_{slug_for_section_id(label)}"
+
+
+def section_id_for_index_item(item):
+    typ = item.get("type")
+    if typ == "note" and item.get("note_no"):
+        return f"note_{int(item['note_no'])}"
+    if typ == "fs":
+        return fs_section_id(item.get("label") or item.get("title") or "")
+    return None
+
+
+def md_line_pages(lines):
+    pages = []
+    current_page = 1
+    for line in lines:
+        pm = PAGE_MARKER_RE.match(str(line or "").strip())
+        if pm:
+            current_page = int(next(g for g in pm.groups() if g))
+        pages.append(current_page)
+    return pages
+
+
+def title_match_score(text, title):
+    text = normalize_title_for_index(text).lower()
+    title = normalize_title_for_index(title).lower()
+    if not text or not title:
+        return 0.0
+    if text == title:
+        return 1.0
+    if title in text or text in title:
+        return 0.92
+    text_tokens = [norm_token(t) for t in text.split() if norm_token(t)]
+    title_tokens = [norm_token(t) for t in title.split() if norm_token(t)]
+    if not text_tokens or not title_tokens:
+        return 0.0
+    shared = len(set(text_tokens) & set(title_tokens))
+    overlap = shared / max(1, min(len(text_tokens), len(title_tokens)))
+    ratio = SequenceMatcher(None, " ".join(text_tokens), " ".join(title_tokens)).ratio()
+    return max(overlap, ratio)
+
+
+def note_heading_candidate(lines, idx, note_no, title):
+    cleaned = normalize_title_for_index(lines[idx])
+    m = re.match(r"^(?:note\s+)?(\d{1,2})\.?\s+(.+?)\s*$", cleaned, re.I)
+    if m and int(m.group(1)) == int(note_no):
+        return idx, title_match_score(m.group(2), title)
+
+    m = re.match(r"^(?:note\s+)?(\d{1,2})\.?\s*$", cleaned, re.I)
+    if m and int(m.group(1)) == int(note_no):
+        for j in range(idx + 1, min(len(lines), idx + 4)):
+            candidate = normalize_title_for_index(lines[j])
+            if candidate:
+                return idx, title_match_score(candidate, title)
+    return None
+
+
+def find_section_heading_line(lines, line_pages, item):
+    section_type = item.get("type")
+    title = item.get("title") or item.get("label") or ""
+    preferred_page = item.get("page_hint") or item.get("page")
+    best = None
+
+    for idx, raw in enumerate(lines):
+        if PAGE_MARKER_RE.match(str(raw or "").strip()):
+            continue
+        if section_type == "note":
+            hit = note_heading_candidate(lines, idx, item.get("note_no"), title)
+            if not hit:
+                continue
+            line_idx, match_score = hit
+        elif section_type == "fs":
+            match_score = title_match_score(raw, title)
+            if match_score < 0.72:
+                continue
+            line_idx = idx
+        else:
+            continue
+
+        page = line_pages[line_idx] if line_idx < len(line_pages) else None
+        page_penalty = abs(page - preferred_page) * 0.08 if page and preferred_page else 0
+        score = match_score - page_penalty
+        if preferred_page and page and abs(page - preferred_page) > 2:
+            score -= 0.35
+        if best is None or score > best[0]:
+            best = (score, line_idx)
+
+    if best and best[0] >= 0.55:
+        return best[1]
+    return None
+
+
+def inject_section_markers(md_path: Path, index_items):
+    lines = strip_section_markers(read_md_lines(md_path))
+    line_pages = md_line_pages(lines)
+    found = []
+    seen_ids = set()
+
+    for item in index_items:
+        section_id = section_id_for_index_item(item)
+        if not section_id or section_id in seen_ids:
+            continue
+        start_idx = find_section_heading_line(lines, line_pages, item)
+        if start_idx is None:
+            continue
+        seen_ids.add(section_id)
+        found.append({
+            "section_id": section_id,
+            "item": item,
+            "start_idx": start_idx,
+        })
+
+    found.sort(key=lambda x: x["start_idx"])
+    if not found:
+        return {"sections": {}}
+
+    for i, section in enumerate(found):
+        next_start = found[i + 1]["start_idx"] if i + 1 < len(found) else len(lines)
+        end_idx = max(section["start_idx"], next_start - 1)
+        while end_idx > section["start_idx"]:
+            trailing = str(lines[end_idx] or "").strip()
+            if trailing and not PAGE_MARKER_RE.match(trailing):
+                break
+            end_idx -= 1
+        section["end_idx"] = end_idx
+
+    starts = {s["start_idx"]: s for s in found}
+    ends = {s["end_idx"]: s for s in found}
+    out = []
+    sections = {}
+
+    for idx, line in enumerate(lines):
+        if idx in starts:
+            section = starts[idx]
+            out.append(f"<!-- SECTION_START:{section['section_id']} -->")
+            item = section["item"]
+            sections[section["section_id"]] = {
+                "title": item.get("title") or item.get("label") or "",
+                "type": item.get("type"),
+                "note_no": item.get("note_no"),
+                "start_line": len(out) + 1,
+                "end_line": None,
+                "page_start": line_pages[idx] if idx < len(line_pages) else item.get("page"),
+                "page_end": None,
+            }
+
+        out.append(line)
+
+        if idx in ends:
+            section = ends[idx]
+            meta = sections[section["section_id"]]
+            meta["end_line"] = len(out)
+            meta["page_end"] = line_pages[idx] if idx < len(line_pages) else meta["page_start"]
+            out.append(f"<!-- SECTION_END:{section['section_id']} -->")
+
+    md_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+    return {"sections": sections}
 
 
 def group_pdf_visual_lines(words, y_tolerance=3.2):
@@ -934,6 +1124,8 @@ def process_job(job_id, old_pdf, new_pdf):
         new_highlights = merge_highlight_rects_server(new_highlights)
         report = alignment_report(diff_doc["segments"], old_words, new_words)
         index_items = build_new_pdf_index(new_md, new_words, len(new_page_sizes))
+        section_map = inject_section_markers(new_md, index_items)
+        (run_dir / "section_map.json").write_text(json.dumps(section_map, ensure_ascii=False, indent=2), encoding="utf-8")
 
         # ---- semantic_map: word-level equal anchor for reviews + index dual-scroll ----
         mapped = map_result_segments_to_pdf_indices(diff_doc["segments"], old_words, new_words)
@@ -956,6 +1148,7 @@ def process_job(job_id, old_pdf, new_pdf):
             "alignment_report": report,
             "suppressed_moves": diff_doc.get("suppressed_moves", []),
             "index_items": index_items,
+            "section_map": section_map,
             "old_filename": old_pdf.name,
             "new_filename": new_pdf.name,
             "semantic_map": semantic_map,
@@ -967,6 +1160,236 @@ def process_job(job_id, old_pdf, new_pdf):
     except Exception as e:
         job["status"] = "error"
         job["error"] = str(e)
+
+
+# =========================================================
+# Document / run pipeline (Phase 2)
+# =========================================================
+
+def utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def read_json(path: Path, default=None):
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+
+def write_json(path: Path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def document_dir(doc_id):
+    return DOCUMENTS_DIR / doc_id
+
+
+def document_run_dir(doc_id, run_id):
+    return document_dir(doc_id) / "runs" / run_id
+
+
+def document_meta_path(doc_id):
+    return document_dir(doc_id) / "meta.json"
+
+
+def load_document_meta(doc_id):
+    return read_json(document_meta_path(doc_id))
+
+
+def save_document_meta(meta):
+    meta["updated_at"] = utc_now()
+    write_json(document_meta_path(meta["doc_id"]), meta)
+
+
+def get_uploaded_pdf(field_names=("pdf", "report_pdf", "file")):
+    for name in field_names:
+        if name in request.files:
+            return request.files[name]
+    return None
+
+
+def copy_if_exists(src: Path, dst: Path):
+    if src.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+
+def write_unmarked_md_copy(src: Path, dst: Path):
+    dst.write_text("\n".join(strip_section_markers(read_md_lines(src))) + "\n", encoding="utf-8")
+    return dst
+
+
+def sync_report_compat_files(run_dir: Path):
+    copy_if_exists(run_dir / "report.pdf", run_dir / "new.pdf")
+    copy_if_exists(run_dir / "report.md", run_dir / "new.md")
+    copy_if_exists(run_dir / "words.json", run_dir / "new_words.json")
+    copy_if_exists(run_dir / "prev_report.pdf", run_dir / "old.pdf")
+    copy_if_exists(run_dir / "prev_report.md", run_dir / "old.md")
+    copy_if_exists(run_dir / "prev_words.json", run_dir / "old_words.json")
+
+
+def process_single_document_run(run_dir: Path, pdf_path: Path, *, doc_id=None, run_id=None, filename=None):
+    words, page_sizes = extract_pdf_words(pdf_path)
+    write_json(run_dir / "words.json", words)
+    write_json(run_dir / "new_words.json", words)
+
+    md_src = run_opendataloader_to_markdown(pdf_path, run_dir / "opendataloader_report")
+    report_md = run_dir / "report.md"
+    report_md.write_text(md_src.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+
+    index_items = build_new_pdf_index(report_md, words, len(page_sizes))
+    section_map = inject_section_markers(report_md, index_items)
+    write_json(run_dir / "section_map.json", section_map)
+    sync_report_compat_files(run_dir)
+
+    viewer_data = {
+        "doc_id": doc_id,
+        "run_id": run_id,
+        "mode": "single",
+        "app_version": "documents-phase2-v1",
+        "summary": {},
+        "engine": None,
+        "algorithm": None,
+        "old_page_count": 0,
+        "new_page_count": len(page_sizes),
+        "page_count": len(page_sizes),
+        "old_page_sizes": [],
+        "new_page_sizes": page_sizes,
+        "page_sizes": page_sizes,
+        "highlights_old": [],
+        "highlights_new": [],
+        "changes": [],
+        "alignment_report": None,
+        "suppressed_moves": [],
+        "index_items": index_items,
+        "section_map": section_map,
+        "old_filename": None,
+        "new_filename": filename or pdf_path.name,
+        "filename": filename or pdf_path.name,
+        "semantic_map": {"unit": "word", "equal_words": []},
+    }
+    write_json(run_dir / "viewer_data.json", viewer_data)
+    return viewer_data
+
+
+def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
+    prev_pdf = run_dir / "prev_report.pdf"
+    report_pdf = run_dir / "report.pdf"
+    prev_md = run_dir / "prev_report.md"
+    report_md = run_dir / "report.md"
+    if not prev_pdf.exists() or not report_pdf.exists():
+        raise FileNotFoundError("prev_report.pdf and report.pdf are required before diff")
+    if not prev_md.exists() or not report_md.exists():
+        raise FileNotFoundError("prev_report.md and report.md are required before diff")
+
+    prev_words = read_json(run_dir / "prev_words.json", [])
+    report_words = read_json(run_dir / "words.json", [])
+    prev_page_sizes = fitz.open(str(prev_pdf))
+    report_page_sizes = fitz.open(str(report_pdf))
+    old_page_sizes = [{"width": float(p.rect.width), "height": float(p.rect.height)} for p in prev_page_sizes]
+    new_page_sizes = [{"width": float(p.rect.width), "height": float(p.rect.height)} for p in report_page_sizes]
+
+    result_path = run_dir / "result.json"
+    diff_prev_md = write_unmarked_md_copy(prev_md, run_dir / "prev_report.diff.md")
+    diff_report_md = write_unmarked_md_copy(report_md, run_dir / "report.diff.md")
+    diff_doc = run_diff_extract(diff_prev_md, diff_report_md, result_path)
+    diff_doc["segments"], suppressed_moves = suppress_layout_moves(diff_doc.get("segments", []))
+    diff_doc["suppressed_moves"] = suppressed_moves
+    diff_doc["summary"] = {
+        "equal": sum(1 for s in diff_doc["segments"] if s.get("type") == "equal" and not s.get("suppressed")),
+        "deleted": sum(1 for s in diff_doc["segments"] if s.get("type") == "delete" and not s.get("suppressed")),
+        "added": sum(1 for s in diff_doc["segments"] if s.get("type") == "add" and not s.get("suppressed")),
+        "suppressed": sum(1 for s in diff_doc["segments"] if s.get("suppressed")),
+    }
+    write_json(result_path, diff_doc)
+
+    old_highlights, new_highlights, changes = make_highlights_and_changes(diff_doc["segments"], prev_words, report_words)
+    old_highlights = merge_highlight_rects_server(old_highlights)
+    new_highlights = merge_highlight_rects_server(new_highlights)
+    report = alignment_report(diff_doc["segments"], prev_words, report_words)
+    index_items = build_new_pdf_index(report_md, report_words, len(new_page_sizes))
+    section_map = inject_section_markers(report_md, index_items)
+    write_json(run_dir / "section_map.json", section_map)
+
+    mapped = map_result_segments_to_pdf_indices(diff_doc["segments"], prev_words, report_words)
+    semantic_map = semantic.build_semantic_map(diff_doc["segments"], mapped, prev_words, report_words)
+    semantic.attach_index_old_side(index_items, semantic_map, prev_words, report_words)
+    sync_report_compat_files(run_dir)
+
+    viewer_data = {
+        "doc_id": doc_id,
+        "run_id": run_id,
+        "mode": "diff",
+        "app_version": "documents-phase2-v1",
+        "summary": diff_doc.get("summary", {}),
+        "engine": diff_doc.get("engine"),
+        "algorithm": diff_doc.get("algorithm"),
+        "old_page_count": len(old_page_sizes),
+        "new_page_count": len(new_page_sizes),
+        "old_page_sizes": old_page_sizes,
+        "new_page_sizes": new_page_sizes,
+        "highlights_old": old_highlights,
+        "highlights_new": new_highlights,
+        "changes": changes,
+        "alignment_report": report,
+        "suppressed_moves": diff_doc.get("suppressed_moves", []),
+        "index_items": index_items,
+        "section_map": section_map,
+        "old_filename": prev_pdf.name,
+        "new_filename": report_pdf.name,
+        "semantic_map": semantic_map,
+    }
+    write_json(run_dir / "viewer_data.json", viewer_data)
+    return viewer_data
+
+
+def document_semantic_map(doc_id, run_id):
+    p = document_run_dir(doc_id, run_id) / "viewer_data.json"
+    return (read_json(p, {}) or {}).get("semantic_map", {})
+
+
+def add_single_document_review(run_dir: Path, data):
+    side = data.get("side")
+    if side not in ("new", "report", "current"):
+        return {"error": "single_run_reviews_only_support_current_report"}
+    word_ids = sorted({int(w) for w in data.get("word_ids", []) if isinstance(w, int) or str(w).isdigit()})
+    words = read_json(run_dir / "words.json", []) or []
+    selected = [words[i] for i in word_ids if 0 <= i < len(words)]
+    if not selected:
+        return {"error": "no_word_selected"}
+    review = {
+        "review_id": "r-" + uuid.uuid4().hex[:8],
+        "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "side": "new",
+        "old_word_ids": [],
+        "new_word_ids": [w["idx"] for w in selected],
+        "segment_ids": [],
+        "change_ids": [],
+        "old_lines": [],
+        "new_lines": [],
+        "text": " ".join(str(w.get("text", "")) for w in selected),
+        "selection": {"page": data.get("page"), "rect": data.get("rect"), "word_ids": word_ids},
+        "comment": data.get("comment", ""),
+        "status": data.get("status", "open"),
+        "created_at": utc_now(),
+        "updated_at": utc_now(),
+    }
+    reviews = semantic.load_reviews(run_dir)
+    reviews.append(review)
+    semantic.save_reviews(run_dir, reviews)
+    return review
+
+
+def update_run_meta(meta, run_id, **patch):
+    for run in meta.get("runs", []):
+        if run.get("run_id") == run_id:
+            run.update(patch)
+            return run
+    return None
 
 
 # =========================================================
@@ -991,6 +1414,295 @@ def index():
     if index_path.exists():
         return send_file(index_path)
     return Response("static/index.html not found", status=404, mimetype="text/plain")
+
+
+@app.route("/api/documents", methods=["POST"])
+def create_document():
+    uploaded = get_uploaded_pdf()
+    if uploaded is None:
+        return jsonify({"error": "pdf file is required; use form field pdf, report_pdf, or file"}), 400
+
+    doc_id = uuid.uuid4().hex[:12]
+    run_id = uuid.uuid4().hex[:12]
+    run_dir = document_run_dir(doc_id, run_id)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    report_pdf = run_dir / "report.pdf"
+    uploaded.save(report_pdf)
+
+    title = request.form.get("title") or Path(uploaded.filename or "report.pdf").stem
+    created_at = utc_now()
+    meta = {
+        "doc_id": doc_id,
+        "title": title,
+        "created_at": created_at,
+        "updated_at": created_at,
+        "runs": [{
+            "run_id": run_id,
+            "kind": "initial",
+            "status": "processing",
+            "created_at": created_at,
+            "filename": uploaded.filename or "report.pdf",
+            "has_diff": False,
+            "has_ai_assessment": False,
+        }],
+    }
+    save_document_meta(meta)
+
+    try:
+        viewer_data = process_single_document_run(
+            run_dir,
+            report_pdf,
+            doc_id=doc_id,
+            run_id=run_id,
+            filename=uploaded.filename or "report.pdf",
+        )
+    except Exception as e:
+        update_run_meta(meta, run_id, status="error", error=str(e))
+        save_document_meta(meta)
+        return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+
+    update_run_meta(meta, run_id, status="ready")
+    save_document_meta(meta)
+    return jsonify({"doc_id": doc_id, "run_id": run_id, "meta": meta, "result": viewer_data}), 201
+
+
+@app.route("/api/documents/<doc_id>")
+def get_document(doc_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    return jsonify(meta)
+
+
+@app.route("/api/documents/<doc_id>/runs", methods=["POST"])
+def create_document_run(doc_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    if not meta.get("runs"):
+        return jsonify({"error": "document has no previous run"}), 400
+
+    uploaded = get_uploaded_pdf()
+    if uploaded is None:
+        return jsonify({"error": "pdf file is required; use form field pdf, report_pdf, or file"}), 400
+
+    prev_run_id = meta["runs"][-1]["run_id"]
+    prev_dir = document_run_dir(doc_id, prev_run_id)
+    if not (prev_dir / "report.pdf").exists():
+        return jsonify({"error": f"previous run {prev_run_id} is missing report.pdf"}), 400
+
+    run_id = uuid.uuid4().hex[:12]
+    run_dir = document_run_dir(doc_id, run_id)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    copy_if_exists(prev_dir / "report.pdf", run_dir / "prev_report.pdf")
+    copy_if_exists(prev_dir / "report.md", run_dir / "prev_report.md")
+    copy_if_exists(prev_dir / "words.json", run_dir / "prev_words.json")
+    copy_if_exists(prev_dir / "section_map.json", run_dir / "prev_section_map.json")
+
+    report_pdf = run_dir / "report.pdf"
+    uploaded.save(report_pdf)
+    created_at = utc_now()
+    run_meta = {
+        "run_id": run_id,
+        "kind": "update",
+        "status": "processing",
+        "created_at": created_at,
+        "filename": uploaded.filename or "report.pdf",
+        "previous_run_id": prev_run_id,
+        "has_diff": False,
+        "has_ai_assessment": False,
+    }
+    meta.setdefault("runs", []).append(run_meta)
+    save_document_meta(meta)
+
+    try:
+        viewer_data = process_single_document_run(
+            run_dir,
+            report_pdf,
+            doc_id=doc_id,
+            run_id=run_id,
+            filename=uploaded.filename or "report.pdf",
+        )
+        sync_report_compat_files(run_dir)
+    except Exception as e:
+        update_run_meta(meta, run_id, status="error", error=str(e))
+        save_document_meta(meta)
+        return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+
+    update_run_meta(meta, run_id, status="ready")
+    save_document_meta(meta)
+    return jsonify({"doc_id": doc_id, "run_id": run_id, "previous_run_id": prev_run_id, "result": viewer_data}), 201
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/diff", methods=["POST"])
+def diff_document_run(doc_id, run_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    run_dir = document_run_dir(doc_id, run_id)
+    if not run_dir.exists():
+        return jsonify({"error": "run not found"}), 404
+
+    try:
+        viewer_data = process_document_diff_run(run_dir, doc_id=doc_id, run_id=run_id)
+    except Exception as e:
+        update_run_meta(meta, run_id, status="error", error=str(e))
+        save_document_meta(meta)
+        return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+
+    update_run_meta(meta, run_id, status="ready", has_diff=True)
+    save_document_meta(meta)
+    return jsonify({"doc_id": doc_id, "run_id": run_id, "result": viewer_data})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>")
+def get_document_run(doc_id, run_id):
+    run_dir = document_run_dir(doc_id, run_id)
+    viewer_path = run_dir / "viewer_data.json"
+    if not viewer_path.exists():
+        return jsonify({"error": "run data not found"}), 404
+    return jsonify(read_json(viewer_path, {}))
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/page/<side>/<int:page_no>")
+def document_page_image(doc_id, run_id, side, page_no):
+    zoom = float(request.args.get("zoom", "1.6"))
+    if side in ("new", "report", "current"):
+        pdf_name = "report.pdf"
+    elif side in ("old", "prev", "previous"):
+        pdf_name = "prev_report.pdf"
+    else:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    pdf_path = document_run_dir(doc_id, run_id) / pdf_name
+    if not pdf_path.exists():
+        return jsonify({"error": "pdf not found"}), 404
+    return Response(render_pdf_page(pdf_path, page_no, zoom), mimetype="image/png")
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/words/<side>")
+def document_words(doc_id, run_id, side):
+    if side in ("new", "report", "current"):
+        name = "words.json"
+    elif side in ("old", "prev", "previous"):
+        name = "prev_words.json"
+    else:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    p = document_run_dir(doc_id, run_id) / name
+    if not p.exists():
+        return jsonify({"error": "not found"}), 404
+    return send_file(p, mimetype="application/json")
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["GET"])
+def list_document_reviews(doc_id, run_id):
+    return jsonify(semantic.load_reviews(document_run_dir(doc_id, run_id)))
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["POST"])
+def create_document_review(doc_id, run_id):
+    run_dir = document_run_dir(doc_id, run_id)
+    if not run_dir.exists():
+        return jsonify({"error": "run not found"}), 404
+    data = request.get_json(force=True) or {}
+    viewer = read_json(run_dir / "viewer_data.json", {}) or {}
+    if viewer.get("mode") == "single":
+        rev = add_single_document_review(run_dir, data)
+    else:
+        rev = semantic.add_review(run_dir, document_semantic_map(doc_id, run_id), data)
+    return jsonify(rev), (400 if rev.get("error") else 201)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["PATCH"])
+def patch_document_review(doc_id, run_id, review_id):
+    r = semantic.update_review(document_run_dir(doc_id, run_id), review_id, request.get_json(force=True) or {})
+    return (jsonify(r), 200) if r else (jsonify({"error": "not found"}), 404)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["DELETE"])
+def remove_document_review(doc_id, run_id, review_id):
+    ok = semantic.delete_review(document_run_dir(doc_id, run_id), review_id)
+    return (jsonify({"deleted": True}), 200) if ok else (jsonify({"error": "not found"}), 404)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>/comments", methods=["POST"])
+def add_document_review_comment(doc_id, run_id, review_id):
+    # Full comment threads are Phase 4. For Phase 2, append text to the existing single comment field.
+    data = request.get_json(force=True) or {}
+    reviews = semantic.load_reviews(document_run_dir(doc_id, run_id))
+    updated = None
+    for review in reviews:
+        if review.get("review_id") == review_id:
+            existing = (review.get("comment") or "").strip()
+            addition = (data.get("text") or data.get("comment") or "").strip()
+            review["comment"] = "\n\n".join(x for x in (existing, addition) if x)
+            review["updated_at"] = utc_now()
+            updated = review
+            break
+    if not updated:
+        return jsonify({"error": "not found"}), 404
+    semantic.save_reviews(document_run_dir(doc_id, run_id), reviews)
+    return jsonify(updated)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/export/<side>")
+def export_document_pdf(doc_id, run_id, side):
+    if side in ("new", "report", "current"):
+        compat_side = "new"
+    elif side in ("old", "prev", "previous"):
+        compat_side = "old"
+    else:
+        return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
+    run_dir = document_run_dir(doc_id, run_id)
+    reviews = semantic.load_reviews(run_dir)
+    if not reviews:
+        return jsonify({"error": "저장된 리뷰가 없습니다"}), 400
+    try:
+        pdf_bytes = export_annotated_pdf(run_dir, compat_side)
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    filename = f"reviewed_{side}_{run_id[:6]}.pdf"
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.route("/api/documents/<doc_id>/workspace")
+def document_workspace(doc_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    runs = []
+    for run in reversed(meta.get("runs", [])[-5:]):
+        run_dir = document_run_dir(doc_id, run["run_id"])
+        reviews = semantic.load_reviews(run_dir)
+        runs.append({
+            **run,
+            "review_count": len(reviews),
+            "open_reviews": sum(1 for r in reviews if r.get("status", "open") == "open"),
+            "closed_reviews": sum(1 for r in reviews if r.get("status") in ("closed", "resolved")),
+            "has_diff": bool((run_dir / "result.json").exists()),
+            "has_ai_assessment": bool((run_dir / "ai_assessment.json").exists()),
+        })
+    return jsonify({"doc_id": doc_id, "title": meta.get("title"), "runs": runs})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["POST"])
+def assess_document_run(doc_id, run_id):
+    return jsonify({"error": "AI assessment is planned for Phase 5"}), 501
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/assess/<review_id>", methods=["PATCH"])
+def patch_document_assessment(doc_id, run_id, review_id):
+    return jsonify({"error": "AI assessment decisions are planned for Phase 5"}), 501
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/migrate", methods=["POST"])
+def migrate_document_reviews(doc_id, run_id):
+    return jsonify({"error": "review migration is planned for Phase 6"}), 501
 
 
 @app.route("/api/jobs", methods=["POST"])

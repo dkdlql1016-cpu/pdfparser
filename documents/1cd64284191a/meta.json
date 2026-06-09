@@ -1,0 +1,27 @@
+{
+  "doc_id": "1cd64284191a",
+  "title": "Smoke",
+  "created_at": "2026-06-09T13:04:19.041523+00:00",
+  "updated_at": "2026-06-09T13:04:20.114261+00:00",
+  "runs": [
+    {
+      "run_id": "c7613373ee61",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-09T13:04:19.041523+00:00",
+      "filename": "one.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "49da5037ecfd",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-09T13:04:19.516122+00:00",
+      "filename": "two.pdf",
+      "previous_run_id": "c7613373ee61",
+      "has_diff": true,
+      "has_ai_assessment": false
+    }
+  ]
+}
