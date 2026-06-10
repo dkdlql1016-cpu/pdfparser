@@ -1,0 +1,3388 @@
+[
+  {
+    "review_id": "r-70841133",
+    "anchor_id": "a-03b1788c",
+    "doc_id": "eb80169621b9",
+    "status": "open",
+    "created_run_id": "0ea806f61d2f",
+    "is_floating": false,
+    "text": "Other Matter The procedures and practices utilized in the Republic of Korea to audit such financial statements may differ from those generally accepted and applied in other countries. Auditors’ Responsibilities for the Audit of the Financial Statements Our objectives are to obtain reasonable assurance about whether the financial statements as a whole",
+    "comments": [
+      {
+        "comment_id": "c-1a9fb7de",
+        "author": "user",
+        "text": "1",
+        "created_at": "2026-06-10T11:53:15.819882+00:00"
+      }
+    ],
+    "anchors": {
+      "0ea806f61d2f": {
+        "run_id": "0ea806f61d2f",
+        "side": "old",
+        "word_ids": [
+          402,
+          403,
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410,
+          411,
+          412,
+          413,
+          414,
+          415,
+          416,
+          417,
+          418,
+          419,
+          420,
+          421,
+          422,
+          423,
+          424,
+          425,
+          426,
+          427,
+          428,
+          429,
+          430,
+          431,
+          432,
+          433,
+          434,
+          435,
+          436,
+          437,
+          438,
+          439,
+          440,
+          441,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453
+        ],
+        "old_word_ids": [
+          402,
+          403,
+          404,
+          405,
+          406,
+          407,
+          408,
+          409,
+          410,
+          411,
+          412,
+          413,
+          414,
+          415,
+          416,
+          417,
+          418,
+          419,
+          420,
+          421,
+          422,
+          423,
+          424,
+          425,
+          426,
+          427,
+          428,
+          429,
+          430,
+          431,
+          432,
+          433,
+          434,
+          435,
+          436,
+          437,
+          438,
+          439,
+          440,
+          441,
+          442,
+          443,
+          444,
+          445,
+          446,
+          447,
+          448,
+          449,
+          450,
+          451,
+          452,
+          453
+        ],
+        "new_word_ids": [],
+        "page": 4,
+        "bbox": [
+          57.119998931884766,
+          70.41150665283203,
+          530.1314086914062,
+          169.31436157226562
+        ],
+        "rect": [
+          44.6351175900445,
+          59.32750397697849,
+          471.8569573804704,
+          166.4517861930853
+        ],
+        "text": "Other Matter The procedures and practices utilized in the Republic of Korea to audit such financial statements may differ from those generally accepted and applied in other countries. Auditors’ Responsibilities for the Audit of the Financial Statements Our objectives are to obtain reasonable assurance about whether the financial statements as a whole",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            43,
+            45,
+            47,
+            49
+          ],
+          "new_lines": [
+            47,
+            49,
+            51,
+            53
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 402,
+              "new_word_id": 393,
+              "old_line": 43,
+              "new_line": 47,
+              "segment_id": null,
+              "text": "Other"
+            },
+            {
+              "old_word_id": 403,
+              "new_word_id": 394,
+              "old_line": 43,
+              "new_line": 47,
+              "segment_id": null,
+              "text": "Matter"
+            },
+            {
+              "old_word_id": 404,
+              "new_word_id": 395,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "The"
+            },
+            {
+              "old_word_id": 405,
+              "new_word_id": 396,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "procedures"
+            },
+            {
+              "old_word_id": 406,
+              "new_word_id": 397,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 407,
+              "new_word_id": 398,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "practices"
+            },
+            {
+              "old_word_id": 408,
+              "new_word_id": 399,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "utilized"
+            },
+            {
+              "old_word_id": 409,
+              "new_word_id": 400,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 410,
+              "new_word_id": 401,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 411,
+              "new_word_id": 402,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "Republic"
+            },
+            {
+              "old_word_id": 412,
+              "new_word_id": 403,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 413,
+              "new_word_id": 404,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "Korea"
+            },
+            {
+              "old_word_id": 414,
+              "new_word_id": 405,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 415,
+              "new_word_id": 406,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 416,
+              "new_word_id": 407,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "such"
+            },
+            {
+              "old_word_id": 417,
+              "new_word_id": 408,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 418,
+              "new_word_id": 409,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 419,
+              "new_word_id": 410,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "may"
+            },
+            {
+              "old_word_id": 420,
+              "new_word_id": 411,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "differ"
+            },
+            {
+              "old_word_id": 421,
+              "new_word_id": 412,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "from"
+            },
+            {
+              "old_word_id": 422,
+              "new_word_id": 413,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "those"
+            },
+            {
+              "old_word_id": 423,
+              "new_word_id": 414,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "generally"
+            },
+            {
+              "old_word_id": 424,
+              "new_word_id": 415,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "accepted"
+            },
+            {
+              "old_word_id": 425,
+              "new_word_id": 416,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 426,
+              "new_word_id": 417,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "applied"
+            },
+            {
+              "old_word_id": 427,
+              "new_word_id": 418,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 428,
+              "new_word_id": 419,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "other"
+            },
+            {
+              "old_word_id": 429,
+              "new_word_id": 420,
+              "old_line": 45,
+              "new_line": 49,
+              "segment_id": null,
+              "text": "countries."
+            },
+            {
+              "old_word_id": 430,
+              "new_word_id": 421,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "Auditors’"
+            },
+            {
+              "old_word_id": 431,
+              "new_word_id": 422,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "Responsibilities"
+            },
+            {
+              "old_word_id": 432,
+              "new_word_id": 423,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 433,
+              "new_word_id": 424,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 434,
+              "new_word_id": 425,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "Audit"
+            },
+            {
+              "old_word_id": 435,
+              "new_word_id": 426,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 436,
+              "new_word_id": 427,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 437,
+              "new_word_id": 428,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "Financial"
+            },
+            {
+              "old_word_id": 438,
+              "new_word_id": 429,
+              "old_line": 47,
+              "new_line": 51,
+              "segment_id": null,
+              "text": "Statements"
+            },
+            {
+              "old_word_id": 439,
+              "new_word_id": 430,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "Our"
+            },
+            {
+              "old_word_id": 440,
+              "new_word_id": 431,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "objectives"
+            },
+            {
+              "old_word_id": 441,
+              "new_word_id": 432,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "are"
+            },
+            {
+              "old_word_id": 442,
+              "new_word_id": 433,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 443,
+              "new_word_id": 434,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "obtain"
+            },
+            {
+              "old_word_id": 444,
+              "new_word_id": 435,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "reasonable"
+            },
+            {
+              "old_word_id": 445,
+              "new_word_id": 436,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "assurance"
+            },
+            {
+              "old_word_id": 446,
+              "new_word_id": 437,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "about"
+            },
+            {
+              "old_word_id": 447,
+              "new_word_id": 438,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "whether"
+            },
+            {
+              "old_word_id": 448,
+              "new_word_id": 439,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 449,
+              "new_word_id": 440,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 450,
+              "new_word_id": 441,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 451,
+              "new_word_id": 442,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 452,
+              "new_word_id": 443,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 453,
+              "new_word_id": 444,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "whole"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          43,
+          45,
+          47,
+          49
+        ],
+        "new_lines": [
+          47,
+          49,
+          51,
+          53
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T11:53:15.819882+00:00",
+    "updated_at": "2026-06-10T11:53:15.819882+00:00"
+  },
+  {
+    "review_id": "r-f8f218bd",
+    "anchor_id": "a-6d1591f7",
+    "doc_id": "eb80169621b9",
+    "status": "open",
+    "created_run_id": "0ea806f61d2f",
+    "is_floating": false,
+    "text": "Reasonable assurance is a high level of assurance, but is not a guarantee that an audit conducted in accordance with KSAs will always detect a material misstatement when it exists. Misstatements can arise from fraud or error and are considered material if, individually or in the aggregate, they could reasonably be expected to influence the economic decisions of users taken on the basis of these financial statements. As part of an audit in accordance with KSAs, we exercise professional judgment and maintain professional skepticism throughout the audit. We also: - Identify and assess the risks of material misstatement of the financial statements, whether due to fraud or error, design and perform audit procedures responsive to those risks, and obtain audit evidence that is sufficient and appropriate to provide a basis for our opinion. The risk of not detecting a material misstatement resulting from fraud is higher than for one resulting from error, as fraud may involve collusion, forgery, intentional omissions,",
+    "comments": [
+      {
+        "comment_id": "c-96d08f35",
+        "author": "user",
+        "text": "3",
+        "created_at": "2026-06-10T11:53:19.212380+00:00"
+      }
+    ],
+    "anchors": {
+      "0ea806f61d2f": {
+        "run_id": "0ea806f61d2f",
+        "side": "old",
+        "word_ids": [
+          475,
+          476,
+          477,
+          478,
+          479,
+          480,
+          481,
+          482,
+          483,
+          484,
+          485,
+          486,
+          487,
+          488,
+          489,
+          490,
+          491,
+          492,
+          493,
+          494,
+          495,
+          496,
+          497,
+          498,
+          499,
+          500,
+          501,
+          502,
+          503,
+          504,
+          505,
+          506,
+          507,
+          508,
+          509,
+          510,
+          511,
+          512,
+          513,
+          514,
+          515,
+          516,
+          517,
+          518,
+          519,
+          520,
+          521,
+          522,
+          523,
+          524,
+          525,
+          526,
+          527,
+          528,
+          529,
+          530,
+          531,
+          532,
+          533,
+          534,
+          535,
+          536,
+          537,
+          538,
+          539,
+          540,
+          541,
+          542,
+          543,
+          544,
+          545,
+          546,
+          547,
+          548,
+          549,
+          550,
+          551,
+          552,
+          553,
+          554,
+          555,
+          556,
+          557,
+          558,
+          559,
+          560,
+          561,
+          562,
+          563,
+          564,
+          565,
+          566,
+          567,
+          568,
+          569,
+          570,
+          571,
+          572,
+          573,
+          574,
+          575,
+          576,
+          577,
+          578,
+          579,
+          580,
+          581,
+          582,
+          583,
+          584,
+          585,
+          586,
+          587,
+          588,
+          589,
+          590,
+          591,
+          592,
+          593,
+          594,
+          595,
+          596,
+          597,
+          598,
+          599,
+          600,
+          601,
+          602,
+          603,
+          604,
+          605,
+          606,
+          607,
+          608,
+          609,
+          610,
+          611,
+          612,
+          613,
+          614,
+          615,
+          616,
+          617,
+          618,
+          619,
+          620,
+          621,
+          622,
+          623,
+          624,
+          625,
+          626,
+          627,
+          628,
+          629,
+          630,
+          631,
+          632,
+          633,
+          634
+        ],
+        "old_word_ids": [
+          475,
+          476,
+          477,
+          478,
+          479,
+          480,
+          481,
+          482,
+          483,
+          484,
+          485,
+          486,
+          487,
+          488,
+          489,
+          490,
+          491,
+          492,
+          493,
+          494,
+          495,
+          496,
+          497,
+          498,
+          499,
+          500,
+          501,
+          502,
+          503,
+          504,
+          505,
+          506,
+          507,
+          508,
+          509,
+          510,
+          511,
+          512,
+          513,
+          514,
+          515,
+          516,
+          517,
+          518,
+          519,
+          520,
+          521,
+          522,
+          523,
+          524,
+          525,
+          526,
+          527,
+          528,
+          529,
+          530,
+          531,
+          532,
+          533,
+          534,
+          535,
+          536,
+          537,
+          538,
+          539,
+          540,
+          541,
+          542,
+          543,
+          544,
+          545,
+          546,
+          547,
+          548,
+          549,
+          550,
+          551,
+          552,
+          553,
+          554,
+          555,
+          556,
+          557,
+          558,
+          559,
+          560,
+          561,
+          562,
+          563,
+          564,
+          565,
+          566,
+          567,
+          568,
+          569,
+          570,
+          571,
+          572,
+          573,
+          574,
+          575,
+          576,
+          577,
+          578,
+          579,
+          580,
+          581,
+          582,
+          583,
+          584,
+          585,
+          586,
+          587,
+          588,
+          589,
+          590,
+          591,
+          592,
+          593,
+          594,
+          595,
+          596,
+          597,
+          598,
+          599,
+          600,
+          601,
+          602,
+          603,
+          604,
+          605,
+          606,
+          607,
+          608,
+          609,
+          610,
+          611,
+          612,
+          613,
+          614,
+          615,
+          616,
+          617,
+          618,
+          619,
+          620,
+          621,
+          622,
+          623,
+          624,
+          625,
+          626,
+          627,
+          628,
+          629,
+          630,
+          631,
+          632,
+          633,
+          634
+        ],
+        "new_word_ids": [],
+        "page": 4,
+        "bbox": [
+          57.12994384765625,
+          180.35006713867188,
+          532.5933837890625,
+          325.1915588378906
+        ],
+        "rect": [
+          48.460984812048316,
+          194.0830559495685,
+          492.26158256449077,
+          333.0895650157071
+        ],
+        "text": "Reasonable assurance is a high level of assurance, but is not a guarantee that an audit conducted in accordance with KSAs will always detect a material misstatement when it exists. Misstatements can arise from fraud or error and are considered material if, individually or in the aggregate, they could reasonably be expected to influence the economic decisions of users taken on the basis of these financial statements. As part of an audit in accordance with KSAs, we exercise professional judgment and maintain professional skepticism throughout the audit. We also: - Identify and assess the risks of material misstatement of the financial statements, whether due to fraud or error, design and perform audit procedures responsive to those risks, and obtain audit evidence that is sufficient and appropriate to provide a basis for our opinion. The risk of not detecting a material misstatement resulting from fraud is higher than for one resulting from error, as fraud may involve collusion, forgery, intentional omissions,",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            49,
+            51,
+            53
+          ],
+          "new_lines": [
+            53,
+            55,
+            57
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 475,
+              "new_word_id": 466,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "Reasonable"
+            },
+            {
+              "old_word_id": 476,
+              "new_word_id": 467,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "assurance"
+            },
+            {
+              "old_word_id": 477,
+              "new_word_id": 468,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "is"
+            },
+            {
+              "old_word_id": 478,
+              "new_word_id": 469,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 479,
+              "new_word_id": 470,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "high"
+            },
+            {
+              "old_word_id": 480,
+              "new_word_id": 471,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "level"
+            },
+            {
+              "old_word_id": 481,
+              "new_word_id": 472,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 482,
+              "new_word_id": 473,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "assurance,"
+            },
+            {
+              "old_word_id": 483,
+              "new_word_id": 474,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "but"
+            },
+            {
+              "old_word_id": 484,
+              "new_word_id": 475,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "is"
+            },
+            {
+              "old_word_id": 485,
+              "new_word_id": 476,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "not"
+            },
+            {
+              "old_word_id": 486,
+              "new_word_id": 477,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 487,
+              "new_word_id": 478,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "guarantee"
+            },
+            {
+              "old_word_id": 488,
+              "new_word_id": 479,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "that"
+            },
+            {
+              "old_word_id": 489,
+              "new_word_id": 480,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "an"
+            },
+            {
+              "old_word_id": 490,
+              "new_word_id": 481,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 491,
+              "new_word_id": 482,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "conducted"
+            },
+            {
+              "old_word_id": 492,
+              "new_word_id": 483,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 493,
+              "new_word_id": 484,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "accordance"
+            },
+            {
+              "old_word_id": 494,
+              "new_word_id": 485,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "with"
+            },
+            {
+              "old_word_id": 495,
+              "new_word_id": 486,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "KSAs"
+            },
+            {
+              "old_word_id": 496,
+              "new_word_id": 487,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "will"
+            },
+            {
+              "old_word_id": 497,
+              "new_word_id": 488,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "always"
+            },
+            {
+              "old_word_id": 498,
+              "new_word_id": 489,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "detect"
+            },
+            {
+              "old_word_id": 499,
+              "new_word_id": 490,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 500,
+              "new_word_id": 491,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 501,
+              "new_word_id": 492,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "misstatement"
+            },
+            {
+              "old_word_id": 502,
+              "new_word_id": 493,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "when"
+            },
+            {
+              "old_word_id": 503,
+              "new_word_id": 494,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "it"
+            },
+            {
+              "old_word_id": 504,
+              "new_word_id": 495,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "exists."
+            },
+            {
+              "old_word_id": 505,
+              "new_word_id": 496,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "Misstatements"
+            },
+            {
+              "old_word_id": 506,
+              "new_word_id": 497,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "can"
+            },
+            {
+              "old_word_id": 507,
+              "new_word_id": 498,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "arise"
+            },
+            {
+              "old_word_id": 508,
+              "new_word_id": 499,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "from"
+            },
+            {
+              "old_word_id": 509,
+              "new_word_id": 500,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "fraud"
+            },
+            {
+              "old_word_id": 510,
+              "new_word_id": 501,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 511,
+              "new_word_id": 502,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "error"
+            },
+            {
+              "old_word_id": 512,
+              "new_word_id": 503,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 513,
+              "new_word_id": 504,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "are"
+            },
+            {
+              "old_word_id": 514,
+              "new_word_id": 505,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "considered"
+            },
+            {
+              "old_word_id": 515,
+              "new_word_id": 506,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 516,
+              "new_word_id": 507,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "if,"
+            },
+            {
+              "old_word_id": 517,
+              "new_word_id": 508,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "individually"
+            },
+            {
+              "old_word_id": 518,
+              "new_word_id": 509,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 519,
+              "new_word_id": 510,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 520,
+              "new_word_id": 511,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 521,
+              "new_word_id": 512,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "aggregate,"
+            },
+            {
+              "old_word_id": 522,
+              "new_word_id": 513,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "they"
+            },
+            {
+              "old_word_id": 523,
+              "new_word_id": 514,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "could"
+            },
+            {
+              "old_word_id": 524,
+              "new_word_id": 515,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "reasonably"
+            },
+            {
+              "old_word_id": 525,
+              "new_word_id": 516,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "be"
+            },
+            {
+              "old_word_id": 526,
+              "new_word_id": 517,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "expected"
+            },
+            {
+              "old_word_id": 527,
+              "new_word_id": 518,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 528,
+              "new_word_id": 519,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "influence"
+            },
+            {
+              "old_word_id": 529,
+              "new_word_id": 520,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 530,
+              "new_word_id": 521,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "economic"
+            },
+            {
+              "old_word_id": 531,
+              "new_word_id": 522,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "decisions"
+            },
+            {
+              "old_word_id": 532,
+              "new_word_id": 523,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 533,
+              "new_word_id": 524,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "users"
+            },
+            {
+              "old_word_id": 534,
+              "new_word_id": 525,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "taken"
+            },
+            {
+              "old_word_id": 535,
+              "new_word_id": 526,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "on"
+            },
+            {
+              "old_word_id": 536,
+              "new_word_id": 527,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 537,
+              "new_word_id": 528,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "basis"
+            },
+            {
+              "old_word_id": 538,
+              "new_word_id": 529,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 539,
+              "new_word_id": 530,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "these"
+            },
+            {
+              "old_word_id": 540,
+              "new_word_id": 531,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 541,
+              "new_word_id": 532,
+              "old_line": 49,
+              "new_line": 53,
+              "segment_id": null,
+              "text": "statements."
+            },
+            {
+              "old_word_id": 542,
+              "new_word_id": 533,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "As"
+            },
+            {
+              "old_word_id": 543,
+              "new_word_id": 534,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "part"
+            },
+            {
+              "old_word_id": 544,
+              "new_word_id": 535,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 545,
+              "new_word_id": 536,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "an"
+            },
+            {
+              "old_word_id": 546,
+              "new_word_id": 537,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 547,
+              "new_word_id": 538,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 548,
+              "new_word_id": 539,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "accordance"
+            },
+            {
+              "old_word_id": 549,
+              "new_word_id": 540,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "with"
+            },
+            {
+              "old_word_id": 550,
+              "new_word_id": 541,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "KSAs,"
+            },
+            {
+              "old_word_id": 551,
+              "new_word_id": 542,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "we"
+            },
+            {
+              "old_word_id": 552,
+              "new_word_id": 543,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "exercise"
+            },
+            {
+              "old_word_id": 553,
+              "new_word_id": 544,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "professional"
+            },
+            {
+              "old_word_id": 554,
+              "new_word_id": 545,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "judgment"
+            },
+            {
+              "old_word_id": 555,
+              "new_word_id": 546,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 556,
+              "new_word_id": 547,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "maintain"
+            },
+            {
+              "old_word_id": 557,
+              "new_word_id": 548,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "professional"
+            },
+            {
+              "old_word_id": 558,
+              "new_word_id": 549,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "skepticism"
+            },
+            {
+              "old_word_id": 559,
+              "new_word_id": 550,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "throughout"
+            },
+            {
+              "old_word_id": 560,
+              "new_word_id": 551,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 561,
+              "new_word_id": 552,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "audit."
+            },
+            {
+              "old_word_id": 562,
+              "new_word_id": 553,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "We"
+            },
+            {
+              "old_word_id": 563,
+              "new_word_id": 554,
+              "old_line": 51,
+              "new_line": 55,
+              "segment_id": null,
+              "text": "also:"
+            },
+            {
+              "old_word_id": 564,
+              "new_word_id": 555,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 565,
+              "new_word_id": 556,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "Identify"
+            },
+            {
+              "old_word_id": 566,
+              "new_word_id": 557,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 567,
+              "new_word_id": 558,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "assess"
+            },
+            {
+              "old_word_id": 568,
+              "new_word_id": 559,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 569,
+              "new_word_id": 560,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "risks"
+            },
+            {
+              "old_word_id": 570,
+              "new_word_id": 561,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 571,
+              "new_word_id": 562,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 572,
+              "new_word_id": 563,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "misstatement"
+            },
+            {
+              "old_word_id": 573,
+              "new_word_id": 564,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 574,
+              "new_word_id": 565,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 575,
+              "new_word_id": 566,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 576,
+              "new_word_id": 567,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "statements,"
+            },
+            {
+              "old_word_id": 577,
+              "new_word_id": 568,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "whether"
+            },
+            {
+              "old_word_id": 578,
+              "new_word_id": 569,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "due"
+            },
+            {
+              "old_word_id": 579,
+              "new_word_id": 570,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 580,
+              "new_word_id": 571,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "fraud"
+            },
+            {
+              "old_word_id": 581,
+              "new_word_id": 572,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 582,
+              "new_word_id": 573,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "error,"
+            },
+            {
+              "old_word_id": 583,
+              "new_word_id": 574,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "design"
+            },
+            {
+              "old_word_id": 584,
+              "new_word_id": 575,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 585,
+              "new_word_id": 576,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "perform"
+            },
+            {
+              "old_word_id": 586,
+              "new_word_id": 577,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 587,
+              "new_word_id": 578,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "procedures"
+            },
+            {
+              "old_word_id": 588,
+              "new_word_id": 579,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "responsive"
+            },
+            {
+              "old_word_id": 589,
+              "new_word_id": 580,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 590,
+              "new_word_id": 581,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "those"
+            },
+            {
+              "old_word_id": 591,
+              "new_word_id": 582,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "risks,"
+            },
+            {
+              "old_word_id": 592,
+              "new_word_id": 583,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 593,
+              "new_word_id": 584,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "obtain"
+            },
+            {
+              "old_word_id": 594,
+              "new_word_id": 585,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "audit"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          49,
+          51,
+          53
+        ],
+        "new_lines": [
+          53,
+          55,
+          57
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T11:53:19.212380+00:00",
+    "updated_at": "2026-06-10T11:53:19.212380+00:00"
+  },
+  {
+    "review_id": "r-e337b92e",
+    "anchor_id": "a-a9a27e0f",
+    "doc_id": "eb80169621b9",
+    "status": "open",
+    "created_run_id": "0ea806f61d2f",
+    "is_floating": false,
+    "text": "- Obtain an understanding of internal control relevant to the audit in order to design audit procedures that are appropriate in the circumstances, but not for the purpose of expressing an opinion on the effectiveness of the Company’s internal control. - Evaluate the appropriateness of accounting policies used in the preparation of the financial statements and the reasonableness of accounting estimates and related disclosures made by management. - Conclude on the appropriateness of management’s use of the going concern basis of accounting and, based on the audit evidence obtained, whether a material uncertainty exists related to events or conditions that may cast significant doubt on the Company’s ability to continue as a going concern. If we conclude that a material uncertainty exists, we are required to draw attention in our auditors’ report to the related disclosures in the financial statements or, if such disclosures are inadequate, to modify our opinion. Our conclusions are based on the audit evidence obtained up to the date of our auditors’ report. However, future events or conditions may cause the Company to cease to continue as a going concern. - Evaluate the overall presentation, structure and content of the financial statements,",
+    "comments": [
+      {
+        "comment_id": "c-9f2e54e4",
+        "author": "user",
+        "text": "4",
+        "created_at": "2026-06-10T11:53:22.934605+00:00"
+      }
+    ],
+    "anchors": {
+      "0ea806f61d2f": {
+        "run_id": "0ea806f61d2f",
+        "side": "old",
+        "word_ids": [
+          642,
+          643,
+          644,
+          645,
+          646,
+          647,
+          648,
+          649,
+          650,
+          651,
+          652,
+          653,
+          654,
+          655,
+          656,
+          657,
+          658,
+          659,
+          660,
+          661,
+          662,
+          663,
+          664,
+          665,
+          666,
+          667,
+          668,
+          669,
+          670,
+          671,
+          672,
+          673,
+          674,
+          675,
+          676,
+          677,
+          678,
+          679,
+          680,
+          681,
+          682,
+          683,
+          684,
+          685,
+          686,
+          687,
+          688,
+          689,
+          690,
+          691,
+          692,
+          693,
+          694,
+          695,
+          696,
+          697,
+          698,
+          699,
+          700,
+          701,
+          702,
+          703,
+          704,
+          705,
+          706,
+          707,
+          708,
+          709,
+          710,
+          711,
+          712,
+          713,
+          714,
+          715,
+          716,
+          717,
+          718,
+          719,
+          720,
+          721,
+          722,
+          723,
+          724,
+          725,
+          726,
+          727,
+          728,
+          729,
+          730,
+          731,
+          732,
+          733,
+          734,
+          735,
+          736,
+          737,
+          738,
+          739,
+          740,
+          741,
+          742,
+          743,
+          744,
+          745,
+          746,
+          747,
+          748,
+          749,
+          750,
+          751,
+          752,
+          753,
+          754,
+          755,
+          756,
+          757,
+          758,
+          759,
+          760,
+          761,
+          762,
+          763,
+          764,
+          765,
+          766,
+          767,
+          768,
+          769,
+          770,
+          771,
+          772,
+          773,
+          774,
+          775,
+          776,
+          777,
+          778,
+          779,
+          780,
+          781,
+          782,
+          783,
+          784,
+          785,
+          786,
+          787,
+          788,
+          789,
+          790,
+          791,
+          792,
+          793,
+          794,
+          795,
+          796,
+          797,
+          798,
+          799,
+          800,
+          801,
+          802,
+          803,
+          804,
+          805,
+          806,
+          807,
+          808,
+          809,
+          810,
+          811,
+          812,
+          813,
+          814,
+          815,
+          816,
+          817,
+          818,
+          819,
+          820,
+          821,
+          822,
+          823,
+          824,
+          825,
+          826,
+          827,
+          828,
+          829,
+          830,
+          831,
+          832,
+          833,
+          834,
+          835,
+          836,
+          837
+        ],
+        "old_word_ids": [
+          642,
+          643,
+          644,
+          645,
+          646,
+          647,
+          648,
+          649,
+          650,
+          651,
+          652,
+          653,
+          654,
+          655,
+          656,
+          657,
+          658,
+          659,
+          660,
+          661,
+          662,
+          663,
+          664,
+          665,
+          666,
+          667,
+          668,
+          669,
+          670,
+          671,
+          672,
+          673,
+          674,
+          675,
+          676,
+          677,
+          678,
+          679,
+          680,
+          681,
+          682,
+          683,
+          684,
+          685,
+          686,
+          687,
+          688,
+          689,
+          690,
+          691,
+          692,
+          693,
+          694,
+          695,
+          696,
+          697,
+          698,
+          699,
+          700,
+          701,
+          702,
+          703,
+          704,
+          705,
+          706,
+          707,
+          708,
+          709,
+          710,
+          711,
+          712,
+          713,
+          714,
+          715,
+          716,
+          717,
+          718,
+          719,
+          720,
+          721,
+          722,
+          723,
+          724,
+          725,
+          726,
+          727,
+          728,
+          729,
+          730,
+          731,
+          732,
+          733,
+          734,
+          735,
+          736,
+          737,
+          738,
+          739,
+          740,
+          741,
+          742,
+          743,
+          744,
+          745,
+          746,
+          747,
+          748,
+          749,
+          750,
+          751,
+          752,
+          753,
+          754,
+          755,
+          756,
+          757,
+          758,
+          759,
+          760,
+          761,
+          762,
+          763,
+          764,
+          765,
+          766,
+          767,
+          768,
+          769,
+          770,
+          771,
+          772,
+          773,
+          774,
+          775,
+          776,
+          777,
+          778,
+          779,
+          780,
+          781,
+          782,
+          783,
+          784,
+          785,
+          786,
+          787,
+          788,
+          789,
+          790,
+          791,
+          792,
+          793,
+          794,
+          795,
+          796,
+          797,
+          798,
+          799,
+          800,
+          801,
+          802,
+          803,
+          804,
+          805,
+          806,
+          807,
+          808,
+          809,
+          810,
+          811,
+          812,
+          813,
+          814,
+          815,
+          816,
+          817,
+          818,
+          819,
+          820,
+          821,
+          822,
+          823,
+          824,
+          825,
+          826,
+          827,
+          828,
+          829,
+          830,
+          831,
+          832,
+          833,
+          834,
+          835,
+          836,
+          837
+        ],
+        "new_word_ids": [],
+        "page": 4,
+        "bbox": [
+          57.119998931884766,
+          349.1529541015625,
+          532.6029052734375,
+          552.2044677734375
+        ],
+        "rect": [
+          22.955203332022887,
+          335.64014316370964,
+          394.06432386639284,
+          538.4111059299117
+        ],
+        "text": "- Obtain an understanding of internal control relevant to the audit in order to design audit procedures that are appropriate in the circumstances, but not for the purpose of expressing an opinion on the effectiveness of the Company’s internal control. - Evaluate the appropriateness of accounting policies used in the preparation of the financial statements and the reasonableness of accounting estimates and related disclosures made by management. - Conclude on the appropriateness of management’s use of the going concern basis of accounting and, based on the audit evidence obtained, whether a material uncertainty exists related to events or conditions that may cast significant doubt on the Company’s ability to continue as a going concern. If we conclude that a material uncertainty exists, we are required to draw attention in our auditors’ report to the related disclosures in the financial statements or, if such disclosures are inadequate, to modify our opinion. Our conclusions are based on the audit evidence obtained up to the date of our auditors’ report. However, future events or conditions may cause the Company to cease to continue as a going concern. - Evaluate the overall presentation, structure and content of the financial statements,",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            53,
+            54,
+            55,
+            56,
+            57
+          ],
+          "new_lines": [
+            57,
+            58,
+            59,
+            60,
+            61
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 642,
+              "new_word_id": 633,
+              "old_line": 53,
+              "new_line": 57,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 642,
+              "new_word_id": 633,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 643,
+              "new_word_id": 634,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "Obtain"
+            },
+            {
+              "old_word_id": 644,
+              "new_word_id": 635,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "an"
+            },
+            {
+              "old_word_id": 645,
+              "new_word_id": 636,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "understanding"
+            },
+            {
+              "old_word_id": 646,
+              "new_word_id": 637,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 647,
+              "new_word_id": 638,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "internal"
+            },
+            {
+              "old_word_id": 648,
+              "new_word_id": 639,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "control"
+            },
+            {
+              "old_word_id": 649,
+              "new_word_id": 640,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "relevant"
+            },
+            {
+              "old_word_id": 650,
+              "new_word_id": 641,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 651,
+              "new_word_id": 642,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 652,
+              "new_word_id": 643,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 653,
+              "new_word_id": 644,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 654,
+              "new_word_id": 645,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "order"
+            },
+            {
+              "old_word_id": 655,
+              "new_word_id": 646,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 656,
+              "new_word_id": 647,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "design"
+            },
+            {
+              "old_word_id": 657,
+              "new_word_id": 648,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 658,
+              "new_word_id": 649,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "procedures"
+            },
+            {
+              "old_word_id": 659,
+              "new_word_id": 650,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "that"
+            },
+            {
+              "old_word_id": 660,
+              "new_word_id": 651,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "are"
+            },
+            {
+              "old_word_id": 661,
+              "new_word_id": 652,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "appropriate"
+            },
+            {
+              "old_word_id": 662,
+              "new_word_id": 653,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 663,
+              "new_word_id": 654,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 664,
+              "new_word_id": 655,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "circumstances,"
+            },
+            {
+              "old_word_id": 665,
+              "new_word_id": 656,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "but"
+            },
+            {
+              "old_word_id": 666,
+              "new_word_id": 657,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "not"
+            },
+            {
+              "old_word_id": 667,
+              "new_word_id": 658,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 668,
+              "new_word_id": 659,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 669,
+              "new_word_id": 660,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "purpose"
+            },
+            {
+              "old_word_id": 670,
+              "new_word_id": 661,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 671,
+              "new_word_id": 662,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "expressing"
+            },
+            {
+              "old_word_id": 672,
+              "new_word_id": 663,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "an"
+            },
+            {
+              "old_word_id": 673,
+              "new_word_id": 664,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "opinion"
+            },
+            {
+              "old_word_id": 674,
+              "new_word_id": 665,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "on"
+            },
+            {
+              "old_word_id": 675,
+              "new_word_id": 666,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 676,
+              "new_word_id": 667,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "effectiveness"
+            },
+            {
+              "old_word_id": 677,
+              "new_word_id": 668,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 678,
+              "new_word_id": 669,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 679,
+              "new_word_id": 670,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "Company’s"
+            },
+            {
+              "old_word_id": 680,
+              "new_word_id": 671,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "internal"
+            },
+            {
+              "old_word_id": 681,
+              "new_word_id": 672,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "control."
+            },
+            {
+              "old_word_id": 682,
+              "new_word_id": 673,
+              "old_line": 54,
+              "new_line": 58,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 682,
+              "new_word_id": 673,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 683,
+              "new_word_id": 674,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "Evaluate"
+            },
+            {
+              "old_word_id": 684,
+              "new_word_id": 675,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 685,
+              "new_word_id": 676,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "appropriateness"
+            },
+            {
+              "old_word_id": 686,
+              "new_word_id": 677,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 687,
+              "new_word_id": 678,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "accounting"
+            },
+            {
+              "old_word_id": 688,
+              "new_word_id": 679,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "policies"
+            },
+            {
+              "old_word_id": 689,
+              "new_word_id": 680,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "used"
+            },
+            {
+              "old_word_id": 690,
+              "new_word_id": 681,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 691,
+              "new_word_id": 682,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 692,
+              "new_word_id": 683,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "preparation"
+            },
+            {
+              "old_word_id": 693,
+              "new_word_id": 684,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 694,
+              "new_word_id": 685,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 695,
+              "new_word_id": 686,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 696,
+              "new_word_id": 687,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 697,
+              "new_word_id": 688,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 698,
+              "new_word_id": 689,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 699,
+              "new_word_id": 690,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "reasonableness"
+            },
+            {
+              "old_word_id": 700,
+              "new_word_id": 691,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 701,
+              "new_word_id": 692,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "accounting"
+            },
+            {
+              "old_word_id": 702,
+              "new_word_id": 693,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "estimates"
+            },
+            {
+              "old_word_id": 703,
+              "new_word_id": 694,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 704,
+              "new_word_id": 695,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "related"
+            },
+            {
+              "old_word_id": 705,
+              "new_word_id": 696,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "disclosures"
+            },
+            {
+              "old_word_id": 706,
+              "new_word_id": 697,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "made"
+            },
+            {
+              "old_word_id": 707,
+              "new_word_id": 698,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "by"
+            },
+            {
+              "old_word_id": 708,
+              "new_word_id": 699,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "management."
+            },
+            {
+              "old_word_id": 709,
+              "new_word_id": 700,
+              "old_line": 55,
+              "new_line": 59,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 709,
+              "new_word_id": 700,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "-"
+            },
+            {
+              "old_word_id": 710,
+              "new_word_id": 701,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "Conclude"
+            },
+            {
+              "old_word_id": 711,
+              "new_word_id": 702,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "on"
+            },
+            {
+              "old_word_id": 712,
+              "new_word_id": 703,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 713,
+              "new_word_id": 704,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "appropriateness"
+            },
+            {
+              "old_word_id": 714,
+              "new_word_id": 705,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 715,
+              "new_word_id": 706,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "management’s"
+            },
+            {
+              "old_word_id": 716,
+              "new_word_id": 707,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "use"
+            },
+            {
+              "old_word_id": 717,
+              "new_word_id": 708,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 718,
+              "new_word_id": 709,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 719,
+              "new_word_id": 710,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "going"
+            },
+            {
+              "old_word_id": 720,
+              "new_word_id": 711,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "concern"
+            },
+            {
+              "old_word_id": 721,
+              "new_word_id": 712,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "basis"
+            },
+            {
+              "old_word_id": 722,
+              "new_word_id": 713,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 723,
+              "new_word_id": 714,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "accounting"
+            },
+            {
+              "old_word_id": 724,
+              "new_word_id": 715,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "and,"
+            },
+            {
+              "old_word_id": 725,
+              "new_word_id": 716,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "based"
+            },
+            {
+              "old_word_id": 726,
+              "new_word_id": 717,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "on"
+            },
+            {
+              "old_word_id": 727,
+              "new_word_id": 718,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 728,
+              "new_word_id": 719,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "audit"
+            },
+            {
+              "old_word_id": 729,
+              "new_word_id": 720,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "evidence"
+            },
+            {
+              "old_word_id": 730,
+              "new_word_id": 721,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "obtained,"
+            },
+            {
+              "old_word_id": 731,
+              "new_word_id": 722,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "whether"
+            },
+            {
+              "old_word_id": 732,
+              "new_word_id": 723,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 733,
+              "new_word_id": 724,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 734,
+              "new_word_id": 725,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "uncertainty"
+            },
+            {
+              "old_word_id": 735,
+              "new_word_id": 726,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "exists"
+            },
+            {
+              "old_word_id": 736,
+              "new_word_id": 727,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "related"
+            },
+            {
+              "old_word_id": 737,
+              "new_word_id": 728,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 738,
+              "new_word_id": 729,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "events"
+            },
+            {
+              "old_word_id": 739,
+              "new_word_id": 730,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "or"
+            },
+            {
+              "old_word_id": 740,
+              "new_word_id": 731,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "conditions"
+            },
+            {
+              "old_word_id": 741,
+              "new_word_id": 732,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "that"
+            },
+            {
+              "old_word_id": 742,
+              "new_word_id": 733,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "may"
+            },
+            {
+              "old_word_id": 743,
+              "new_word_id": 734,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "cast"
+            },
+            {
+              "old_word_id": 744,
+              "new_word_id": 735,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "significant"
+            },
+            {
+              "old_word_id": 745,
+              "new_word_id": 736,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "doubt"
+            },
+            {
+              "old_word_id": 746,
+              "new_word_id": 737,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "on"
+            },
+            {
+              "old_word_id": 747,
+              "new_word_id": 738,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 748,
+              "new_word_id": 739,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "Company’s"
+            },
+            {
+              "old_word_id": 749,
+              "new_word_id": 740,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "ability"
+            },
+            {
+              "old_word_id": 750,
+              "new_word_id": 741,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "to"
+            },
+            {
+              "old_word_id": 751,
+              "new_word_id": 742,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "continue"
+            },
+            {
+              "old_word_id": 752,
+              "new_word_id": 743,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 753,
+              "new_word_id": 744,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "a"
+            },
+            {
+              "old_word_id": 754,
+              "new_word_id": 745,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "going"
+            },
+            {
+              "old_word_id": 755,
+              "new_word_id": 746,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "concern."
+            },
+            {
+              "old_word_id": 756,
+              "new_word_id": 747,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "If"
+            },
+            {
+              "old_word_id": 757,
+              "new_word_id": 748,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "we"
+            },
+            {
+              "old_word_id": 758,
+              "new_word_id": 749,
+              "old_line": 56,
+              "new_line": 60,
+              "segment_id": null,
+              "text": "conclude"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          53,
+          54,
+          55,
+          56,
+          57
+        ],
+        "new_lines": [
+          57,
+          58,
+          59,
+          60,
+          61
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T11:53:22.934605+00:00",
+    "updated_at": "2026-06-10T11:53:22.934605+00:00"
+  }
+]

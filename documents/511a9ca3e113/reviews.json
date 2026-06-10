@@ -1,0 +1,301 @@
+[
+  {
+    "review_id": "r-c13a3517",
+    "anchor_id": "a-765f4627",
+    "doc_id": "511a9ca3e113",
+    "status": "open",
+    "created_run_id": "7cab02dcc26e",
+    "is_floating": false,
+    "text": "December 31, 2024 and 2023 (With Independent Auditors’",
+    "comments": [
+      {
+        "comment_id": "c-ddfb654d",
+        "author": "user",
+        "text": "12",
+        "created_at": "2026-06-10T09:42:52.480779+00:00"
+      }
+    ],
+    "anchors": {
+      "7cab02dcc26e": {
+        "run_id": "7cab02dcc26e",
+        "side": "new",
+        "word_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "page": 1,
+        "bbox": [
+          150.60000610351562,
+          261.0599670410156,
+          312.7064514160156,
+          303.9331970214844
+        ],
+        "rect": [
+          146.27789413719847,
+          274.66682986156536,
+          243.16325259170654,
+          286.5400355545198
+        ],
+        "text": "December 31, 2024 and 2023 (With Independent Auditors’",
+        "floating": false,
+        "md_anchor": {
+          "source": "section_only",
+          "section_id": null,
+          "old_lines": [],
+          "new_lines": [],
+          "segment_ids": [],
+          "equal_refs": []
+        },
+        "section_id": null,
+        "old_lines": [],
+        "new_lines": [],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T09:42:52.480779+00:00",
+    "updated_at": "2026-06-10T09:42:52.480779+00:00"
+  },
+  {
+    "review_id": "r-163d62de",
+    "anchor_id": "a-9e7bc7f8",
+    "doc_id": "511a9ca3e113",
+    "status": "open",
+    "created_run_id": "adbab6897b33",
+    "is_floating": false,
+    "text": "Financial Position 3 Statements of Income 5 Statements of Changes in Equity 6 Statements of Cash",
+    "comments": [
+      {
+        "comment_id": "c-722c1d56",
+        "author": "user",
+        "text": "123",
+        "created_at": "2026-06-10T09:43:59.114710+00:00"
+      }
+    ],
+    "anchors": {
+      "adbab6897b33": {
+        "run_id": "adbab6897b33",
+        "side": "new",
+        "word_ids": [
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38
+        ],
+        "old_word_ids": [],
+        "new_word_ids": [
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38
+        ],
+        "page": 2,
+        "bbox": [
+          62.750091552734375,
+          160.06271362304688,
+          518.1712036132812,
+          246.59524536132812
+        ],
+        "rect": [
+          122.23283792687295,
+          159.23858642866875,
+          132.63563264405363,
+          229.4574507696383
+        ],
+        "text": "Financial Position 3 Statements of Income 5 Statements of Changes in Equity 6 Statements of Cash",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            17
+          ],
+          "new_lines": [
+            17
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 23,
+              "new_word_id": 23,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Financial"
+            },
+            {
+              "old_word_id": 24,
+              "new_word_id": 24,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Position"
+            },
+            {
+              "old_word_id": 25,
+              "new_word_id": 25,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "3"
+            },
+            {
+              "old_word_id": 26,
+              "new_word_id": 26,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Statements"
+            },
+            {
+              "old_word_id": 27,
+              "new_word_id": 27,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 28,
+              "new_word_id": 28,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Income"
+            },
+            {
+              "old_word_id": 29,
+              "new_word_id": 29,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "5"
+            },
+            {
+              "old_word_id": 30,
+              "new_word_id": 30,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Statements"
+            },
+            {
+              "old_word_id": 31,
+              "new_word_id": 31,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 32,
+              "new_word_id": 32,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Changes"
+            },
+            {
+              "old_word_id": 33,
+              "new_word_id": 33,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 34,
+              "new_word_id": 34,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Equity"
+            },
+            {
+              "old_word_id": 35,
+              "new_word_id": 35,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "6"
+            },
+            {
+              "old_word_id": 36,
+              "new_word_id": 36,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Statements"
+            },
+            {
+              "old_word_id": 37,
+              "new_word_id": 37,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 38,
+              "new_word_id": 38,
+              "old_line": 17,
+              "new_line": 17,
+              "segment_id": null,
+              "text": "Cash"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          17
+        ],
+        "new_lines": [
+          17
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T09:43:59.114710+00:00",
+    "updated_at": "2026-06-10T09:43:59.114710+00:00"
+  }
+]

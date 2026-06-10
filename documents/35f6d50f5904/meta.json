@@ -1,0 +1,28 @@
+{
+  "doc_id": "35f6d50f5904",
+  "title": "Report_v1",
+  "is_saved": false,
+  "created_at": "2026-06-10T09:28:17.970264+00:00",
+  "updated_at": "2026-06-10T09:29:19.862422+00:00",
+  "runs": [
+    {
+      "run_id": "78a08ea5f1c7",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-10T09:28:17.970264+00:00",
+      "filename": "Report_v1.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "30d3c967414a",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-10T09:29:07.117146+00:00",
+      "filename": "Report_v2.pdf",
+      "previous_run_id": "78a08ea5f1c7",
+      "has_diff": true,
+      "has_ai_assessment": false
+    }
+  ]
+}

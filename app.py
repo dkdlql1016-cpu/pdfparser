@@ -23,11 +23,14 @@ if importlib.util.find_spec("dotenv"):
     importlib.import_module("dotenv").load_dotenv(BASE_DIR / ".env")
 RUNS_DIR = BASE_DIR / "runs"
 DOCUMENTS_DIR = BASE_DIR / "documents"
+INPUT_DIR = BASE_DIR / "input"
+DEFAULT_FILE_MANAGER_INPUTS = ("Report_v1.pdf", "Report_v2.pdf")
 RUNS_DIR.mkdir(exist_ok=True)
 DOCUMENTS_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 JOBS = {}
+DEFAULT_FILE_MANAGER_SEEDED = False
 
 
 # =========================================================
@@ -1218,6 +1221,367 @@ def save_document_meta(meta):
     write_json(document_meta_path(meta["doc_id"]), meta)
 
 
+def create_seed_document_from_pdf(pdf_path: Path, *, seed_key: str):
+    doc_id = uuid.uuid4().hex[:12]
+    run_id = uuid.uuid4().hex[:12]
+    run_dir = document_run_dir(doc_id, run_id)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    report_pdf = run_dir / "report.pdf"
+    shutil.copy2(pdf_path, report_pdf)
+    created_at = utc_now()
+    meta = {
+        "doc_id": doc_id,
+        "title": pdf_path.stem,
+        "seed_key": seed_key,
+        "is_saved": True,
+        "created_at": created_at,
+        "updated_at": created_at,
+        "runs": [{
+            "run_id": run_id,
+            "kind": "initial",
+            "status": "ready",
+            "created_at": created_at,
+            "filename": pdf_path.name,
+            "has_diff": False,
+            "has_ai_assessment": False,
+        }],
+    }
+    save_document_meta(meta)
+    # Seed entries should be lightweight so file-manager opens instantly.
+    # Full parsing/diff assets are generated only after the user runs Analysis/Compare.
+
+
+def ensure_default_file_manager_documents():
+    global DEFAULT_FILE_MANAGER_SEEDED
+    if DEFAULT_FILE_MANAGER_SEEDED:
+        return
+    if not INPUT_DIR.exists():
+        DEFAULT_FILE_MANAGER_SEEDED = True
+        return
+    existing_seed_keys = set()
+    existing_filenames = set()
+    for candidate in DOCUMENTS_DIR.iterdir():
+        if not candidate.is_dir():
+            continue
+        meta = read_json(candidate / "meta.json", None) or {}
+        key = str(meta.get("seed_key") or "").strip()
+        if key:
+            existing_seed_keys.add(key)
+        runs = meta.get("runs", []) or []
+        if runs:
+            filename = str((runs[-1] or {}).get("filename") or "").strip()
+            if filename:
+                existing_filenames.add(filename)
+    for filename in DEFAULT_FILE_MANAGER_INPUTS:
+        if filename in existing_seed_keys or filename in existing_filenames:
+            continue
+        src = INPUT_DIR / filename
+        if not src.exists():
+            continue
+        create_seed_document_from_pdf(src, seed_key=filename)
+    DEFAULT_FILE_MANAGER_SEEDED = True
+
+
+def normalize_document_title(value: str):
+    return re.sub(r"\s+", " ", str(value or "").strip())
+
+
+def public_report_filename(meta, run_meta):
+    filename = str((run_meta or {}).get("filename") or "").strip()
+    if filename.lower() in ("report.pdf", "prev_report.pdf", "old.pdf", "new.pdf", ""):
+        title = normalize_document_title((meta or {}).get("title") or "")
+        if title:
+            return title if title.lower().endswith(".pdf") else f"{title}.pdf"
+        return "report.pdf"
+    return filename
+
+
+def list_documents_for_manager():
+    raw_items = []
+    if not DOCUMENTS_DIR.exists():
+        return raw_items
+    for candidate in DOCUMENTS_DIR.iterdir():
+        if not candidate.is_dir():
+            continue
+        meta = read_json(candidate / "meta.json", None)
+        if not meta:
+            continue
+        # Backward compatibility: older documents may not have is_saved.
+        # Treat missing flag as saved so existing user data remains visible.
+        saved_flag = meta.get("is_saved")
+        is_saved = True if saved_flag is None else bool(saved_flag)
+        if not is_saved and not bool(meta.get("seed_key")):
+            continue
+        runs = meta.get("runs", []) or []
+        latest = runs[-1] if runs else {}
+        public_filename = public_report_filename(meta, latest)
+        raw_items.append({
+            "doc_id": meta.get("doc_id") or candidate.name,
+            "title": meta.get("title") or (latest.get("filename") or "Workspace"),
+            "name": public_filename,
+            "created_at": meta.get("created_at"),
+            "updated_at": meta.get("updated_at"),
+            "run_count": len(runs),
+            "latest_run_id": latest.get("run_id"),
+            "latest_filename": public_filename,
+            "latest_status": latest.get("status") or "unknown",
+            "_explicit_saved": bool(saved_flag is True),
+            "_seed": bool(meta.get("seed_key")),
+        })
+    # Deduplicate noisy legacy entries that share identical visible name/filename.
+    # Keep the most likely canonical entry (explicitly saved > seeded > newest).
+    dedup = {}
+    for item in raw_items:
+        key = (
+            str(item.get("title") or "").strip().lower(),
+            str(item.get("latest_filename") or "").strip().lower(),
+        )
+        prev = dedup.get(key)
+        if not prev:
+            dedup[key] = item
+            continue
+        prev_rank = (1 if prev.get("_explicit_saved") else 0, 1 if prev.get("_seed") else 0, prev.get("updated_at") or prev.get("created_at") or "")
+        cur_rank = (1 if item.get("_explicit_saved") else 0, 1 if item.get("_seed") else 0, item.get("updated_at") or item.get("created_at") or "")
+        if cur_rank > prev_rank:
+            dedup[key] = item
+    items = []
+    for item in dedup.values():
+        item.pop("_explicit_saved", None)
+        item.pop("_seed", None)
+        items.append(item)
+    items.sort(key=lambda x: x.get("updated_at") or x.get("created_at") or "", reverse=True)
+    return items
+
+def is_saved_or_seed_meta(meta):
+    if not meta:
+        return False
+    saved_flag = meta.get("is_saved")
+    is_saved = True if saved_flag is None else bool(saved_flag)
+    return is_saved or bool(meta.get("seed_key"))
+
+
+def find_document_id_by_title(title: str, *, exclude_doc_id: str = None):
+    wanted = normalize_document_title(title).casefold()
+    if not wanted or not DOCUMENTS_DIR.exists():
+        return None
+    for candidate in DOCUMENTS_DIR.iterdir():
+        if not candidate.is_dir():
+            continue
+        meta = read_json(candidate / "meta.json", None)
+        if not is_saved_or_seed_meta(meta):
+            continue
+        doc_id = str(meta.get("doc_id") or candidate.name)
+        if exclude_doc_id and doc_id == exclude_doc_id:
+            continue
+        current_title = normalize_document_title(meta.get("title") or "").casefold()
+        if current_title and current_title == wanted:
+            return doc_id
+    return None
+
+
+def document_title_exists(title: str, *, exclude_doc_id: str = None):
+    return find_document_id_by_title(title, exclude_doc_id=exclude_doc_id) is not None
+
+
+def overwrite_saved_document(source_doc_id, source_run_id, target_doc_id):
+    source_dir = document_dir(source_doc_id)
+    target_dir = document_dir(target_doc_id)
+    if not source_dir.exists():
+        return {"error": "source document not found"}, 404
+    target_meta = load_document_meta(target_doc_id)
+    if not target_meta:
+        return {"error": "target document not found"}, 404
+    tmp_dir = DOCUMENTS_DIR / f".tmp_overwrite_{target_doc_id}_{uuid.uuid4().hex[:8]}"
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+    shutil.copytree(source_dir, tmp_dir)
+    copied_meta = read_json(tmp_dir / "meta.json", {}) or {}
+    copied_meta["doc_id"] = target_doc_id
+    copied_meta["is_saved"] = True
+    copied_meta["title"] = target_meta.get("title") or copied_meta.get("title") or "Workspace"
+    runs = copied_meta.get("runs", []) or []
+    if source_run_id and runs:
+        idx = next((i for i, r in enumerate(runs) if r.get("run_id") == source_run_id), -1)
+        if idx >= 0:
+            selected = runs.pop(idx)
+            runs.append(selected)
+            copied_meta["runs"] = runs
+    copied_meta["updated_at"] = utc_now()
+    write_json(tmp_dir / "meta.json", copied_meta)
+    reviews = read_json(tmp_dir / "reviews.json", []) or []
+    for review in reviews:
+        review["doc_id"] = target_doc_id
+    write_json(tmp_dir / "reviews.json", reviews)
+    if target_dir.exists():
+        shutil.rmtree(target_dir, ignore_errors=True)
+    tmp_dir.rename(target_dir)
+    latest_run_id = (copied_meta.get("runs") or [{}])[-1].get("run_id")
+    return {
+        "saved": True,
+        "overwritten": True,
+        "doc_id": target_doc_id,
+        "run_id": source_run_id or latest_run_id,
+        "title": copied_meta.get("title"),
+    }, 200
+
+
+def run_side_pdf_info(doc_id, run_id, run_dir: Path, side: str):
+    meta = load_document_meta(doc_id) or {}
+    run_meta = run_meta_for(meta, run_id) or {}
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    if side in ("old", "prev", "previous"):
+        pdf_path = run_dir / "prev_report.pdf"
+        prev_run_id = run_meta.get("previous_run_id")
+        prev_meta = run_meta_for(meta, prev_run_id) if prev_run_id else None
+        filename = (prev_meta or {}).get("filename") or viewer_data.get("old_filename") or "prev_report.pdf"
+    elif side in ("new", "report", "current"):
+        pdf_path = run_dir / "report.pdf"
+        filename = run_meta.get("filename") or viewer_data.get("new_filename") or viewer_data.get("filename") or "report.pdf"
+    else:
+        return None, None
+    return pdf_path, filename
+
+
+def canonical_review_from_anchor(doc_id, run_id, anchor, *, status="open", comments=None, text="", source_review_id=None, source_side=None, created_at=None):
+    """Build a stored review in the canonical format that document_reviews_for_run can project."""
+    now = utc_now()
+    return {
+        "review_id": "r-" + uuid.uuid4().hex[:8],
+        "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "doc_id": doc_id,
+        "status": status or "open",
+        "created_run_id": run_id,
+        "is_floating": False,
+        "text": anchor.get("text", "") or text,
+        "comments": [dict(c) for c in (comments or []) if c.get("text")],
+        "anchors": {run_id: anchor},
+        "source_review_id": source_review_id,
+        "source_side": source_side,
+        "created_at": created_at or now,
+        "updated_at": now,
+    }
+
+
+def reviews_for_single_file_side(source_doc_id, source_run_id, side, target_doc_id, file_run_id):
+    """Copy the reviews shown on one side of a run into a saved single-file document.
+
+    The saved document holds the PDF of that side as its 'new' report, so every
+    review is re-anchored as a canonical 'new'-side anchor keyed by file_run_id.
+    Word indices stay valid because word extraction is deterministic per PDF.
+    """
+    side_norm = "old" if side in ("old", "prev", "previous") else "new"
+    source_run_dir = document_run_dir(source_doc_id, source_run_id)
+    out = []
+    seen_source_ids = set()
+    for proj in document_reviews_for_run(source_doc_id, source_run_id):
+        ids = list((proj.get("old_word_ids") if side_norm == "old" else proj.get("new_word_ids")) or [])
+        if not ids:
+            continue
+        source_review_id = proj.get("review_id")
+        if source_review_id in seen_source_ids:
+            continue
+        anchor = anchor_for_selection(source_run_dir, file_run_id, side_norm, ids, (proj.get("selection") or {}).get("rect"))
+        if not anchor:
+            continue
+        seen_source_ids.add(source_review_id)
+        anchor["side"] = "new"
+        anchor["old_word_ids"] = []
+        anchor["new_word_ids"] = list(anchor.get("word_ids") or ids)
+        out.append(canonical_review_from_anchor(
+            target_doc_id,
+            file_run_id,
+            anchor,
+            status=proj.get("status", "open"),
+            comments=proj.get("comments"),
+            text=proj.get("text", ""),
+            source_review_id=source_review_id,
+            source_side=side_norm,
+            created_at=proj.get("created_at"),
+        ))
+    return out
+
+
+def write_single_file_document(doc_id, pdf_path: Path, filename: str, title: str, *, source_doc_id=None, source_run_id=None, source_side="new", replace=False):
+    doc_path = document_dir(doc_id)
+    run_id = uuid.uuid4().hex[:12]
+    reviews = reviews_for_single_file_side(source_doc_id, source_run_id, source_side, doc_id, run_id) if source_doc_id and source_run_id else []
+    if replace and doc_path.exists():
+        shutil.rmtree(doc_path, ignore_errors=True)
+    run_dir = document_run_dir(doc_id, run_id)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(pdf_path, run_dir / "report.pdf")
+    now = utc_now()
+    meta = {
+        "doc_id": doc_id,
+        "title": normalize_document_title(title)[:120] or Path(filename).stem or "Workspace",
+        "is_saved": True,
+        "created_at": now,
+        "updated_at": now,
+        "source_doc_id": source_doc_id,
+        "source_run_id": source_run_id,
+        "runs": [{
+            "run_id": run_id,
+            "kind": "file",
+            "status": "ready",
+            "created_at": now,
+            "filename": filename or "report.pdf",
+            "has_diff": False,
+            "has_ai_assessment": False,
+        }],
+    }
+    save_document_meta(meta)
+    if reviews:
+        save_document_reviews(doc_id, reviews)
+    return meta, run_id
+
+
+def save_run_side_file(doc_id, run_id, side, *, target_doc_id=None, title=None, overwrite_existing=False):
+    run_dir = document_run_dir(doc_id, run_id)
+    pdf_path, filename = run_side_pdf_info(doc_id, run_id, run_dir, side)
+    if not pdf_path or not pdf_path.exists():
+        return {"error": "report file not found for side"}, 404
+
+    # Save (without an explicit target) onto an existing name overwrites that document.
+    if not target_doc_id and overwrite_existing and title:
+        target_doc_id = find_document_id_by_title(title)
+
+    if target_doc_id:
+        target_meta = load_document_meta(target_doc_id)
+        if not target_meta:
+            return {"error": "target document not found"}, 404
+        target_runs = target_meta.get("runs", []) or []
+        target_latest = target_runs[-1] if target_runs else {}
+        save_title = target_meta.get("title") or title or Path(filename).stem
+        save_filename = public_report_filename(target_meta, target_latest) or filename
+        meta, new_run_id = write_single_file_document(
+            target_doc_id,
+            pdf_path,
+            save_filename,
+            save_title,
+            source_doc_id=doc_id,
+            source_run_id=run_id,
+            source_side=side,
+            replace=True,
+        )
+        return {"saved": True, "overwritten": True, "doc_id": target_doc_id, "run_id": new_run_id, "title": meta.get("title")}, 200
+
+    save_title = normalize_document_title(title or Path(filename).stem)
+    if document_title_exists(save_title):
+        return {"error": "duplicate title"}, 409
+    save_filename = save_title if save_title.lower().endswith(".pdf") else f"{save_title}.pdf"
+    new_doc_id = uuid.uuid4().hex[:12]
+    meta, new_run_id = write_single_file_document(
+        new_doc_id,
+        pdf_path,
+        save_filename,
+        save_title,
+        source_doc_id=doc_id,
+        source_run_id=run_id,
+        source_side=side,
+    )
+    return {"saved": True, "created": True, "doc_id": new_doc_id, "run_id": new_run_id, "title": meta.get("title")}, 201
+
+
 def get_uploaded_pdf(field_names=("pdf", "report_pdf", "file")):
     for name in field_names:
         if name in request.files:
@@ -1961,7 +2325,7 @@ SNAPSHOT_LIMIT = 10
 
 def snapshot_file_names():
     return [
-        "viewer_data.json", "result.json", "ai_assessment.json", "reviews.json",
+        "viewer_data.json", "result.json", "ai_assessment.json", "change_ai_assessment.json", "reviews.json",
         "report.pdf", "report.md", "words.json", "chars.json", "section_map.json",
         "prev_report.pdf", "prev_report.md", "prev_words.json", "prev_chars.json", "prev_section_map.json",
         "new.pdf", "new.md", "new_words.json", "new_chars.json", "old.pdf", "old.md", "old_words.json", "old_chars.json",
@@ -2053,6 +2417,7 @@ def update_run_meta(meta, run_id, **patch):
 AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL") or "claude-3-5-sonnet-latest"
 AI_CONTEXT_CHARS = 9000
 AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "ai_assessment_system.md"
+CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "change_ai_assessment_system.md"
 
 
 def ai_provider_for_model(model_name):
@@ -2074,6 +2439,10 @@ def ai_assessment_path(doc_id, run_id):
     return document_run_dir(doc_id, run_id) / "ai_assessment.json"
 
 
+def change_ai_assessment_path(doc_id, run_id):
+    return document_run_dir(doc_id, run_id) / "change_ai_assessment.json"
+
+
 def load_ai_assessment(doc_id, run_id):
     return read_json(ai_assessment_path(doc_id, run_id), {"doc_id": doc_id, "run_id": run_id, "items": []}) or {"doc_id": doc_id, "run_id": run_id, "items": []}
 
@@ -2085,12 +2454,35 @@ def save_ai_assessment(doc_id, run_id, assessment):
     write_json(ai_assessment_path(doc_id, run_id), assessment)
 
 
+def load_change_ai_assessment(doc_id, run_id):
+    return read_json(
+        change_ai_assessment_path(doc_id, run_id),
+        {"doc_id": doc_id, "run_id": run_id, "items": []},
+    ) or {"doc_id": doc_id, "run_id": run_id, "items": []}
+
+
+def save_change_ai_assessment(doc_id, run_id, assessment):
+    assessment["doc_id"] = doc_id
+    assessment["run_id"] = run_id
+    assessment["updated_at"] = utc_now()
+    write_json(change_ai_assessment_path(doc_id, run_id), assessment)
+
+
 def load_ai_system_prompt():
     if AI_ASSESSMENT_SYSTEM_PROMPT_PATH.exists():
         return AI_ASSESSMENT_SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").strip()
     return (
         "You are an expert financial report review assistant. "
         "Use the available markdown tools before calling submit_verdict."
+    )
+
+
+def load_change_ai_system_prompt():
+    if CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH.exists():
+        return CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").strip()
+    return (
+        "You are an expert financial report risk reviewer focused on change bundles. "
+        "Use the available markdown tools before calling submit_change_review or submit_change_reviews."
     )
 
 
@@ -2402,6 +2794,250 @@ def normalize_batch_assessment_payload(data):
     return out
 
 
+def review_threads_for_prompt_from_projection(review):
+    comments = []
+    for idx, comment in enumerate(review.get("comments", []), start=1):
+        text = str(comment.get("text", "")).strip()
+        if not text:
+            continue
+        comments.append({
+            "index": idx,
+            "author": comment.get("author", "user"),
+            "created_at": comment.get("created_at", ""),
+            "text": text,
+        })
+    if not comments and review.get("comment"):
+        comments.append({"index": 1, "author": "user", "created_at": review.get("created_at", ""), "text": review.get("comment", "")})
+    return comments
+
+
+def change_by_id(viewer_data, change_id):
+    wanted = int(change_id)
+    for change in (viewer_data or {}).get("changes", []) or []:
+        if int(change.get("id", -1)) == wanted:
+            return change
+    return None
+
+
+def section_id_for_change_anchor(run_dir, section_map, change, side):
+    anchor = (change or {}).get("old_anchor" if side == "old" else "new_anchor") or {}
+    inferred = infer_section_id_for_anchor(section_map, anchor, run_dir / ("prev_report.md" if side == "old" else "report.md"))
+    if inferred:
+        return inferred
+    page = (change or {}).get("old_page" if side == "old" else "new_page")
+    if not page:
+        return None
+    for section in section_entries(section_map):
+        start = section.get("page_start")
+        end = section.get("page_end") or start
+        if start and end and int(start) <= int(page) <= int(end):
+            return section.get("section_id")
+    return None
+
+
+def reviews_for_sections(doc_id, run_id, old_section_id=None, current_section_id=None):
+    out = []
+    seen = set()
+    for review in document_reviews_for_run(doc_id, run_id):
+        rid = review.get("review_id")
+        if not rid or rid in seen:
+            continue
+        side = "old" if (review.get("old_word_ids") or []) else "new"
+        sec = review.get("section_id")
+        if side == "old" and old_section_id and sec != old_section_id:
+            continue
+        if side == "new" and current_section_id and sec != current_section_id:
+            continue
+        if side == "old" and not old_section_id:
+            continue
+        if side == "new" and not current_section_id:
+            continue
+        seen.add(rid)
+        out.append({
+            "review_id": rid,
+            "side": side,
+            "status": review.get("status", "open"),
+            "section_id": sec,
+            "text": review.get("text", ""),
+            "review_thread": review_threads_for_prompt_from_projection(review),
+        })
+    return out[:30]
+
+
+def build_change_assessment_context_pack(doc_id, run_id, run_dir, change, prev_section_map, current_section_map):
+    old_section_id = section_id_for_change_anchor(run_dir, prev_section_map, change, "old")
+    current_section_id = section_id_for_change_anchor(run_dir, current_section_map, change, "new")
+    return {
+        "change_id": change.get("id"),
+        "change_bundle": {
+            "removed_text": trim_for_prompt(change.get("old_text", ""), 3500),
+            "added_text": trim_for_prompt(change.get("new_text", ""), 3500),
+            "old_page": change.get("old_page"),
+            "new_page": change.get("new_page"),
+            "removed_count": len(change.get("old_highlight_ids") or []),
+            "added_count": len(change.get("new_highlight_ids") or []),
+        },
+        "recognized_report_section": {
+            "previous_section_id": old_section_id,
+            "current_section_id": current_section_id,
+        },
+        "matching_section_reviews": reviews_for_sections(doc_id, run_id, old_section_id, current_section_id),
+    }
+
+
+def build_change_assessment_prompt(context_pack, available_sections):
+    return (
+        "Assess whether this change introduces additional risk in the updated report.\n"
+        "If there is meaningful risk, provide a practical recommended review comment.\n"
+        "If there is no meaningful risk, still provide short reasoning.\n\n"
+        "Input package:\n"
+        f"{json.dumps(context_pack, ensure_ascii=False, indent=2)}\n\n"
+        "Available markdown files for exceptional extra lookup only: previous, current.\n"
+        f"Available sections:\n{json.dumps(available_sections, ensure_ascii=False)[:12000]}\n"
+    )
+
+
+def build_change_batch_assessment_prompt(context_packs, available_sections):
+    return (
+        "Assess each change bundle and decide if it introduces additional risk in the updated report.\n"
+        "Return one result per change_id using submit_change_reviews.\n\n"
+        "Change bundles:\n"
+        f"{json.dumps(context_packs, ensure_ascii=False, indent=2)}\n\n"
+        "Available markdown files for exceptional extra lookup only: previous, current.\n"
+        f"Available sections:\n{json.dumps(available_sections, ensure_ascii=False)[:12000]}\n"
+    )
+
+
+def normalize_change_verdict(value):
+    raw = str(value or "").strip().lower()
+    # Backward compatibility for previously stored/generated labels.
+    legacy = {
+        "risk": "medium",
+        "no_risk": "low",
+        "unclear": "low",
+        "unknown": "low",
+    }
+    normalized = legacy.get(raw, raw)
+    if normalized not in ("high", "medium", "low"):
+        raise ValueError("invalid verdict")
+    return normalized
+
+
+def normalize_change_assessment_payload(data):
+    verdict = normalize_change_verdict((data or {}).get("verdict", ""))
+    recommended_comment = str(data.get("recommended_comment", ""))[:2200]
+    if verdict == "low":
+        # Low-risk items only keep analysis output, no suggested review text.
+        recommended_comment = ""
+    return {
+        "verdict": verdict,
+        "confidence": data.get("confidence"),
+        "reasoning": str(data.get("reasoning", ""))[:2200],
+        "recommended_comment": recommended_comment,
+        "evidence_old": str(data.get("evidence_old", ""))[:1200],
+        "evidence_new": str(data.get("evidence_new", ""))[:1200],
+    }
+
+
+def enforce_change_verdict_policy(item):
+    """Apply strict policy so High appears only for truly global, critical errors."""
+    verdict = normalize_change_verdict(item.get("verdict", "low"))
+    reasoning = str(item.get("reasoning", "") or "")
+    evidence_old = str(item.get("evidence_old", "") or "")
+    evidence_new = str(item.get("evidence_new", "") or "")
+    text = f"{reasoning}\n{evidence_old}\n{evidence_new}".lower()
+
+    global_markers = (
+        "entire report", "report-wide", "across all sections", "all sections", "company-wide", "global",
+        "전체 보고서", "전범위", "모든 섹션",
+    )
+    clear_error_markers = (
+        "must fix", "critical", "material misstatement", "wrong legal entity", "definitely incorrect",
+        "반드시 수정", "중대한", "명백히 잘못",
+    )
+    uncertainty_markers = (
+        "might", "may", "possibly", "unclear", "uncertain",
+        "가능성", "확인 필요", "불명확", "애매",
+    )
+    has_global = any(m in text for m in global_markers)
+    has_clear = any(m in text for m in clear_error_markers)
+    has_uncertain = any(m in text for m in uncertainty_markers)
+
+    # Name-only replacement is usually low unless there is explicit, broad misstatement evidence.
+    old_text = str(item.get("old_text", "") or "").strip()
+    new_text = str(item.get("new_text", "") or "").strip()
+    old_norm = re.sub(r"[^a-z0-9가-힣]", "", old_text.lower())
+    new_norm = re.sub(r"[^a-z0-9가-힣]", "", new_text.lower())
+    name_like = bool(old_norm and new_norm and old_norm != new_norm and old_norm.isalpha() and new_norm.isalpha())
+
+    # High: only if both globally impactful and clearly wrong.
+    if verdict == "high" and not (has_global and has_clear):
+        verdict = "medium"
+    # Medium: should still be clearly wrong (but scoped); otherwise low.
+    if verdict == "medium" and (has_uncertain and not has_clear):
+        verdict = "low"
+    if name_like and not (has_global and has_clear):
+        verdict = "low"
+
+    item["verdict"] = verdict
+    if verdict == "low":
+        item["recommended_comment"] = ""
+    return item
+
+
+def normalized_change_signature(item):
+    old_text = re.sub(r"\s+", " ", str(item.get("old_text", "") or "").strip().lower())
+    new_text = re.sub(r"\s+", " ", str(item.get("new_text", "") or "").strip().lower())
+    if not old_text and not new_text:
+        return None
+    return f"{old_text} -> {new_text}"
+
+
+def harmonize_change_items(items):
+    """Keep same replacement patterns at a consistent risk level.
+
+    Use majority vote for stability; in ties choose lower risk.
+    """
+    rank = {"low": 0, "medium": 1, "high": 2}
+    groups = {}
+    for item in items or []:
+        sig = normalized_change_signature(item)
+        if not sig:
+            continue
+        groups.setdefault(sig, []).append(item)
+    for group_items in groups.values():
+        if len(group_items) < 2:
+            continue
+        counts = {}
+        for it in group_items:
+            verdict = str(it.get("verdict", "low"))
+            counts[verdict] = counts.get(verdict, 0) + 1
+        # Sort by frequency(desc), then risk rank(asc) to prefer safer level on ties.
+        target = sorted(counts.keys(), key=lambda v: (-counts[v], rank.get(v, 0)))[0]
+        for it in group_items:
+            it["verdict"] = target
+            if target == "low":
+                it["recommended_comment"] = ""
+    return items
+
+
+def normalize_change_batch_assessment_payload(data):
+    items = data.get("items") or []
+    if not isinstance(items, list):
+        raise ValueError("items must be a list")
+    out = {}
+    for raw in items:
+        change_id = str((raw or {}).get("change_id", "")).strip()
+        if not change_id:
+            continue
+        payload = normalize_change_assessment_payload(raw or {})
+        payload["change_id"] = int(change_id)
+        out[payload["change_id"]] = payload
+    if not out:
+        raise ValueError("no verdict items returned")
+    return out
+
+
 def search_markdown_context(md_path: Path, query, limit=4):
     if not md_path.exists() or not query:
         return []
@@ -2497,6 +3133,84 @@ def assessment_tool_definitions(batch=False):
     ]
 
 
+def change_assessment_tool_definitions(batch=False):
+    submit_tool = {
+        "name": "submit_change_review",
+        "description": "Submit one structured change-risk assessment and recommended review comment.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "verdict": {"type": "string", "enum": ["high", "medium", "low"]},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                "reasoning": {"type": "string"},
+                "recommended_comment": {"type": "string"},
+                "evidence_old": {"type": "string"},
+                "evidence_new": {"type": "string"},
+            },
+            "required": ["verdict", "confidence", "reasoning", "recommended_comment", "evidence_old", "evidence_new"],
+            "additionalProperties": False,
+        },
+    }
+    if batch:
+        submit_tool = {
+            "name": "submit_change_reviews",
+            "description": "Submit one structured change-risk assessment for each change_id in the batch.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "change_id": {"type": "integer"},
+                                "verdict": {"type": "string", "enum": ["high", "medium", "low"]},
+                                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                                "reasoning": {"type": "string"},
+                                "recommended_comment": {"type": "string"},
+                                "evidence_old": {"type": "string"},
+                                "evidence_new": {"type": "string"},
+                            },
+                            "required": ["change_id", "verdict", "confidence", "reasoning", "recommended_comment", "evidence_old", "evidence_new"],
+                            "additionalProperties": False,
+                        },
+                    }
+                },
+                "required": ["items"],
+                "additionalProperties": False,
+            },
+        }
+    return [
+        {
+            "name": "read_section",
+            "description": "Read one markdown section from the previous or current report.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "section_id": {"type": "string"},
+                },
+                "required": ["file", "section_id"],
+                "additionalProperties": False,
+            },
+        },
+        {
+            "name": "search_markdown",
+            "description": "Search a markdown report and return small context windows around matches.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "query": {"type": "string"},
+                },
+                "required": ["file", "query"],
+                "additionalProperties": False,
+            },
+        },
+        submit_tool,
+    ]
+
+
 def content_block_to_dict(block):
     if hasattr(block, "model_dump"):
         return block.model_dump(exclude_none=True)
@@ -2506,6 +3220,20 @@ def content_block_to_dict(block):
 def openai_tool_definitions(batch=False):
     tools = []
     for tool in assessment_tool_definitions(batch=batch):
+        tools.append({
+            "type": "function",
+            "function": {
+                "name": tool.get("name"),
+                "description": tool.get("description", ""),
+                "parameters": tool.get("input_schema", {"type": "object", "properties": {}}),
+            },
+        })
+    return tools
+
+
+def openai_change_tool_definitions(batch=False):
+    tools = []
+    for tool in change_assessment_tool_definitions(batch=batch):
         tools.append({
             "type": "function",
             "function": {
@@ -2795,6 +3523,244 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context):
     raise ValueError("AI batch assessment reached the tool-call limit")
 
 
+def call_ai_change_assessment_openai(prompt, tool_context):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
+    try:
+        from openai import OpenAI
+    except Exception as e:
+        raise RuntimeError("openai package is not installed") from e
+    client = OpenAI(api_key=api_key)
+    messages = [
+        {"role": "system", "content": load_change_ai_system_prompt()},
+        {"role": "user", "content": prompt},
+    ]
+    tool_trace = []
+    for _ in range(8):
+        response = client.chat.completions.create(
+            model=AI_ASSESSMENT_MODEL,
+            temperature=0,
+            tools=openai_change_tool_definitions(batch=False),
+            messages=messages,
+        )
+        choice = response.choices[0].message
+        tool_calls = list(choice.tool_calls or [])
+        assistant_message = {"role": "assistant", "content": choice.content or ""}
+        if tool_calls:
+            assistant_message["tool_calls"] = [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {"name": call.function.name, "arguments": call.function.arguments},
+                }
+                for call in tool_calls
+            ]
+        messages.append(assistant_message)
+        if not tool_calls:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_review."})
+            continue
+        for call in tool_calls:
+            name = call.function.name
+            args = openai_tool_call_args(call.function.arguments)
+            if name == "submit_change_review":
+                payload = normalize_change_assessment_payload(args)
+                payload["tool_trace"] = tool_trace
+                return payload
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
+    raise ValueError("AI change assessment reached the tool-call limit")
+
+
+def call_ai_change_assessment_batch_openai(context_packs, available_sections, tool_context):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
+    try:
+        from openai import OpenAI
+    except Exception as e:
+        raise RuntimeError("openai package is not installed") from e
+    client = OpenAI(api_key=api_key)
+    messages = [
+        {"role": "system", "content": load_change_ai_system_prompt()},
+        {"role": "user", "content": build_change_batch_assessment_prompt(context_packs, available_sections)},
+    ]
+    tool_trace = []
+    for _ in range(8):
+        response = client.chat.completions.create(
+            model=AI_ASSESSMENT_MODEL,
+            temperature=0,
+            tools=openai_change_tool_definitions(batch=True),
+            messages=messages,
+        )
+        choice = response.choices[0].message
+        tool_calls = list(choice.tool_calls or [])
+        assistant_message = {"role": "assistant", "content": choice.content or ""}
+        if tool_calls:
+            assistant_message["tool_calls"] = [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {"name": call.function.name, "arguments": call.function.arguments},
+                }
+                for call in tool_calls
+            ]
+        messages.append(assistant_message)
+        if not tool_calls:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_reviews."})
+            continue
+        for call in tool_calls:
+            name = call.function.name
+            args = openai_tool_call_args(call.function.arguments)
+            if name == "submit_change_reviews":
+                payloads = normalize_change_batch_assessment_payload(args)
+                for payload in payloads.values():
+                    payload["tool_trace"] = tool_trace
+                return payloads
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
+    raise ValueError("AI change batch assessment reached the tool-call limit")
+
+
+def call_ai_change_assessment(prompt, tool_context):
+    if ai_provider_for_model(AI_ASSESSMENT_MODEL) == "openai":
+        return call_ai_change_assessment_openai(prompt, tool_context)
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    try:
+        from anthropic import Anthropic
+    except Exception as e:
+        raise RuntimeError("anthropic package is not installed") from e
+    client = Anthropic(api_key=api_key)
+    messages = [{"role": "user", "content": prompt}]
+    system_prompt = load_change_ai_system_prompt()
+    tool_trace = []
+    for _ in range(8):
+        msg = client.messages.create(
+            model=AI_ASSESSMENT_MODEL,
+            max_tokens=1400,
+            temperature=0,
+            system=system_prompt,
+            tools=change_assessment_tool_definitions(),
+            messages=messages,
+        )
+        messages.append({"role": "assistant", "content": [content_block_to_dict(block) for block in msg.content]})
+        tool_results = []
+        for block in msg.content:
+            if getattr(block, "type", "") != "tool_use":
+                continue
+            name = getattr(block, "name", "")
+            args = getattr(block, "input", {}) or {}
+            if name == "submit_change_review":
+                payload = normalize_change_assessment_payload(args)
+                payload["tool_trace"] = tool_trace
+                return payload
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
+        if not tool_results:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_review."})
+        else:
+            messages.append({"role": "user", "content": tool_results})
+    raise ValueError("AI change assessment reached the tool-call limit")
+
+
+def call_ai_change_assessment_batch(context_packs, available_sections, tool_context):
+    if ai_provider_for_model(AI_ASSESSMENT_MODEL) == "openai":
+        return call_ai_change_assessment_batch_openai(context_packs, available_sections, tool_context)
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set")
+    try:
+        from anthropic import Anthropic
+    except Exception as e:
+        raise RuntimeError("anthropic package is not installed") from e
+    client = Anthropic(api_key=api_key)
+    messages = [{"role": "user", "content": build_change_batch_assessment_prompt(context_packs, available_sections)}]
+    system_prompt = load_change_ai_system_prompt()
+    tool_trace = []
+    for _ in range(8):
+        msg = client.messages.create(
+            model=AI_ASSESSMENT_MODEL,
+            max_tokens=3000,
+            temperature=0,
+            system=system_prompt,
+            tools=change_assessment_tool_definitions(batch=True),
+            messages=messages,
+        )
+        messages.append({"role": "assistant", "content": [content_block_to_dict(block) for block in msg.content]})
+        tool_results = []
+        for block in msg.content:
+            if getattr(block, "type", "") != "tool_use":
+                continue
+            name = getattr(block, "name", "")
+            args = getattr(block, "input", {}) or {}
+            if name == "submit_change_reviews":
+                payloads = normalize_change_batch_assessment_payload(args)
+                for payload in payloads.values():
+                    payload["tool_trace"] = tool_trace
+                return payloads
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
+        if not tool_results:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_reviews."})
+        else:
+            messages.append({"role": "user", "content": tool_results})
+    raise ValueError("AI change batch assessment reached the tool-call limit")
+
+
 def run_ai_assessment(doc_id, run_id, review_id=None, review_ids=None):
     meta = load_document_meta(doc_id)
     if not meta:
@@ -2901,6 +3867,291 @@ def run_ai_assessment(doc_id, run_id, review_id=None, review_ids=None):
     return assessment, None
 
 
+def nearest_words_for_anchor(new_words, page, bbox, limit=8):
+    if not (new_words and page and bbox):
+        return []
+    cx = (bbox[0] + bbox[2]) / 2
+    cy = (bbox[1] + bbox[3]) / 2
+    scored = []
+    for word in new_words:
+        if word.get("page") != page:
+            continue
+        wx0, wy0, wx1, wy1 = word.get("bbox", [0, 0, 0, 0])
+        wcx = (wx0 + wx1) / 2
+        wcy = (wy0 + wy1) / 2
+        dist = ((wcx - cx) ** 2 + (wcy - cy) ** 2) ** 0.5
+        scored.append((dist, word.get("idx")))
+    scored.sort(key=lambda x: x[0])
+    return [wid for _dist, wid in scored if isinstance(wid, int)][:limit]
+
+
+def new_word_ids_for_change(run_dir, change):
+    new_words = read_json(run_dir / "words.json", []) or []
+    if not new_words:
+        return []
+    # Prefer added highlights that belong directly to this change.
+    ids = []
+    by_id = {h.get("id"): h for h in (read_json(run_dir / "highlights_new.json", []) or [])}
+    if not by_id:
+        viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+        by_id = {h.get("id"): h for h in (viewer_data.get("highlights_new") or []) if h.get("id")}
+    for hid in change.get("new_highlight_ids") or []:
+        h = by_id.get(hid) or {}
+        page = h.get("page")
+        bbox = h.get("bbox")
+        if page and bbox:
+            ids.extend(word_ids_in_page_bbox(new_words, page, bbox, pad=6))
+    if ids:
+        return sorted({i for i in ids if isinstance(i, int)})
+    # Otherwise use the new anchor bbox.
+    new_anchor = change.get("new_anchor") or {}
+    anchor_ids = word_ids_in_page_bbox(
+        new_words,
+        new_anchor.get("page") or change.get("new_page"),
+        new_anchor.get("bbox"),
+        pad=12,
+    )
+    if anchor_ids:
+        return sorted({i for i in anchor_ids if isinstance(i, int)})
+    # Delete-only fallback: nearest words around the old anchor mapped page if possible.
+    old_anchor = change.get("old_anchor") or {}
+    nearest = nearest_words_for_anchor(
+        new_words,
+        change.get("new_page") or old_anchor.get("page") or 1,
+        old_anchor.get("bbox") or [0, 0, 1, 1],
+        limit=8,
+    )
+    return sorted({i for i in nearest if isinstance(i, int)})
+
+
+def build_change_groups_for_run(doc_id, run_id, *, change_ids=None):
+    meta = load_document_meta(doc_id) or {}
+    run_meta = run_meta_for(meta, run_id) or {}
+    if not run_meta:
+        return []
+    if not run_meta.get("previous_run_id"):
+        return []
+    run_dir = document_run_dir(doc_id, run_id)
+    prev_section_map = read_json(run_dir / "prev_section_map.json", []) or []
+    current_section_map = read_json(run_dir / "section_map.json", []) or []
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    changes = viewer_data.get("changes", []) or []
+    if change_ids is not None:
+        wanted = {int(cid) for cid in (change_ids or [])}
+        changes = [c for c in changes if int(c.get("id", -1)) in wanted]
+    grouped = {}
+    for change in changes:
+        pack = build_change_assessment_context_pack(doc_id, run_id, run_dir, change, prev_section_map, current_section_map)
+        old_sid = (pack.get("recognized_report_section") or {}).get("previous_section_id")
+        cur_sid = (pack.get("recognized_report_section") or {}).get("current_section_id")
+        if old_sid:
+            gkey = f"old:{old_sid}"
+        elif cur_sid:
+            gkey = f"new:{cur_sid}"
+        else:
+            gkey = f"page:{change.get('old_page') or '-'}:{change.get('new_page') or '-'}"
+        grouped.setdefault(gkey, []).append(int(change.get("id")))
+    return [{"group_key": key, "change_ids": ids} for key, ids in grouped.items()]
+
+
+def run_change_ai_assessment(doc_id, run_id, change_id=None, change_ids=None):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return None, ("document not found", 404)
+    run_meta = run_meta_for(meta, run_id)
+    if not run_meta:
+        return None, ("run not found", 404)
+    prev_run_id = run_meta.get("previous_run_id")
+    if not prev_run_id:
+        return None, ("AI assessment requires a diff run", 400)
+    run_dir = document_run_dir(doc_id, run_id)
+    prev_section_map = read_json(run_dir / "prev_section_map.json", []) or []
+    current_section_map = read_json(run_dir / "section_map.json", []) or []
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    tool_context = {
+        "previous": (run_dir / "prev_report.md", prev_section_map),
+        "current": (run_dir / "report.md", current_section_map),
+    }
+    changes = viewer_data.get("changes", []) or []
+    if change_id is not None:
+        only = int(change_id)
+        changes = [c for c in changes if int(c.get("id", -1)) == only]
+        if not changes:
+            return None, ("change not found", 404)
+    if change_ids is not None:
+        wanted = {int(cid) for cid in (change_ids or [])}
+        changes = [c for c in changes if int(c.get("id", -1)) in wanted]
+    required_key_name = required_ai_api_key_name()
+    if changes and not required_ai_api_key():
+        return None, (f"{required_key_name} is not set", 400)
+    previous = load_change_ai_assessment(doc_id, run_id)
+    replacing = {int(c.get("id")) for c in changes if c.get("id") is not None}
+    previous_items = previous.get("items", []) or []
+    previous_by_id = {int(item.get("change_id")): item for item in previous_items if item.get("change_id") is not None}
+    kept = [item for item in previous_items if int(item.get("change_id", -1)) not in replacing]
+    started_at = utc_now()
+    available_sections = available_assessment_sections(prev_section_map, current_section_map)
+    prepared = []
+    for change in changes:
+        pack = build_change_assessment_context_pack(doc_id, run_id, run_dir, change, prev_section_map, current_section_map)
+        item = {
+            "change_id": int(change.get("id")),
+            "status": "done",
+            "assessed_at": utc_now(),
+            "old_section_id": (pack.get("recognized_report_section") or {}).get("previous_section_id"),
+            "current_section_id": (pack.get("recognized_report_section") or {}).get("current_section_id"),
+            "old_text": change.get("old_text", ""),
+            "new_text": change.get("new_text", ""),
+        }
+        prev_item = previous_by_id.get(item["change_id"]) or {}
+        if prev_item.get("forwarded_review_id"):
+            item["forwarded_review_id"] = prev_item.get("forwarded_review_id")
+            item["forwarded_at"] = prev_item.get("forwarded_at")
+        prepared.append({"change": change, "item": item, "context_pack": pack})
+    # Single-item calls return better precision for targeted button usage.
+    if change_id is not None:
+        for entry in prepared:
+            try:
+                entry["item"].update(call_ai_change_assessment(
+                    build_change_assessment_prompt(entry["context_pack"], available_sections),
+                    tool_context,
+                ))
+                enforce_change_verdict_policy(entry["item"])
+            except Exception as e:
+                entry["item"].update({
+                    "status": "error",
+                    "verdict": "low",
+                    "confidence": None,
+                    "reasoning": str(e),
+                    "recommended_comment": "",
+                    "evidence_old": "",
+                    "evidence_new": "",
+                })
+            kept.append(entry["item"])
+    else:
+        grouped_meta = build_change_groups_for_run(
+            doc_id,
+            run_id,
+            change_ids=[entry["item"].get("change_id") for entry in prepared],
+        )
+        grouped = {str(group.get("group_key")): [] for group in grouped_meta}
+        by_id = {entry["item"].get("change_id"): entry for entry in prepared}
+        for group in grouped_meta:
+            gkey = str(group.get("group_key"))
+            for cid in group.get("change_ids") or []:
+                if cid in by_id:
+                    grouped[gkey].append(by_id[cid])
+        for group_key, batch in grouped.items():
+            if not batch:
+                continue
+            try:
+                verdicts = call_ai_change_assessment_batch(
+                    [entry["context_pack"] for entry in batch],
+                    available_sections,
+                    tool_context,
+                )
+                for entry in batch:
+                    cid = entry["item"].get("change_id")
+                    if cid in verdicts:
+                        entry["item"].update(verdicts[cid])
+                        enforce_change_verdict_policy(entry["item"])
+                    else:
+                        entry["item"].update({
+                            "status": "error",
+                            "verdict": "low",
+                            "confidence": None,
+                            "reasoning": "AI did not return a verdict for this change_id",
+                            "recommended_comment": "",
+                            "evidence_old": "",
+                            "evidence_new": "",
+                        })
+                    entry["item"]["batch_key"] = group_key
+                    kept.append(entry["item"])
+            except Exception as e:
+                for entry in batch:
+                    entry["item"].update({
+                        "status": "error",
+                        "verdict": "low",
+                        "confidence": None,
+                        "reasoning": str(e),
+                        "recommended_comment": "",
+                        "evidence_old": "",
+                        "evidence_new": "",
+                        "batch_key": group_key,
+                    })
+                    kept.append(entry["item"])
+    harmonize_change_items(kept)
+    assessment = {
+        "status": "done",
+        "model": AI_ASSESSMENT_MODEL,
+        "started_at": started_at,
+        "completed_at": utc_now(),
+        "items": kept,
+    }
+    save_change_ai_assessment(doc_id, run_id, assessment)
+    update_run_meta(meta, run_id, has_change_ai_assessment=True)
+    save_document_meta(meta)
+    return assessment, None
+
+
+def forward_change_assessment_to_review(doc_id, run_id, change_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return {"error": "document not found"}, 404
+    if not run_meta_for(meta, run_id):
+        return {"error": "run not found"}, 404
+    run_dir = document_run_dir(doc_id, run_id)
+    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    change = change_by_id(viewer_data, change_id)
+    if not change:
+        return {"error": "change not found"}, 404
+    assessment = load_change_ai_assessment(doc_id, run_id)
+    item = next((x for x in (assessment.get("items") or []) if int(x.get("change_id", -1)) == int(change_id)), None)
+    if not item:
+        return {"error": "change assessment not found"}, 404
+    comment_text = str(item.get("recommended_comment") or "").strip()
+    if not comment_text:
+        return {"error": "no recommended review comment to forward"}, 400
+    if item.get("forwarded_review_id"):
+        projected = next((r for r in document_reviews_for_run(doc_id, run_id) if r.get("review_id") == item.get("forwarded_review_id")), None)
+        return {"already_forwarded": True, "review": projected, "change_id": int(change_id)}, 200
+    word_ids = new_word_ids_for_change(run_dir, change)
+    if not word_ids:
+        return {"error": "could not anchor forwarded review"}, 400
+    anchor = anchor_for_selection(run_dir, run_id, "new", word_ids, (change.get("new_anchor") or {}).get("bbox"))
+    if not anchor:
+        return {"error": "could not anchor forwarded review"}, 400
+    now = utc_now()
+    review = {
+        "review_id": "r-" + uuid.uuid4().hex[:8],
+        "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "doc_id": doc_id,
+        "status": "open",
+        "created_run_id": run_id,
+        "is_floating": False,
+        "text": anchor.get("text", ""),
+        "comments": [{
+            "comment_id": "c-" + uuid.uuid4().hex[:8],
+            "author": "ai",
+            "text": comment_text,
+            "created_at": now,
+        }],
+        "anchors": {run_id: anchor},
+        "source_change_id": int(change_id),
+        "source_change_assessment_at": item.get("assessed_at"),
+        "created_at": now,
+        "updated_at": now,
+    }
+    reviews = load_document_reviews(doc_id)
+    reviews.append(review)
+    save_document_reviews(doc_id, reviews)
+    semantic.save_reviews(run_dir, document_reviews_for_run(doc_id, run_id))
+    item["forwarded_review_id"] = review["review_id"]
+    item["forwarded_at"] = now
+    save_change_ai_assessment(doc_id, run_id, assessment)
+    return {"forwarded": True, "change_id": int(change_id), "review": review_projection_for_anchor(review, run_id)}, 200
+
+
 # =========================================================
 # Routes
 # =========================================================
@@ -2943,6 +4194,7 @@ def create_document():
     meta = {
         "doc_id": doc_id,
         "title": title,
+        "is_saved": False,
         "created_at": created_at,
         "updated_at": created_at,
         "runs": [{
@@ -3101,6 +4353,53 @@ def create_document_run(doc_id):
     update_run_meta(meta, run_id, status="ready")
     save_document_meta(meta)
     return jsonify({"doc_id": doc_id, "run_id": run_id, "previous_run_id": prev_run_id, "result": viewer_data}), 201
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/import-reviews", methods=["POST"])
+def import_document_reviews(doc_id, run_id):
+    if not load_document_meta(doc_id):
+        return jsonify({"error": "document not found"}), 404
+    run_dir = document_run_dir(doc_id, run_id)
+    if not run_dir.exists():
+        return jsonify({"error": "run not found"}), 404
+    data = request.get_json(silent=True) or {}
+    source_doc_id = str(data.get("source_doc_id") or "").strip()
+    source_meta = load_document_meta(source_doc_id) if source_doc_id else None
+    if not source_meta:
+        return jsonify({"error": "source document not found"}), 404
+    source_runs = source_meta.get("runs", []) or []
+    latest_source_run_id = (source_runs[-1] if source_runs else {}).get("run_id")
+    existing = load_document_reviews(doc_id)
+    existing_source_ids = {r.get("source_review_id") for r in existing if r.get("source_review_id")}
+    imported = []
+    for review in load_document_reviews(source_doc_id):
+        anchors = review.get("anchors") or {}
+        src_anchor = anchors.get(latest_source_run_id) or next(iter(anchors.values()), None)
+        # Legacy flat-format reviews carry word ids at the top level.
+        word_ids = list((src_anchor or {}).get("word_ids") or review.get("new_word_ids") or [])
+        side_hint = (src_anchor or {}).get("side") or review.get("side") or "new"
+        if not word_ids or side_hint == "old":
+            continue
+        source_review_id = review.get("review_id")
+        if source_review_id and source_review_id in existing_source_ids:
+            continue
+        anchor = anchor_for_selection(run_dir, run_id, "new", word_ids, (src_anchor or {}).get("rect"))
+        if not anchor:
+            continue
+        imported.append(canonical_review_from_anchor(
+            doc_id,
+            run_id,
+            anchor,
+            status=review.get("status", "open"),
+            comments=review.get("comments"),
+            text=review.get("text", ""),
+            source_review_id=source_review_id,
+            created_at=review.get("created_at"),
+        ))
+    if imported:
+        save_document_reviews(doc_id, existing + imported)
+        semantic.save_reviews(run_dir, document_reviews_for_run(doc_id, run_id))
+    return jsonify({"imported": len(imported)})
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/diff", methods=["POST"])
@@ -3262,6 +4561,114 @@ def document_workspace(doc_id):
     return jsonify({"doc_id": doc_id, "title": meta.get("title"), "runs": runs})
 
 
+@app.route("/api/file-manager")
+def file_manager_index():
+    ensure_default_file_manager_documents()
+    return jsonify({"items": list_documents_for_manager()})
+
+
+@app.route("/api/file-manager/<doc_id>", methods=["PATCH"])
+def file_manager_rename(doc_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    data = request.get_json(silent=True) or {}
+    title = str(data.get("title") or "").strip()
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+    title = normalize_document_title(title[:120])
+    if document_title_exists(title, exclude_doc_id=doc_id):
+        return jsonify({"error": "duplicate title"}), 409
+    meta["title"] = title
+    save_document_meta(meta)
+    return jsonify({"renamed": True, "doc_id": doc_id, "title": meta.get("title")})
+
+
+@app.route("/api/file-manager/<doc_id>", methods=["DELETE"])
+def file_manager_delete(doc_id):
+    path = document_dir(doc_id)
+    if not path.exists():
+        return jsonify({"error": "document not found"}), 404
+    shutil.rmtree(path, ignore_errors=True)
+    return jsonify({"deleted": True, "doc_id": doc_id})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/file/report")
+def document_report_file(doc_id, run_id):
+    path = document_run_dir(doc_id, run_id) / "report.pdf"
+    if not path.exists():
+        return jsonify({"error": "report.pdf not found"}), 404
+    return send_file(path, mimetype="application/pdf", as_attachment=True, download_name=f"{run_id}.pdf")
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/save", methods=["POST"])
+def save_document_run(doc_id, run_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    run_meta = run_meta_for(meta, run_id)
+    if not run_meta:
+        return jsonify({"error": "run not found"}), 404
+    data = request.get_json(silent=True) or {}
+    target_doc_id = str(data.get("target_doc_id") or "").strip()
+    if target_doc_id and target_doc_id != doc_id:
+        payload, status = overwrite_saved_document(doc_id, run_id, target_doc_id)
+        return jsonify(payload), status
+    current_title = normalize_document_title(meta.get("title") or "Workspace")
+    if not bool(meta.get("is_saved")) and document_title_exists(current_title, exclude_doc_id=doc_id):
+        return jsonify({"error": "duplicate title; use Save As with a different name"}), 409
+    meta["is_saved"] = True
+    meta["title"] = current_title
+    update_run_meta(meta, run_id, saved_at=utc_now(), status=run_meta.get("status") or "ready")
+    save_document_meta(meta)
+    return jsonify({"saved": True, "doc_id": doc_id, "run_id": run_id})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/save-file/<side>", methods=["POST"])
+def save_document_run_file(doc_id, run_id, side):
+    if not load_document_meta(doc_id):
+        return jsonify({"error": "document not found"}), 404
+    data = request.get_json(silent=True) or {}
+    payload, status = save_run_side_file(
+        doc_id,
+        run_id,
+        side,
+        target_doc_id=str(data.get("target_doc_id") or "").strip() or None,
+        title=data.get("title"),
+        overwrite_existing=bool(data.get("overwrite_existing")),
+    )
+    return jsonify(payload), status
+
+
+@app.route("/api/documents/<doc_id>/save-as", methods=["POST"])
+def save_document_as(doc_id):
+    source_meta = load_document_meta(doc_id)
+    if not source_meta:
+        return jsonify({"error": "document not found"}), 404
+    data = request.get_json(silent=True) or {}
+    new_title = normalize_document_title(str(data.get("title") or "").strip())
+    if not new_title:
+        return jsonify({"error": "title is required"}), 400
+    if document_title_exists(new_title):
+        return jsonify({"error": "duplicate title"}), 409
+    new_doc_id = uuid.uuid4().hex[:12]
+    src_dir = document_dir(doc_id)
+    dst_dir = document_dir(new_doc_id)
+    shutil.copytree(src_dir, dst_dir)
+    meta = read_json(dst_dir / "meta.json", {}) or {}
+    meta["doc_id"] = new_doc_id
+    meta["is_saved"] = True
+    meta["title"] = new_title[:120]
+    meta["created_at"] = utc_now()
+    save_document_meta(meta)
+    reviews = read_json(dst_dir / "reviews.json", []) or []
+    for review in reviews:
+        review["doc_id"] = new_doc_id
+    write_json(dst_dir / "reviews.json", reviews)
+    latest_run_id = (meta.get("runs") or [{}])[-1].get("run_id")
+    return jsonify({"saved_as": True, "doc_id": new_doc_id, "run_id": latest_run_id, "title": meta.get("title")}), 201
+
+
 @app.route("/api/documents/<doc_id>/snapshots")
 def list_document_snapshots(doc_id):
     meta = load_document_meta(doc_id)
@@ -3360,6 +4767,54 @@ def assess_document_run(doc_id, run_id):
         message, status = error
         return jsonify({"error": message}), status
     return jsonify(assessment)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/change-assess", methods=["POST"])
+def assess_document_changes(doc_id, run_id):
+    data = request.get_json(silent=True) or {}
+    change_ids = data.get("change_ids")
+    if change_ids is not None and not isinstance(change_ids, list):
+        return jsonify({"error": "change_ids must be a list"}), 400
+    assessment, error = run_change_ai_assessment(doc_id, run_id, change_ids=change_ids)
+    if error:
+        message, status = error
+        return jsonify({"error": message}), status
+    return jsonify(assessment)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/change-assess", methods=["GET"])
+def get_document_change_assessment(doc_id, run_id):
+    meta = load_document_meta(doc_id)
+    if not meta:
+        return jsonify({"error": "document not found"}), 404
+    if not run_meta_for(meta, run_id):
+        return jsonify({"error": "run not found"}), 404
+    return jsonify(load_change_ai_assessment(doc_id, run_id))
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/change-assess/groups", methods=["POST"])
+def get_document_change_assessment_groups(doc_id, run_id):
+    data = request.get_json(silent=True) or {}
+    change_ids = data.get("change_ids")
+    if change_ids is not None and not isinstance(change_ids, list):
+        return jsonify({"error": "change_ids must be a list"}), 400
+    groups = build_change_groups_for_run(doc_id, run_id, change_ids=change_ids)
+    return jsonify({"groups": groups})
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/change-assess/<int:change_id>", methods=["POST"])
+def assess_single_document_change(doc_id, run_id, change_id):
+    assessment, error = run_change_ai_assessment(doc_id, run_id, change_id=change_id)
+    if error:
+        message, status = error
+        return jsonify({"error": message}), status
+    return jsonify(assessment)
+
+
+@app.route("/api/documents/<doc_id>/runs/<run_id>/change-assess/<int:change_id>/forward", methods=["POST"])
+def forward_document_change_assessment(doc_id, run_id, change_id):
+    payload, status = forward_change_assessment_to_review(doc_id, run_id, change_id)
+    return jsonify(payload), status
 
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["GET"])

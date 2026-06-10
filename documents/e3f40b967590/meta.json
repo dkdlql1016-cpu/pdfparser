@@ -1,0 +1,18 @@
+{
+  "doc_id": "e3f40b967590",
+  "title": "Report_v1",
+  "is_saved": false,
+  "created_at": "2026-06-10T10:26:11.895682+00:00",
+  "updated_at": "2026-06-10T10:26:16.379744+00:00",
+  "runs": [
+    {
+      "run_id": "cad7a0beebe0",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-10T10:26:11.895682+00:00",
+      "filename": "Report_v1.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    }
+  ]
+}
