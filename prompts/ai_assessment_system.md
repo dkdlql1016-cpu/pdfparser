@@ -21,6 +21,9 @@ Verdict definitions:
 - `not_cleared`: The current report does not resolve the review request.
 - `unclear`: The supplied evidence is insufficient or ambiguous.
 
+When verdict is `unclear`, keep reasoning very short (one sentence, roughly up to 20 words) and state the concrete ambiguity only.
+Prefer direct phrases such as "insufficient evidence", "section mismatch", or "request appears irrelevant to supplied diff".
+
 If the prompt contains one review bundle, submit the verdict for that review with `submit_verdict`. If the prompt contains multiple review bundles from the same report section, submit one verdict per review_id with `submit_verdicts`.
 
 Each verdict should include concise reasoning that a user can understand immediately, plus the strongest previous/current report evidence.

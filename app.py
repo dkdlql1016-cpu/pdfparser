@@ -1072,7 +1072,7 @@ def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
             rects = [fitz.Rect(w["bbox"]) for w in page_words]
             hl = page.add_highlight_annot(rects)
             hl.set_colors(stroke=color)
-            hl.set_info(title=title, content=comment)
+            # Keep highlight visual-only so comment text appears once via sticky note.
             hl.update()
 
             # Place a sticky note next to the first word only.
@@ -1543,6 +1543,45 @@ def run_side_anchor_key(run_id, side):
     return f"{run_id}:{side}"
 
 
+def copied_comments_for_forward(review):
+    copied = []
+    for comment in review.get("comments", []) or []:
+        text = str(comment.get("text", "")).strip()
+        if not text:
+            continue
+        copied.append({
+            "comment_id": "c-" + uuid.uuid4().hex[:8],
+            "author": comment.get("author", "user"),
+            "text": text,
+            "created_at": comment.get("created_at") or utc_now(),
+        })
+    if not copied and review.get("comment"):
+        copied.append({
+            "comment_id": "c-" + uuid.uuid4().hex[:8],
+            "author": "user",
+            "text": str(review.get("comment", "")),
+            "created_at": review.get("created_at") or utc_now(),
+        })
+    return copied
+
+
+def assessment_anchor_for_previous_side(review, prev_run_id, run_id):
+    anchors = review.get("anchors") or {}
+    run_old_key = run_side_anchor_key(run_id, "old")
+    candidates = [
+        (prev_run_id, anchors.get(prev_run_id)),
+        (run_old_key, anchors.get(run_old_key)),
+        (run_id, anchors.get(run_id)),
+    ]
+    for anchor_run_id, anchor in candidates:
+        if not anchor:
+            continue
+        if anchor_run_id == run_id and anchor.get("side") != "old":
+            continue
+        return anchor, anchor_run_id
+    return None, None
+
+
 def document_reviews_for_run(doc_id, run_id):
     meta = load_document_meta(doc_id) or {}
     run_meta = next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), {})
@@ -1850,12 +1889,21 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
         return {"error": "run not found"}, 404
 
     reviews = load_document_reviews(doc_id)
-    review = next((r for r in reviews if r.get("review_id") == review_id), None)
-    if not review:
+    source_review = next((r for r in reviews if r.get("review_id") == review_id), None)
+    if not source_review:
         return {"error": "review not found"}, 404
-    anchors = review.setdefault("anchors", {})
-    if anchors.get(run_id) and anchors[run_id].get("side") == "new":
-        return {"review": review_projection_for_anchor(review, run_id), "already_current": True}, 200
+    existing_copy = next(
+        (
+            r for r in reviews
+            if r.get("copied_from_review_id") == review_id
+            and r.get("created_run_id") == run_id
+            and ((r.get("anchors") or {}).get(run_id) or {}).get("side") == "new"
+        ),
+        None,
+    )
+    if existing_copy:
+        return {"review": review_projection_for_anchor(existing_copy, run_id), "already_current": True}, 200
+    anchors = source_review.setdefault("anchors", {})
 
     source_anchor_run_id = prev_run_id
     prev_anchor = anchors.get(prev_run_id)
@@ -1869,11 +1917,9 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
     new_words = read_json(run_dir / "words.json", []) or []
     new_ids = map_anchor_to_current_md_anchor(prev_anchor, document_semantic_map(doc_id, run_id), new_words)
     if not new_ids:
-        new_ids = find_word_sequence_by_text(new_words, prev_anchor.get("text") or review.get("text", ""))
+        new_ids = find_word_sequence_by_text(new_words, prev_anchor.get("text") or source_review.get("text", ""))
     if not new_ids:
         new_ids = fallback_current_word_ids_from_diff(run_dir, prev_anchor, new_words)
-    if source_anchor_run_id == run_id:
-        anchors[run_side_anchor_key(run_id, "old")] = dict(prev_anchor)
     anchor = {
         "run_id": run_id,
         "side": "new",
@@ -1887,11 +1933,27 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
         "migrated_from_run_id": source_anchor_run_id,
         "migrated_at": utc_now(),
     }
-    anchors[run_id] = anchor
-    review["updated_at"] = utc_now()
+    now = utc_now()
+    copied_review = {
+        "review_id": "r-" + uuid.uuid4().hex[:8],
+        "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "doc_id": doc_id,
+        "status": source_review.get("status", "open"),
+        "created_run_id": run_id,
+        "is_floating": anchor.get("floating", False),
+        "text": anchor.get("text") or source_review.get("text", ""),
+        "comments": copied_comments_for_forward(source_review),
+        "anchors": {run_id: anchor},
+        "copied_from_review_id": source_review.get("review_id"),
+        "copied_from_anchor_run_id": source_anchor_run_id,
+        "copied_at": now,
+        "created_at": now,
+        "updated_at": now,
+    }
+    reviews.append(copied_review)
     save_document_reviews(doc_id, reviews)
     semantic.save_reviews(run_dir, document_reviews_for_run(doc_id, run_id))
-    return {"review": review_projection_for_anchor(review, run_id), "already_current": False}, 200
+    return {"review": review_projection_for_anchor(copied_review, run_id), "already_current": False}, 200
 
 
 SNAPSHOT_LIMIT = 10
@@ -1993,6 +2055,21 @@ AI_CONTEXT_CHARS = 9000
 AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "ai_assessment_system.md"
 
 
+def ai_provider_for_model(model_name):
+    model = str(model_name or "").strip().lower()
+    if model.startswith(("gpt", "o1", "o3", "o4")):
+        return "openai"
+    return "anthropic"
+
+
+def required_ai_api_key_name():
+    return "OPENAI_API_KEY" if ai_provider_for_model(AI_ASSESSMENT_MODEL) == "openai" else "ANTHROPIC_API_KEY"
+
+
+def required_ai_api_key():
+    return os.environ.get(required_ai_api_key_name())
+
+
 def ai_assessment_path(doc_id, run_id):
     return document_run_dir(doc_id, run_id) / "ai_assessment.json"
 
@@ -2075,9 +2152,9 @@ def assessment_reviews_for_run(doc_id, run_id, review_id=None):
             continue
         if review.get("status", "open") not in ("open", "partial", "unclear"):
             continue
-        prev_anchor = review_anchor_for_run(review, prev_run_id)
+        prev_anchor, anchor_run_id = assessment_anchor_for_previous_side(review, prev_run_id, run_id)
         if prev_anchor:
-            reviews.append((review, prev_anchor, prev_run_id))
+            reviews.append((review, prev_anchor, anchor_run_id))
     return reviews
 
 
@@ -2426,7 +2503,180 @@ def content_block_to_dict(block):
     return block
 
 
+def openai_tool_definitions(batch=False):
+    tools = []
+    for tool in assessment_tool_definitions(batch=batch):
+        tools.append({
+            "type": "function",
+            "function": {
+                "name": tool.get("name"),
+                "description": tool.get("description", ""),
+                "parameters": tool.get("input_schema", {"type": "object", "properties": {}}),
+            },
+        })
+    return tools
+
+
+def openai_tool_call_args(arguments):
+    if isinstance(arguments, dict):
+        return arguments
+    raw = str(arguments or "").strip()
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
+
+
+def call_ai_assessment_openai(prompt, tool_context):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
+    try:
+        from openai import OpenAI
+    except Exception as e:
+        raise RuntimeError("openai package is not installed") from e
+    client = OpenAI(api_key=api_key)
+    messages = [
+        {"role": "system", "content": load_ai_system_prompt()},
+        {"role": "user", "content": prompt},
+    ]
+    tool_trace = []
+    for _ in range(8):
+        response = client.chat.completions.create(
+            model=AI_ASSESSMENT_MODEL,
+            temperature=0,
+            tools=openai_tool_definitions(batch=False),
+            messages=messages,
+        )
+        choice = response.choices[0].message
+        tool_calls = list(choice.tool_calls or [])
+        assistant_message = {
+            "role": "assistant",
+            "content": choice.content or "",
+        }
+        if tool_calls:
+            assistant_message["tool_calls"] = [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
+                }
+                for call in tool_calls
+            ]
+        messages.append(assistant_message)
+        if not tool_calls:
+            messages.append({"role": "user", "content": "Use read_section or search_markdown, then call submit_verdict."})
+            continue
+        for call in tool_calls:
+            name = call.function.name
+            args = openai_tool_call_args(call.function.arguments)
+            if name == "submit_verdict":
+                payload = normalize_assessment_payload(args)
+                payload["tool_trace"] = tool_trace
+                return payload
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            messages.append({
+                "role": "tool",
+                "tool_call_id": call.id,
+                "content": json.dumps(result, ensure_ascii=False),
+            })
+    raise ValueError("AI assessment reached the tool-call limit")
+
+
+def call_ai_assessment_batch_openai(context_packs, available_sections, tool_context):
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
+    try:
+        from openai import OpenAI
+    except Exception as e:
+        raise RuntimeError("openai package is not installed") from e
+    client = OpenAI(api_key=api_key)
+    messages = [
+        {"role": "system", "content": load_ai_system_prompt()},
+        {"role": "user", "content": build_batch_assessment_prompt(context_packs, available_sections)},
+    ]
+    tool_trace = []
+    for _ in range(8):
+        response = client.chat.completions.create(
+            model=AI_ASSESSMENT_MODEL,
+            temperature=0,
+            tools=openai_tool_definitions(batch=True),
+            messages=messages,
+        )
+        choice = response.choices[0].message
+        tool_calls = list(choice.tool_calls or [])
+        assistant_message = {
+            "role": "assistant",
+            "content": choice.content or "",
+        }
+        if tool_calls:
+            assistant_message["tool_calls"] = [
+                {
+                    "id": call.id,
+                    "type": "function",
+                    "function": {
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
+                }
+                for call in tool_calls
+            ]
+        messages.append(assistant_message)
+        if not tool_calls:
+            messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_verdicts with one item per review_id."})
+            continue
+        for call in tool_calls:
+            name = call.function.name
+            args = openai_tool_call_args(call.function.arguments)
+            if name == "submit_verdicts":
+                payloads = normalize_batch_assessment_payload(args)
+                for payload in payloads.values():
+                    payload["tool_trace"] = tool_trace
+                return payloads
+            if name == "read_section":
+                file_key = args.get("file")
+                section_id = args.get("section_id")
+                md_path, section_map = tool_context[file_key]
+                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+            elif name == "search_markdown":
+                file_key = args.get("file")
+                query = args.get("query", "")
+                md_path, _section_map = tool_context[file_key]
+                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+                tool_trace.append({"tool": name, "file": file_key, "query": query})
+            else:
+                result = {"error": f"Unknown tool: {name}"}
+            messages.append({
+                "role": "tool",
+                "tool_call_id": call.id,
+                "content": json.dumps(result, ensure_ascii=False),
+            })
+    raise ValueError("AI batch assessment reached the tool-call limit")
+
+
 def call_ai_assessment(prompt, tool_context):
+    if ai_provider_for_model(AI_ASSESSMENT_MODEL) == "openai":
+        return call_ai_assessment_openai(prompt, tool_context)
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is not set")
@@ -2485,6 +2735,8 @@ def call_ai_assessment(prompt, tool_context):
 
 
 def call_ai_assessment_batch(context_packs, available_sections, tool_context):
+    if ai_provider_for_model(AI_ASSESSMENT_MODEL) == "openai":
+        return call_ai_assessment_batch_openai(context_packs, available_sections, tool_context)
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY is not set")
@@ -2543,7 +2795,7 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context):
     raise ValueError("AI batch assessment reached the tool-call limit")
 
 
-def run_ai_assessment(doc_id, run_id, review_id=None):
+def run_ai_assessment(doc_id, run_id, review_id=None, review_ids=None):
     meta = load_document_meta(doc_id)
     if not meta:
         return None, ("document not found", 404)
@@ -2564,10 +2816,18 @@ def run_ai_assessment(doc_id, run_id, review_id=None):
     }
     available_sections = available_assessment_sections(prev_section_map, current_section_map)
     targets = assessment_reviews_for_run(doc_id, run_id, review_id=review_id)
+    if review_ids is not None:
+        allowed = {str(rid).strip() for rid in (review_ids or []) if str(rid).strip()}
+        targets = [
+            (review, prev_anchor, anchor_run_id)
+            for review, prev_anchor, anchor_run_id in targets
+            if str(review.get("review_id", "")).strip() in allowed
+        ]
     if review_id and not targets:
         return None, ("review is not assessable for previous run", 404)
-    if targets and not os.environ.get("ANTHROPIC_API_KEY"):
-        return None, ("ANTHROPIC_API_KEY is not set", 400)
+    required_key_name = required_ai_api_key_name()
+    if targets and not required_ai_api_key():
+        return None, (f"{required_key_name} is not set", 400)
     previous = load_ai_assessment(doc_id, run_id)
     replacing = {review.get("review_id") for review, _, _ in targets}
     previous_items = previous.get("items", []) or []
@@ -3091,7 +3351,11 @@ def export_snapshot_pdf(doc_id, snapshot_id, side):
 
 @app.route("/api/documents/<doc_id>/runs/<run_id>/assess", methods=["POST"])
 def assess_document_run(doc_id, run_id):
-    assessment, error = run_ai_assessment(doc_id, run_id)
+    data = request.get_json(silent=True) or {}
+    review_ids = data.get("review_ids")
+    if review_ids is not None and not isinstance(review_ids, list):
+        return jsonify({"error": "review_ids must be a list"}), 400
+    assessment, error = run_ai_assessment(doc_id, run_id, review_ids=review_ids)
     if error:
         message, status = error
         return jsonify({"error": message}), status

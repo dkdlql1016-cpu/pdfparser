@@ -7,13 +7,13 @@
 <style>
 :root{--red:#cf222e;--green:#2da44e;--red-bg:rgba(255,65,65,.38);--green-bg:rgba(34,197,94,.38);--blue:#2563eb}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827}
-.topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap}.brand{font-size:15px;font-weight:800;white-space:nowrap}
-.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:auto}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer}.fileName{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d1d5db}
+.topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap;transition:margin-left .18s ease}
+.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:0}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer}.fileName{display:none}
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
-#status{font-size:12px;color:#d1d5db;min-width:90px}.topActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.topActions button{font-size:12px;padding:6px 9px}.modeBadge,.dirtyBadge{border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}.modeBadge{background:#dbeafe;color:#1e40af}.dirtyBadge{background:#fef3c7;color:#92400e}main{height:calc(100vh - 58px);display:grid;grid-template-columns:320px 1fr;overflow:hidden}body.sidebarCollapsed main{grid-template-columns:0 1fr}body.sidebarCollapsed aside{border-right:0}
-.sidebarRail{position:fixed;left:0;top:78px;z-index:2000;display:none;writing-mode:vertical-rl;transform:rotate(180deg);padding:10px 5px;border-radius:0 10px 10px 0;background:#111827;color:#fff;border:1px solid #374151;box-shadow:0 4px 12px rgba(0,0,0,.22);font-size:11px;letter-spacing:.04em}body.sidebarCollapsed .sidebarRail{display:block}
-aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column}.sideHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;height:36px;padding:6px 8px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.sideTitle{font-size:12px;font-weight:800;color:#374151}.sideCollapse{width:26px;height:24px;padding:0;border-radius:7px;background:#e5e7eb;color:#374151}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:10px 6px;font-size:12px}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
-.tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:800}.addStat{color:var(--green)}.delStat{color:var(--red)}
+#status{font-size:12px;color:#d1d5db;min-width:90px}.topActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.topActions button{font-size:12px;padding:6px 9px}.modeBadge,.dirtyBadge{border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}.modeBadge{background:#dbeafe;color:#1e40af}.dirtyBadge{background:#fef3c7;color:#92400e}main{height:calc(100vh - 58px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
+.sidebarRail{display:none;position:static;flex:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center}body.sidebarCollapsed .sidebarRail{display:inline-block}
+aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease}body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}.sideHeader{display:flex;align-items:center;gap:8px;height:38px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.workspaceTitleRow{display:flex;align-items:center;gap:6px;min-width:0;width:100%}.sideTitle{font-size:12px;font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sideTitleInput{flex:1;min-width:0;height:24px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:12px system-ui;color:#111827}.sideIconBtn{width:24px;height:24px;padding:0;border-radius:6px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1}.sideCollapse{margin-left:auto;width:24px;height:24px;padding:0;border-radius:6px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 4px;font-size:10px;line-height:1.2}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
+.tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:8px 11px;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700}.addStat{color:var(--green)}.delStat{color:var(--red)}
 #changes,#indexList,#reviewPane,#snapshotPane{overflow:auto;padding:8px}.indexItem,.change,.snapshotRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:12px}.indexItem:hover,.change:hover,.snapshotRow:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:10px;color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.snapshotBar{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border-bottom:1px solid #e5e7eb}.snapshotBar input{min-width:0;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:12px system-ui}.snapshotBar button{font-size:12px}.readonlyBadge{background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}
 .meta{color:#6b7280;font-size:11px;margin-bottom:4px}.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
 .viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.viewer.single{grid-template-columns:1fr}.viewer.single #oldPane{display:none}.pane{position:relative;overflow:auto;background:#e5e7eb;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:7px 10px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -25,31 +25,28 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
 #reviewPopover{position:fixed;z-index:1000;width:262px;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.22);padding:10px;display:none}#reviewPopover textarea{width:100%;height:64px;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:13px system-ui;resize:vertical}#reviewPopover .row{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}#reviewPopover button{padding:6px 10px}#reviewPopover button.cancel{background:#e5e7eb;color:#374151}
 .reviewRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:12px;overflow:hidden}.reviewRow:hover{background:#fffaf0;border-color:#fcd34d}.reviewRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.reviewRow.cleared,.reviewRow.resolved{opacity:.6}.rvSummary{display:flex;align-items:flex-start;gap:6px;margin:3px 0}.rvSummaryText{min-width:0;flex:1;color:#111827;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.rvMoreCount{flex:none;background:#fef3c7;color:#92400e;border-radius:999px;padding:1px 6px;font-size:10px;font-weight:800}.reviewRow .rvActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.reviewRow .rvActions button{padding:4px 8px;font-size:11px;background:#eef2ff;color:#3730a3}.rvReply{display:none;margin-top:6px}.rvReply textarea{width:100%;height:48px;border:1px solid #d1d5db;border-radius:6px;padding:5px;font:12px system-ui;resize:vertical}.rvReplyActions{display:flex;justify-content:flex-end;gap:5px;margin-top:4px}.rvReplyActions button{padding:4px 8px;font-size:11px}.aiBar{display:none;padding:8px 12px;border-bottom:1px solid #e5e7eb;gap:8px}.aiBar button{flex:1;font-size:12px;background:#7c3aed}.aiBadge{display:inline-block;margin-left:5px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:800;background:#e5e7eb;color:#374151}.aiBadge.cleared{background:#dcfce7;color:#166534}.aiBadge.partial{background:#fef3c7;color:#92400e}.aiBadge.unclear{background:#e0e7ff;color:#3730a3}.aiBadge.not_cleared{background:#fee2e2;color:#991b1b}.aiReason{margin-top:5px;padding:6px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px;line-height:1.35}
 .reviewSubtabs{display:flex;border-bottom:1px solid #e5e7eb}.reviewSubtab{flex:1;border-radius:0;background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:8px;font-size:12px}.reviewSubtab.active{background:#eef2ff;color:#1d4ed8;box-shadow:inset 0 -2px 0 var(--blue)}.filterBar{display:flex;gap:5px;align-items:center;padding:7px 8px;border-bottom:1px solid #e5e7eb;background:#f8fafc;flex-wrap:wrap}.filterBar select,.filterBar button{font-size:11px;padding:4px 6px;border-radius:6px}.filterBar select{border:1px solid #cbd5e1;background:white;color:#374151;min-width:70px}.filterBar button{background:#e5e7eb;color:#374151}.confirmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:2500;display:none;align-items:center;justify-content:center}.confirmBox{width:310px;background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.32);padding:14px}.confirmMsg{font-size:13px;line-height:1.45;color:#111827;margin-bottom:12px}.confirmActions{display:flex;gap:8px;justify-content:flex-end}.confirmActions button{padding:6px 12px}.confirmActions .cancel{background:#e5e7eb;color:#374151}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
+*::-webkit-scrollbar-button{display:none;width:0;height:0}*{scrollbar-width:thin}
 </style>
 </head>
-<body>
+<body class="sidebarCollapsed">
 <div class="topbar">
-  <div class="brand">Report Review Workspace</div>
+  <button id="sidebarRail" class="sidebarRail" type="button" title="Open panel">☰</button>
   <form id="createForm" class="uploadForm">
-    <label class="fileLabel">Base Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="initialFileName" class="fileName">No file selected</span></label>
-    <button id="createBtn" type="submit">Create Workspace</button>
+    <label class="fileLabel">Base Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span></label>
+    <button id="createBtn" type="submit">Analysis</button>
   </form>
   <form id="updateForm" class="uploadForm" style="display:none">
-    <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span><span id="updateFileName" class="fileName">No file selected</span></label>
-    <button id="updateBtn" type="submit">Compare Update</button>
+    <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf" required><span class="fileBtn">Select File</span></label>
+    <button id="updateBtn" type="submit">Compare</button>
   </form>
   <div class="topActions">
-    <button id="topSaveSnapshotBtn" class="secondary" type="button" onclick="saveSnapshot()">Save Snapshot</button>
-    <button id="backLiveBtn" class="secondary" type="button" onclick="backToLiveRun()" style="display:none">Back to Live Run</button>
-    <span id="modeBadge" class="modeBadge">Live Run</span>
     <span id="dirtyBadge" class="dirtyBadge" style="display:none">Unsaved changes</span>
   </div>
   <span id="status">Idle</span>
 </div>
-<button id="sidebarRail" class="sidebarRail" type="button" title="Open sidebar">Open panel</button>
 <main>
   <aside>
-    <div class="sideHeader"><span class="sideTitle">Review Panel</span><button id="sidebarCollapseBtn" class="sideCollapse" type="button" title="Collapse sidebar">‹</button></div>
+    <div class="sideHeader"><div class="workspaceTitleRow"><button id="workspaceHomeBtn" class="sideIconBtn" type="button" title="Home">⌂</button><button id="workspaceRenameBtn" class="sideIconBtn" type="button" title="Rename workspace">✎</button><span id="workspaceTitle" class="sideTitle">Workspace</span></div><button id="sidebarCollapseBtn" class="sideCollapse" type="button" title="Collapse panel">‹</button></div>
     <div class="tabs">
       <button class="tabBtn active" data-tab="index">Outline</button>
       <button class="tabBtn" data-tab="diff">Changes</button>
@@ -81,6 +78,9 @@ aside{background:white;border-right:1px solid #d1d5db;overflow:hidden;display:fl
 let ZOOM=1.15;
 const $=s=>document.querySelector(s);
 let DATA=null, DOC_ID=null, RUN_ID=null, LIVE_RUN_ID=null, SNAPSHOT_ID=null, READ_ONLY=false, DIRTY=false;
+let WORKSPACE_TITLE='Workspace';
+let PREV_REPORT_FILENAME='';
+let CUR_REPORT_FILENAME='';
 let WORDS={old:[],new:[]};
 let CHARS={old:[],new:[]};
 let EQUAL={pairs:[],newToOld:new Map(),oldToNew:new Map(),newEqual:new Set(),oldEqual:new Set()};
@@ -90,12 +90,37 @@ let REVIEW_SIDE='new';
 let REVIEW_FILTERS={status:'all',ai:'all',match:'all',sort:'default'};
 
 document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
-function setSidebarCollapsed(collapsed){document.body.classList.toggle('sidebarCollapsed',collapsed);if(DATA)requestAnimationFrame(()=>draw(DATA))}
+function updateWorkspaceTitle(){const el=$('#workspaceTitle');if(el)el.textContent=WORKSPACE_TITLE||'Workspace'}
+function startWorkspaceRename(){
+  const titleEl=$('#workspaceTitle');
+  if(!titleEl)return;
+  const input=document.createElement('input');
+  input.type='text';
+  input.className='sideTitleInput';
+  input.value=WORKSPACE_TITLE||'Workspace';
+  const commit=()=>{
+    const next=String(input.value||'').trim();
+    WORKSPACE_TITLE=next||WORKSPACE_TITLE||'Workspace';
+    titleEl.replaceWith(input._titleElRef||titleEl);
+    updateWorkspaceTitle();
+  };
+  const cancel=()=>{
+    titleEl.replaceWith(input._titleElRef||titleEl);
+    updateWorkspaceTitle();
+  };
+  input._titleElRef=titleEl;
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+  input.addEventListener('blur',commit,{once:true});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit()}else if(e.key==='Escape'){e.preventDefault();cancel()}});
+}
+function setSidebarCollapsed(collapsed){document.body.classList.toggle('sidebarCollapsed',collapsed);const rail=$('#sidebarRail');if(rail)rail.textContent='☰';if(DATA)requestAnimationFrame(()=>draw(DATA))}
 $('#sidebarCollapseBtn').addEventListener('click',()=>setSidebarCollapsed(true));
 $('#sidebarRail').addEventListener('click',()=>setSidebarCollapsed(false));
+$('#workspaceHomeBtn').addEventListener('click',()=>toast('Home action will be added later'));
+$('#workspaceRenameBtn').addEventListener('click',startWorkspaceRename);
 window.addEventListener('resize',()=>{if(DATA)draw(DATA)});
-$('#initialFile').addEventListener('change',()=>{$('#initialFileName').textContent=$('#initialFile').files[0]?.name||'No file selected'});
-$('#updateFile').addEventListener('change',()=>{$('#updateFileName').textContent=$('#updateFile').files[0]?.name||'No file selected'});
 function activateTab(name){document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tabBody').forEach(b=>b.classList.toggle('active',b.id===`tab-${name}`));if(name==='snapshot')loadSnapshots()}
 function apiBase(){return SNAPSHOT_ID?`/api/documents/${DOC_ID}/snapshots/${SNAPSHOT_ID}`:`/api/documents/${DOC_ID}/runs/${RUN_ID}`}
 function isDiff(){return DATA?.mode==='diff'}
@@ -104,7 +129,7 @@ function trim(s,n=160){s=String(s||'');return s.length>n?s.slice(0,n-1)+'...':s}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
 function setBusy(busy,msg){$('#createBtn').disabled=busy;$('#updateBtn').disabled=busy;$('#status').textContent=msg||'Idle'}
 function setDirty(value=true){DIRTY=!!value;updateModeUi()}
-function updateModeUi(){const mode=$('#modeBadge'),dirty=$('#dirtyBadge'),back=$('#backLiveBtn');mode.textContent=READ_ONLY?'Snapshot View':'Live Run';mode.style.background=READ_ONLY?'#fef3c7':'#dbeafe';mode.style.color=READ_ONLY?'#92400e':'#1e40af';dirty.style.display=(!READ_ONLY&&DIRTY)?'inline-block':'none';back.style.display=READ_ONLY?'inline-block':'none'}
+function updateModeUi(){const dirty=$('#dirtyBadge');if(dirty)dirty.style.display=DIRTY?'inline-block':'none'}
 
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -117,7 +142,7 @@ $('#createForm').addEventListener('submit',async e=>{
     const res=await fetch('/api/documents',{method:'POST',body:fd});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
-    DOC_ID=data.doc_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
+    DOC_ID=data.doc_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result; CUR_REPORT_FILENAME=file.name||CUR_REPORT_FILENAME; PREV_REPORT_FILENAME=''; updateWorkspaceTitle(); setSidebarCollapsed(false);
     $('#updateForm').style.display='flex';
     draw(DATA); loadSnapshots(); activateTab('review'); setBusy(false,'Base report ready');
   }catch(err){setBusy(false,'Error: '+err.message)}
@@ -134,6 +159,8 @@ $('#updateForm').addEventListener('submit',async e=>{
     let data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
     RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false);
+    PREV_REPORT_FILENAME=CUR_REPORT_FILENAME||PREV_REPORT_FILENAME;
+    CUR_REPORT_FILENAME=file.name||CUR_REPORT_FILENAME;
     $('#status').textContent='Comparing reports';
     res=await fetch(`${apiBase()}/diff`,{method:'POST'});
     data=await res.json();
@@ -146,19 +173,22 @@ $('#updateForm').addEventListener('submit',async e=>{
 function draw(d){
   $('#viewer').classList.toggle('single',!isDiff());
   if(!isDiff())REVIEW_SIDE='new';
+  updateWorkspaceTitle();
   updateModeUi();
   if(READ_ONLY)$('#status').innerHTML='<span class="readonlyBadge">Snapshot</span>';
-  $('#oldTitle').textContent=d.old_filename||'Previous PDF';
-  $('#newTitle').textContent=d.new_filename||d.filename||'Current PDF';
-  const added=d.summary?.added||0, deleted=d.summary?.deleted||0;
-  $('#diffStats').innerHTML=`<span class="addStat">+ ${added}</span> / <span class="delStat">-${deleted}</span>`;
+  $('#oldTitle').textContent=PREV_REPORT_FILENAME||d.old_filename||'prev_report.pdf';
+  $('#newTitle').textContent=CUR_REPORT_FILENAME||d.new_filename||d.filename||'report.pdf';
+  const changes=d.changes||[];
+  const addGroups=changes.filter(c=>String(c.new_text||'').trim()).length;
+  const delGroups=changes.filter(c=>String(c.old_text||'').trim()).length;
+  $('#diffStats').innerHTML=`<span class="addStat">+ ${addGroups}</span> / <span class="delStat">-${delGroups}</span>`;
   ZOOM=computeFitZoom(d);
   drawIndex(d); drawChanges(d);
   if(isDiff())drawPages('old',d.old_page_count||0,d.old_page_sizes||[],d.highlights_old||[]);
   else $('#oldPages').innerHTML='';
   drawPages('new',d.new_page_count||d.page_count||0,d.new_page_sizes||d.page_sizes||[],d.highlights_new||[]);
-  $('#oldCount').textContent=isDiff()?`${(d.highlights_old||[]).length}`:'';
-  $('#newCount').textContent=`${(d.highlights_new||[]).length}`;
+  $('#oldCount').textContent='';
+  $('#newCount').textContent='';
   $('#reviewSubtabs').style.display=isDiff()?'flex':'none';
   updateReviewSubtabs();
   setupSemantic(d);
@@ -550,10 +580,24 @@ function updateReviewSubtabs(){if(!$('#reviewPrevTab'))return;$('#reviewPrevTab'
 window.setReviewSide=function(side){REVIEW_SIDE=side;updateReviewSubtabs();renderReviewList(REVIEWS)}
 function reviewPreviewText(rv){const comments=reviewComments(rv);return comments.length?comments[comments.length-1].text:(rv.comment||'(No comment)')}
 function aiItemForReview(id){return (AI_ASSESSMENT.items||[]).find(x=>x.review_id===id)}
-function renderAiBadge(item){if(!item)return '';const v=item.verdict||'unclear';return `<span class="aiBadge ${escapeHtml(v)}">${escapeHtml(v.replace('_',' '))}</span>`}
-function renderAiReason(item){if(!item?.reasoning)return '';return `<div class="aiReason">${escapeHtml(item.reasoning)}</div>`}
+function renderAiBadge(item){if(!item)return '';const v=String(item.human_decision||item.verdict||'unclear').toLowerCase();return `<span class="aiBadge ${escapeHtml(v)}">${escapeHtml(v.replace('_',' '))}</span>`}
+function verdictLabel(value){return String(value||'unclear').replace(/_/g,' ').toUpperCase()}
+function decisionToReviewStatus(decision){return String(decision||'').toLowerCase()==='cleared'?'cleared':'open'}
+function renderAiReason(item){
+  if(!item)return '';
+  const modelVerdict=item.verdict||'unclear';
+  const finalVerdict=item.human_decision||modelVerdict;
+  const verdictLine=`<strong>Verdict: ${escapeHtml(verdictLabel(finalVerdict))}</strong>`;
+  let reasoningText=String(item.reasoning||'');
+  if(String(finalVerdict).toLowerCase()==='unclear'){
+    reasoningText=reasoningText.replace(/\s+/g,' ').trim();
+    if(reasoningText.length>140)reasoningText=reasoningText.slice(0,140).trim()+'...';
+  }
+  const reasonLine=reasoningText?`<div>${escapeHtml(reasoningText)}</div>`:'';
+  return `<div class="aiReason">${verdictLine}${reasonLine}</div>`;
+}
 function renderReviewSummary(rv){const comments=reviewComments(rv);const last=comments.length?comments[comments.length-1]:null;const more=Math.max(0,comments.length-1);const text=last?.text||rv.comment||'(No comment)';return `<div class="rvSummary"><div class="rvSummaryText">${escapeHtml(text)}</div>${more?`<span class="rvMoreCount">+${more}</span>`:''}</div>`}
-function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const bar=$('#exportBar');if(bar)bar.style.display=visible.length?'flex':'none';$('#exportOldBtn').style.display=(isDiff()&&REVIEW_SIDE==='old')?'block':'none';$('#exportCurrentBtn').style.display=REVIEW_SIDE==='new'?'block':'none';const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+(REVIEW_SIDE==='old'?'previous':'current')+' comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=ai?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${renderAiBadge(ai)}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
+function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const bar=$('#exportBar');if(bar)bar.style.display=visible.length?'flex':'none';$('#exportOldBtn').style.display=(isDiff()&&REVIEW_SIDE==='old')?'block':'none';$('#exportCurrentBtn').style.display=REVIEW_SIDE==='new'?'block':'none';const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+(REVIEW_SIDE==='old'?'previous':'current')+' comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=(ai&&String(ai.verdict||'').toLowerCase()==='cleared')?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${renderAiBadge(ai)}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
 function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]?.length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
 function focusReview(rv,displaySide){
   clearAnchorFocus();
@@ -573,11 +617,32 @@ window.focusReviewById=function(id){const matches=REVIEWS.filter(r=>r.review_id=
 window.toggleReview=async function(id,status){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});setDirty(true);await loadReviews()}catch(e){toast('Failed to update status')}}
 window.addComment=function(id){if(READ_ONLY){toast('Snapshot is read-only');return}showListReply(id)}
 window.deleteReview=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});setDirty(true);await loadReviews();clearAnchorFocus()}catch(e){toast('Failed to delete review')}}
-window.moveReviewToCurrent=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}const ok=await askConfirm('Move this previous review to Current?');if(!ok)return;try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:id})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Move failed');return}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();focusReviewById(id);toast(data.already_current?'Already in Current':'Moved to Current')}catch(e){toast('Move failed')}}
-window.moveOpenPreviousReviewsToCurrent=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}const targets=[...new Map((REVIEWS||[]).filter(rv=>reviewBelongsToSide(rv,'old')&&!isCleared(rv)).map(rv=>[rv.review_id,rv])).values()];if(!targets.length){toast('No open previous comments to forward.');return}const ok=await askConfirm(`Forward ${targets.length} open previous comment${targets.length===1?'':'s'} to Current?`);if(!ok)return;const btn=$('#moveOpenBtn');if(btn){btn.disabled=true;btn.textContent='Forwarding...'}let moved=0,failed=0,lastError='';try{for(const rv of targets){try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:rv.review_id})});const data=await res.json();if(!res.ok||data.error){failed++;lastError=data.error||String(res.status)}else moved++}catch(e){failed++;lastError=e.message||'request failed'}}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();toast(`Forwarded ${moved}${failed?`, ${failed} failed${lastError?`: ${lastError}`:''}`:''}`)}finally{if(btn){btn.disabled=false;btn.textContent='Forward All'}}}
-window.runAiAssessment=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}if(!isDiff()){toast('Compare reports before running AI.');return}const btn=$('#runAiBtn');btn.disabled=true;btn.textContent='AI Running...';try{const res=await fetch(`${apiBase()}/assess`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI check failed');return}AI_ASSESSMENT=data;setDirty(true);renderReviewList(REVIEWS);toast('AI check complete')}catch(e){toast('AI check failed')}finally{btn.disabled=false;btn.textContent='Run AI on All'}}
+window.moveReviewToCurrent=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}const ok=await askConfirm('Move this previous review to Current?');if(!ok)return;try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:id})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Move failed');return}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();const movedId=data?.review?.review_id||id;focusReviewById(movedId);toast(data.already_current?'Already in Current':'Copied to Current')}catch(e){toast('Move failed')}}
+window.moveOpenPreviousReviewsToCurrent=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}const visible=filteredSortedReviews(REVIEWS||[]);const targets=[...new Map(visible.filter(rv=>reviewBelongsToSide(rv,'old')&&!isCleared(rv)).map(rv=>[rv.review_id,rv])).values()];if(!targets.length){toast('No open previous comments to forward in current filter.');return}const ok=await askConfirm(`Forward ${targets.length} open previous comment${targets.length===1?'':'s'} to Current?`);if(!ok)return;const btn=$('#moveOpenBtn');if(btn){btn.disabled=true;btn.textContent='Forwarding...'}let moved=0,failed=0,lastError='';try{for(const rv of targets){try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:rv.review_id})});const data=await res.json();if(!res.ok||data.error){failed++;lastError=data.error||String(res.status)}else moved++}catch(e){failed++;lastError=e.message||'request failed'}}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();toast(`Forwarded ${moved}${failed?`, ${failed} failed${lastError?`: ${lastError}`:''}`:''}`)}finally{if(btn){btn.disabled=false;btn.textContent='Forward All'}}}
+window.runAiAssessment=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}if(!isDiff()){toast('Compare reports before running AI.');return}const visible=filteredSortedReviews(REVIEWS||[]);const reviewIds=[...new Set(visible.map(rv=>rv.review_id).filter(Boolean))];if(!reviewIds.length){toast('No filtered comments to run AI on.');return}const btn=$('#runAiBtn');btn.disabled=true;btn.textContent='AI Running...';try{const res=await fetch(`${apiBase()}/assess`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_ids:reviewIds})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI check failed');return}AI_ASSESSMENT=data;setDirty(true);renderReviewList(REVIEWS);toast('AI check complete')}catch(e){toast('AI check failed')}finally{btn.disabled=false;btn.textContent='Run AI on All'}}
 window.runReviewAiAssessment=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'POST'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'AI check failed');return}AI_ASSESSMENT=data;setDirty(true);renderReviewList(REVIEWS);focusReviewById(id);toast('AI check complete')}catch(e){toast('AI check failed')}}
-window.saveAssessmentDecision=async function(id,decision){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/assess/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({human_decision:decision})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Failed to save decision');return}const item=aiItemForReview(id);if(item){item.human_decision=decision;item.human_updated_at=data.human_updated_at}setDirty(true);toast('Decision saved')}catch(e){toast('Failed to save decision')}}
+window.saveAssessmentDecision=async function(id,decision){
+  if(READ_ONLY){toast('Snapshot is read-only');return}
+  try{
+    const assessRes=await fetch(`${apiBase()}/assess/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({human_decision:decision})});
+    const assessData=await assessRes.json();
+    if(!assessRes.ok||assessData.error){toast(assessData.error||'Failed to save decision');return}
+
+    const status=decisionToReviewStatus(decision);
+    const reviewRes=await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+    const reviewData=await reviewRes.json();
+    if(!reviewRes.ok||reviewData.error){toast(reviewData.error||'Decision saved but status update failed');return}
+
+    const item=aiItemForReview(id);
+    if(item){item.human_decision=decision;item.human_updated_at=assessData.human_updated_at}
+    setDirty(true);
+    await loadReviews();
+    focusReviewById(id);
+    toast(`Decision saved (${verdictLabel(decision)})`);
+  }catch(e){
+    toast('Failed to save decision');
+  }
+}
 window.exportPdf=function(side){if(!DATA)return;if(!REVIEWS.length){toast('No saved comments');return}window.open(`${apiBase()}/export/${side}`,'_blank')}
 </script>
 </body>

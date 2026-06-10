@@ -1,0 +1,1518 @@
+[
+  {
+    "review_id": "r-0b25427e",
+    "anchor_id": "a-b49c029e",
+    "doc_id": "37820dd106af",
+    "status": "open",
+    "created_run_id": "c1dddd3817e1",
+    "is_floating": false,
+    "text": "Qualified Opinion We have audited the financial statements of DEMO International, Inc. (the “Company”), which comprise the statements of financial position as of December 31, 2024 and 2023, the statements of income, changes in equity and cash flows for the years then ended, and notes, comprising significant accounting policies. In our opinion, except for the possible effects on the financial statements of the matter described in the Basis for Qualified Opinion section of our report, the accompanying financial statements present fairly, in all material respects, the financial position of the Company as of December 31, 2024 and 2023, and its operation, changes in equity and its cash flows for the years then ended in accordance with Accounting Standards for Non-public Entities in the Republic of Korea (“K-GAAP”).",
+    "comments": [
+      {
+        "comment_id": "c-a7540940",
+        "author": "user",
+        "text": "Please change the opinion",
+        "created_at": "2026-06-10T02:36:43.154959+00:00"
+      }
+    ],
+    "anchors": {
+      "c1dddd3817e1": {
+        "run_id": "c1dddd3817e1",
+        "side": "old",
+        "word_ids": [
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195
+        ],
+        "old_word_ids": [
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          99,
+          100,
+          101,
+          102,
+          103,
+          104,
+          105,
+          106,
+          107,
+          108,
+          109,
+          110,
+          111,
+          112,
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          174,
+          175,
+          176,
+          177,
+          178,
+          179,
+          180,
+          181,
+          182,
+          183,
+          184,
+          185,
+          186,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195
+        ],
+        "new_word_ids": [],
+        "page": 3,
+        "bbox": [
+          57.13429260253906,
+          181.29811096191406,
+          530.7551879882812,
+          316.9234924316406
+        ],
+        "rect": [
+          57.56507873535156,
+          189.27082061767578,
+          148.81507873535156,
+          316.7708206176758
+        ],
+        "text": "Qualified Opinion We have audited the financial statements of DEMO International, Inc. (the “Company”), which comprise the statements of financial position as of December 31, 2024 and 2023, the statements of income, changes in equity and cash flows for the years then ended, and notes, comprising significant accounting policies. In our opinion, except for the possible effects on the financial statements of the matter described in the Basis for Qualified Opinion section of our report, the accompanying financial statements present fairly, in all material respects, the financial position of the Company as of December 31, 2024 and 2023, and its operation, changes in equity and its cash flows for the years then ended in accordance with Accounting Standards for Non-public Entities in the Republic of Korea (“K-GAAP”).",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            27,
+            29,
+            31
+          ],
+          "new_lines": [
+            27,
+            29,
+            31,
+            33,
+            35
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 70,
+              "new_word_id": 69,
+              "old_line": 27,
+              "new_line": 27,
+              "segment_id": null,
+              "text": "Opinion"
+            },
+            {
+              "old_word_id": 71,
+              "new_word_id": 70,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "We"
+            },
+            {
+              "old_word_id": 72,
+              "new_word_id": 71,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "have"
+            },
+            {
+              "old_word_id": 73,
+              "new_word_id": 72,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "audited"
+            },
+            {
+              "old_word_id": 74,
+              "new_word_id": 73,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 75,
+              "new_word_id": 74,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 76,
+              "new_word_id": 75,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 77,
+              "new_word_id": 76,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 79,
+              "new_word_id": 78,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "International,"
+            },
+            {
+              "old_word_id": 80,
+              "new_word_id": 79,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "Inc."
+            },
+            {
+              "old_word_id": 81,
+              "new_word_id": 80,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "(the"
+            },
+            {
+              "old_word_id": 82,
+              "new_word_id": 81,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "“Company”),"
+            },
+            {
+              "old_word_id": 83,
+              "new_word_id": 82,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "which"
+            },
+            {
+              "old_word_id": 84,
+              "new_word_id": 83,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "comprise"
+            },
+            {
+              "old_word_id": 85,
+              "new_word_id": 84,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 86,
+              "new_word_id": 85,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 87,
+              "new_word_id": 86,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 88,
+              "new_word_id": 87,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 89,
+              "new_word_id": 88,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "position"
+            },
+            {
+              "old_word_id": 90,
+              "new_word_id": 89,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 91,
+              "new_word_id": 90,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 92,
+              "new_word_id": 91,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "December"
+            },
+            {
+              "old_word_id": 93,
+              "new_word_id": 92,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "31,"
+            },
+            {
+              "old_word_id": 94,
+              "new_word_id": 93,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "2024"
+            },
+            {
+              "old_word_id": 95,
+              "new_word_id": 94,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 96,
+              "new_word_id": 95,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "2023,"
+            },
+            {
+              "old_word_id": 97,
+              "new_word_id": 96,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 98,
+              "new_word_id": 97,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 99,
+              "new_word_id": 98,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 100,
+              "new_word_id": 99,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "income,"
+            },
+            {
+              "old_word_id": 101,
+              "new_word_id": 100,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "changes"
+            },
+            {
+              "old_word_id": 102,
+              "new_word_id": 101,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 103,
+              "new_word_id": 102,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "equity"
+            },
+            {
+              "old_word_id": 104,
+              "new_word_id": 103,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 105,
+              "new_word_id": 104,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "cash"
+            },
+            {
+              "old_word_id": 106,
+              "new_word_id": 105,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "flows"
+            },
+            {
+              "old_word_id": 107,
+              "new_word_id": 106,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 108,
+              "new_word_id": 107,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 109,
+              "new_word_id": 108,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "years"
+            },
+            {
+              "old_word_id": 110,
+              "new_word_id": 109,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "then"
+            },
+            {
+              "old_word_id": 111,
+              "new_word_id": 110,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "ended,"
+            },
+            {
+              "old_word_id": 112,
+              "new_word_id": 111,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 113,
+              "new_word_id": 112,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "notes,"
+            },
+            {
+              "old_word_id": 114,
+              "new_word_id": 113,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "comprising"
+            },
+            {
+              "old_word_id": 115,
+              "new_word_id": 114,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "significant"
+            },
+            {
+              "old_word_id": 116,
+              "new_word_id": 115,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "accounting"
+            },
+            {
+              "old_word_id": 117,
+              "new_word_id": 116,
+              "old_line": 29,
+              "new_line": 29,
+              "segment_id": null,
+              "text": "policies."
+            },
+            {
+              "old_word_id": 118,
+              "new_word_id": 117,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "In"
+            },
+            {
+              "old_word_id": 119,
+              "new_word_id": 118,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "our"
+            },
+            {
+              "old_word_id": 120,
+              "new_word_id": 119,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "opinion,"
+            },
+            {
+              "old_word_id": 144,
+              "new_word_id": 120,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 145,
+              "new_word_id": 121,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "accompanying"
+            },
+            {
+              "old_word_id": 146,
+              "new_word_id": 122,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 147,
+              "new_word_id": 123,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "statements"
+            },
+            {
+              "old_word_id": 148,
+              "new_word_id": 124,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "present"
+            },
+            {
+              "old_word_id": 149,
+              "new_word_id": 125,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "fairly,"
+            },
+            {
+              "old_word_id": 150,
+              "new_word_id": 126,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 151,
+              "new_word_id": 127,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "all"
+            },
+            {
+              "old_word_id": 152,
+              "new_word_id": 128,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "material"
+            },
+            {
+              "old_word_id": 153,
+              "new_word_id": 129,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "respects,"
+            },
+            {
+              "old_word_id": 154,
+              "new_word_id": 130,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 155,
+              "new_word_id": 131,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "financial"
+            },
+            {
+              "old_word_id": 156,
+              "new_word_id": 132,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "position"
+            },
+            {
+              "old_word_id": 157,
+              "new_word_id": 133,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 158,
+              "new_word_id": 134,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 160,
+              "new_word_id": 136,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "as"
+            },
+            {
+              "old_word_id": 161,
+              "new_word_id": 137,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "of"
+            },
+            {
+              "old_word_id": 162,
+              "new_word_id": 138,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "December"
+            },
+            {
+              "old_word_id": 163,
+              "new_word_id": 139,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "31,"
+            },
+            {
+              "old_word_id": 164,
+              "new_word_id": 140,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "2024"
+            },
+            {
+              "old_word_id": 165,
+              "new_word_id": 141,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 166,
+              "new_word_id": 142,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "2023,"
+            },
+            {
+              "old_word_id": 167,
+              "new_word_id": 143,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 168,
+              "new_word_id": 144,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "its"
+            },
+            {
+              "old_word_id": 173,
+              "new_word_id": 147,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 174,
+              "new_word_id": 148,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "its"
+            },
+            {
+              "old_word_id": 175,
+              "new_word_id": 149,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "cash"
+            },
+            {
+              "old_word_id": 176,
+              "new_word_id": 150,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "flows"
+            },
+            {
+              "old_word_id": 177,
+              "new_word_id": 151,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 178,
+              "new_word_id": 152,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 179,
+              "new_word_id": 153,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "years"
+            },
+            {
+              "old_word_id": 180,
+              "new_word_id": 154,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "then"
+            },
+            {
+              "old_word_id": 181,
+              "new_word_id": 155,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "ended"
+            },
+            {
+              "old_word_id": 182,
+              "new_word_id": 156,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 183,
+              "new_word_id": 157,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "accordance"
+            },
+            {
+              "old_word_id": 184,
+              "new_word_id": 158,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "with"
+            },
+            {
+              "old_word_id": 186,
+              "new_word_id": 163,
+              "old_line": 31,
+              "new_line": 31,
+              "segment_id": null,
+              "text": "Standards"
+            },
+            {
+              "old_word_id": 187,
+              "new_word_id": 166,
+              "old_line": 31,
+              "new_line": 33,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 190,
+              "new_word_id": 225,
+              "old_line": 31,
+              "new_line": 35,
+              "segment_id": null,
+              "text": "in"
+            },
+            {
+              "old_word_id": 191,
+              "new_word_id": 226,
+              "old_line": 31,
+              "new_line": 35,
+              "segment_id": null,
+              "text": "the"
+            },
+            {
+              "old_word_id": 192,
+              "new_word_id": 227,
+              "old_line": 31,
+              "new_line": 35,
+              "segment_id": null,
+              "text": "Republic"
+            },
+            {
+              "old_word_id": 193,
+              "new_word_id": 228,
+              "old_line": 31,
+              "new_line": 35,
+              "segment_id": null,
+              "text": "of"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          27,
+          29,
+          31
+        ],
+        "new_lines": [
+          27,
+          29,
+          31,
+          33,
+          35
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T02:36:43.154959+00:00",
+    "updated_at": "2026-06-10T02:36:43.154959+00:00"
+  },
+  {
+    "review_id": "r-88ed98b9",
+    "anchor_id": "a-8d52201a",
+    "doc_id": "37820dd106af",
+    "status": "open",
+    "created_run_id": "c1dddd3817e1",
+    "is_floating": false,
+    "text": "Current assets Cash and cash equivalents 20 W 11,259,742 21,295,609 Trade receivables, less allowance for doubtful accounts of W13,628,240 thousand in 2024 and W2,992,257 thousand in 2023 20,21 70,993,392 16,440,069 Non-trade receivables, less allowance for doubtful accounts of nil in 2024 and W501,574 thousand in 2023",
+    "comments": [
+      {
+        "comment_id": "c-5f669b1f",
+        "author": "user",
+        "text": "form is wrong",
+        "created_at": "2026-06-10T02:36:56.733957+00:00"
+      }
+    ],
+    "anchors": {
+      "c1dddd3817e1": {
+        "run_id": "c1dddd3817e1",
+        "side": "old",
+        "word_ids": [
+          932,
+          933,
+          934,
+          935,
+          936,
+          937,
+          938,
+          939,
+          940,
+          941,
+          942,
+          943,
+          944,
+          945,
+          946,
+          947,
+          948,
+          949,
+          950,
+          951,
+          952,
+          953,
+          954,
+          955,
+          956,
+          957,
+          958,
+          959,
+          960,
+          961,
+          962,
+          963,
+          964,
+          965,
+          966,
+          967,
+          968,
+          969,
+          970,
+          971,
+          972,
+          973,
+          974,
+          975,
+          976,
+          977
+        ],
+        "old_word_ids": [
+          932,
+          933,
+          934,
+          935,
+          936,
+          937,
+          938,
+          939,
+          940,
+          941,
+          942,
+          943,
+          944,
+          945,
+          946,
+          947,
+          948,
+          949,
+          950,
+          951,
+          952,
+          953,
+          954,
+          955,
+          956,
+          957,
+          958,
+          959,
+          960,
+          961,
+          962,
+          963,
+          964,
+          965,
+          966,
+          967,
+          968,
+          969,
+          970,
+          971,
+          972,
+          973,
+          974,
+          975,
+          976,
+          977
+        ],
+        "new_word_ids": [],
+        "page": 5,
+        "bbox": [
+          58.68000030517578,
+          134.4915313720703,
+          545.2901000976562,
+          231.94747924804688
+        ],
+        "rect": [
+          55.06507873535156,
+          155.20832061767578,
+          225.06507873535156,
+          227.70832061767578
+        ],
+        "text": "Current assets Cash and cash equivalents 20 W 11,259,742 21,295,609 Trade receivables, less allowance for doubtful accounts of W13,628,240 thousand in 2024 and W2,992,257 thousand in 2023 20,21 70,993,392 16,440,069 Non-trade receivables, less allowance for doubtful accounts of nil in 2024 and W501,574 thousand in 2023",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": "fs_position",
+          "old_lines": [
+            74,
+            76,
+            78,
+            80
+          ],
+          "new_lines": [
+            78,
+            80,
+            82,
+            84
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 932,
+              "new_word_id": 999,
+              "old_line": 74,
+              "new_line": 78,
+              "segment_id": null,
+              "text": "Current"
+            },
+            {
+              "old_word_id": 933,
+              "new_word_id": 1000,
+              "old_line": 74,
+              "new_line": 78,
+              "segment_id": null,
+              "text": "assets"
+            },
+            {
+              "old_word_id": 934,
+              "new_word_id": 1001,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "Cash"
+            },
+            {
+              "old_word_id": 935,
+              "new_word_id": 1002,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 936,
+              "new_word_id": 1003,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "cash"
+            },
+            {
+              "old_word_id": 937,
+              "new_word_id": 1004,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "equivalents"
+            },
+            {
+              "old_word_id": 938,
+              "new_word_id": 1005,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "20"
+            },
+            {
+              "old_word_id": 939,
+              "new_word_id": 1006,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "W"
+            },
+            {
+              "old_word_id": 940,
+              "new_word_id": 1007,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "11,259,742"
+            },
+            {
+              "old_word_id": 941,
+              "new_word_id": 1008,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "21,295,609"
+            },
+            {
+              "old_word_id": 942,
+              "new_word_id": 1009,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "Trade"
+            },
+            {
+              "old_word_id": 944,
+              "new_word_id": 1014,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "less"
+            },
+            {
+              "old_word_id": 945,
+              "new_word_id": 1015,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "allowance"
+            },
+            {
+              "old_word_id": 946,
+              "new_word_id": 1016,
+              "old_line": 76,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 947,
+              "new_word_id": 1017,
+              "old_line": 78,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "doubtful"
+            },
+            {
+              "old_word_id": 948,
+              "new_word_id": 1018,
+              "old_line": 78,
+              "new_line": 80,
+              "segment_id": null,
+              "text": "accounts"
+            },
+            {
+              "old_word_id": 960,
+              "new_word_id": 1021,
+              "old_line": 78,
+              "new_line": 82,
+              "segment_id": null,
+              "text": "70,993,392"
+            },
+            {
+              "old_word_id": 961,
+              "new_word_id": 1022,
+              "old_line": 78,
+              "new_line": 82,
+              "segment_id": null,
+              "text": "16,440,069"
+            },
+            {
+              "old_word_id": 962,
+              "new_word_id": 1023,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "Non-trade"
+            },
+            {
+              "old_word_id": 963,
+              "new_word_id": 1024,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "receivables,"
+            },
+            {
+              "old_word_id": 964,
+              "new_word_id": 1028,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "less"
+            },
+            {
+              "old_word_id": 965,
+              "new_word_id": 1029,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "allowance"
+            },
+            {
+              "old_word_id": 966,
+              "new_word_id": 1030,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "for"
+            },
+            {
+              "old_word_id": 967,
+              "new_word_id": 1031,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "doubtful"
+            },
+            {
+              "old_word_id": 968,
+              "new_word_id": 1032,
+              "old_line": 80,
+              "new_line": 84,
+              "segment_id": null,
+              "text": "accounts"
+            }
+          ]
+        },
+        "section_id": "fs_position",
+        "old_lines": [
+          74,
+          76,
+          78,
+          80
+        ],
+        "new_lines": [
+          78,
+          80,
+          82,
+          84
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T02:36:56.733957+00:00",
+    "updated_at": "2026-06-10T02:36:56.733957+00:00"
+  },
+  {
+    "review_id": "r-d05f4829",
+    "anchor_id": "a-34190ce2",
+    "doc_id": "37820dd106af",
+    "status": "cleared",
+    "created_run_id": "c1dddd3817e1",
+    "is_floating": false,
+    "text": "DEMO International,",
+    "comments": [
+      {
+        "comment_id": "c-5bcb1c3f",
+        "author": "user",
+        "text": "please change the compnay name in to real. other parts are the same",
+        "created_at": "2026-06-10T02:37:18.576904+00:00"
+      }
+    ],
+    "anchors": {
+      "c1dddd3817e1": {
+        "run_id": "c1dddd3817e1",
+        "side": "old",
+        "word_ids": [
+          2049,
+          2050
+        ],
+        "old_word_ids": [
+          2049,
+          2050
+        ],
+        "new_word_ids": [],
+        "page": 11,
+        "bbox": [
+          78.0,
+          121.90103149414062,
+          162.69090270996094,
+          135.22750854492188
+        ],
+        "rect": [
+          75.06507873535156,
+          123.02083015441895,
+          110.06507873535156,
+          130.52083015441895
+        ],
+        "text": "DEMO International,",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": "note_1",
+          "old_lines": [
+            211
+          ],
+          "new_lines": [
+            219
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 2050,
+              "new_word_id": 2106,
+              "old_line": 211,
+              "new_line": 219,
+              "segment_id": null,
+              "text": "International,"
+            }
+          ]
+        },
+        "section_id": "note_1",
+        "old_lines": [
+          211
+        ],
+        "new_lines": [
+          219
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-10T02:37:18.576904+00:00",
+    "updated_at": "2026-06-10T02:40:00.830243+00:00"
+  }
+]
