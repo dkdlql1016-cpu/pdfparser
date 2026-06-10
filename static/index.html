@@ -7,10 +7,10 @@
 <style>
 :root{--red:#cf222e;--green:#2da44e;--red-bg:rgba(255,65,65,.38);--green-bg:rgba(34,197,94,.38);--blue:#2563eb;--ui-font:12px;--ui-font-sm:11px}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827;font-size:var(--ui-font)}
-.topbar{min-height:58px;background:#111827;color:white;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap;transition:margin-left .18s ease}
+.topbar{min-height:48px;background:#111827;color:white;display:flex;align-items:center;gap:8px;padding:5px 10px;flex-wrap:wrap;transition:margin-left .18s ease}
 .uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:0}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer;user-select:none;outline:none}.fileName{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;font-size:var(--ui-font-sm)}
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
-#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 58px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
+#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 48px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
 .sidebarRail{display:none;position:static;flex:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center}body.sidebarCollapsed .sidebarRail{display:inline-block}
 aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease}body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}.sideHeader{display:flex;align-items:center;gap:8px;height:38px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.workspaceTitleRow{display:flex;align-items:center;gap:6px;min-width:0;width:100%}.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sideTitleInput{flex:none;min-width:0;max-width:180px;width:auto;height:24px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:var(--ui-font) system-ui;color:#111827}.sideIconBtn{width:24px;height:24px;padding:0;border-radius:6px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1}.sideCollapse{margin-left:auto;width:24px;height:24px;padding:0;border-radius:6px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 4px;font-size:var(--ui-font-sm);line-height:1.2}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
 .tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:8px 11px;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700}.addStat{color:var(--green)}.delStat{color:var(--red)}
@@ -26,8 +26,20 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
 .changeModalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .changeModalBody{font-size:var(--ui-font);line-height:1.5;color:#111827;white-space:pre-wrap;overflow-wrap:anywhere}
 .changeModalSection{margin-bottom:10px}
+.reviewModalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:3250;display:none;align-items:center;justify-content:center;padding:16px}
+.reviewModalBox{width:min(920px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
+.reviewModalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.reviewModalBody{font-size:var(--ui-font);line-height:1.5;color:#111827}
+.reviewModalThread{display:flex;flex-direction:column;gap:8px}
+.reviewModalComment{border:1px solid #e5e7eb;border-radius:8px;padding:8px;background:#f8fafc}
+.reviewModalMeta{font-size:var(--ui-font-sm);color:#6b7280;margin-bottom:4px}
+.reviewModalComment textarea{width:100%;min-height:72px;border:1px solid #cbd5e1;border-radius:6px;padding:6px;font:var(--ui-font) system-ui;resize:vertical}
+.reviewModalActions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+.editedMark{display:inline-flex;align-items:center;gap:3px;padding:0 6px;height:18px;border-radius:999px;background:#ecfdf3;border:1px solid #86efac;color:#166534;font-weight:800;font-size:10px;vertical-align:middle}
+.toolTraceBox{display:flex;flex-wrap:wrap;gap:5px}
+.toolTracePill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:11px}
 .meta{color:#6b7280;font-size:11px;margin-bottom:4px}.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
-.viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.viewer.single{grid-template-columns:1fr}.viewer.single #oldPane{display:none}.pane{position:relative;overflow:auto;background:#fff;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:7px 10px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer{display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.viewer.single{grid-template-columns:1fr}.viewer.single #oldPane{display:none}.pane{position:relative;overflow:auto;background:#fff;border-right:1px solid #9ca3af}.pane:last-child{border-right:0}.paneTitle{position:sticky;top:0;z-index:20;background:rgba(17,24,39,.95);color:white;padding:4px 8px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:8px}.paneTitle span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pages{padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:0}.page{position:relative;background:white;box-shadow:none;flex:none}.page img{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;user-select:none;-webkit-user-drag:none}.hl{position:absolute;z-index:2;border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.hl.delete{background:var(--red-bg)}.hl.add{background:var(--green-bg)}.hl.focus{outline:none!important;box-shadow:inset 0 0 0 1.5px #2563eb!important;z-index:4!important;border-radius:3px!important}
 .empty{padding:20px;color:#6b7280;font-size:var(--ui-font)}.reviewPlaceholder{color:#6b7280;line-height:1.5;font-size:var(--ui-font);padding:10px}.selbox{display:none}.textsel{position:absolute;z-index:7;background:rgba(37,99,235,.30);border-radius:2px;pointer-events:none;mix-blend-mode:multiply}.reviewAnchorFocus,.reviewAnchorHover{position:absolute;z-index:6;background:rgba(99,102,241,.16);box-shadow:inset 0 0 0 1.5px #4f46e5;border-radius:2px;pointer-events:none}.reviewAnchorHover{z-index:7;background:rgba(245,158,11,.24);box-shadow:inset 0 0 0 1.5px #d97706}
 .review{position:absolute;z-index:3;background:rgba(245,158,11,.30);box-shadow:inset 0 0 0 1px rgba(180,83,9,.65);border-radius:2px;cursor:pointer}.review.cleared,.review.resolved{background:rgba(148,163,184,.28);box-shadow:inset 0 0 0 1px rgba(100,116,139,.6)}.review.active{box-shadow:inset 0 0 0 2px var(--blue);z-index:5}.review.preview{background:rgba(37,99,235,.22);box-shadow:inset 0 0 0 1px var(--blue);pointer-events:none}
@@ -103,6 +115,12 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
     <div id="changeAiModalBody" class="changeModalBody"></div>
   </div>
 </div>
+<div id="reviewDetailModal" class="reviewModalBackdrop">
+  <div class="reviewModalBox">
+    <div class="reviewModalHead"><strong id="reviewDetailTitle">Comment Detail</strong><button type="button" class="secondary" onclick="closeReviewDetailModal()">Close</button></div>
+    <div id="reviewDetailBody" class="reviewModalBody"></div>
+  </div>
+</div>
 <div id="toast"></div>
 <div id="sourcePicker" class="sourcePicker"><button id="sourceFileManagerBtn" type="button">File Manager</button><button id="sourceExternalBtn" type="button">External</button></div>
 <div id="fmDialog" class="fmBackdrop"><div class="fmBox"><div class="fmHead"><strong>File Manager</strong><button type="button" class="secondary" onclick="closeFileManager()">Close</button></div><div id="fmTableWrap"></div></div></div>
@@ -134,6 +152,8 @@ let REVIEW_AI_ABORT_CONTROLLER=null;
 let CHANGE_AI_ABORT_CONTROLLER=null;
 let REVIEW_AI_RUNNING_IDS=new Set();
 let CHANGE_AI_RUNNING_IDS=new Set();
+let REVIEW_DETAIL_MODAL_ID=null;
+let REVIEW_EDITING_COMMENT_ID=null;
 let HOME_RETURN_COLLAPSED=false;
 let BASE_UPLOAD_NAME='';
 let UPDATE_UPLOAD_NAME='';
@@ -195,7 +215,29 @@ $('#sourceFileManagerBtn').addEventListener('click',()=>{closeSourcePicker();ope
 $('#sourceExternalBtn').addEventListener('click',()=>{const id=UPLOAD_CONTEXT==='base'?'#initialFile':'#updateFile';closeSourcePicker();$(id).click()});
 document.addEventListener('click',e=>{const picker=$('#sourcePicker');if(!picker||picker.style.display==='none')return;if(picker.contains(e.target)||e.target.id==='baseUploadBtn'||e.target.id==='updateUploadBtn')return;closeSourcePicker()});
 document.addEventListener('click',e=>{const modal=$('#changeAiModal');if(!modal||modal.style.display!=='flex')return;if(e.target===modal)closeChangeAiModal()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChangeAiModal()});
+document.addEventListener('click',e=>{const modal=$('#reviewDetailModal');if(!modal||modal.style.display!=='flex')return;if(e.target===modal)closeReviewDetailModal()});
+function closeTopOverlayOnEscape(){
+  const reviewModal=$('#reviewDetailModal');
+  if(reviewModal&&reviewModal.style.display==='flex'){closeReviewDetailModal();return true}
+  const changeModal=$('#changeAiModal');
+  if(changeModal&&changeModal.style.display==='flex'){closeChangeAiModal();return true}
+  const sourcePicker=$('#sourcePicker');
+  if(sourcePicker&&sourcePicker.style.display!=='none'){closeSourcePicker();return true}
+  const fmDialog=$('#fmDialog');
+  if(fmDialog&&fmDialog.style.display==='flex'){closeFileManager();return true}
+  const confirmDialog=$('#confirmDialog');
+  if(confirmDialog&&confirmDialog.style.display==='flex'){
+    const noBtn=$('#confirmNo');
+    if(noBtn)noBtn.click();else confirmDialog.style.display='none';
+    return true;
+  }
+  const reviewPop=$('#reviewPopover');
+  if(reviewPop&&reviewPop.style.display==='block'){closeReviewPopover();return true}
+  const notePanels=[...document.querySelectorAll('.reviewNotePanel')];
+  if(notePanels.length){notePanels[notePanels.length-1].remove();return true}
+  return false;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(closeTopOverlayOnEscape())e.preventDefault()}});
 document.addEventListener('mousedown',e=>{if(!WORKSPACE_RENAME_INPUT)return;if(e.target===WORKSPACE_RENAME_INPUT||e.target.id==='workspaceRenameBtn')return;finishWorkspaceRename(true)});
 document.querySelectorAll('.zoomControls').forEach(ctrl=>{
   const side=ctrl.dataset.side;
@@ -783,7 +825,8 @@ function finishSelection(side,pageEl,rectPx,xy,startDoc,endDoc){
   openPopover(side,pageNo,sel,ids,xy);
 }
 function clearPreview(){document.querySelectorAll('.review.preview,.textsel').forEach(e=>e.remove())}
-function openPopover(side,pageNo,sel,ids,xy){const pop=$('#reviewPopover');$('#pvComment').value='';pop.style.display='block';const w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';$('#pvComment').focus();const close=()=>{pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null};$('#pvCancel').onclick=close;$('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);close()}}
+function closeReviewPopover(){const pop=$('#reviewPopover');if(!pop)return;pop.style.display='none';clearPreview();$('#pvSave').onclick=null;$('#pvCancel').onclick=null}
+function openPopover(side,pageNo,sel,ids,xy){const pop=$('#reviewPopover');$('#pvComment').value='';pop.style.display='block';const w=pop.offsetWidth,h=pop.offsetHeight;pop.style.left=Math.max(8,Math.min(xy.x+8,window.innerWidth-w-8))+'px';pop.style.top=Math.max(8,Math.min(xy.y+8,window.innerHeight-h-8))+'px';$('#pvComment').focus();$('#pvCancel').onclick=closeReviewPopover;$('#pvSave').onclick=async()=>{const comment=$('#pvComment').value.trim();await submitReview(side,pageNo,sel,ids,comment);closeReviewPopover()}}
 async function submitReview(side,pageNo,sel,ids,comment){if(READ_ONLY){toast('Snapshot is read-only');return}try{const res=await fetch(`${apiBase()}/reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({side,page:pageNo,rect:sel,word_ids:ids,comment})});const rev=await res.json();if(!res.ok||rev.error){toast('Failed to save comment: '+(rev.error||res.status));return}setDirty(true);REVIEW_SIDE=side==='old'?'old':'new';await loadReviews();activateTab('review');updateReviewSubtabs();focusReviewById(rev.review_id)}catch(e){toast('Comment save failed')}}
 
 async function loadAssessment(){if(!DATA||!isDiff()){AI_ASSESSMENT={items:[]};return}try{AI_ASSESSMENT=await fetch(`${apiBase()}/assess`).then(r=>r.ok?r.json():{items:[]})}catch(e){AI_ASSESSMENT={items:[]}}}
@@ -793,7 +836,7 @@ async function loadChangeAssessment(){
   catch(e){CHANGE_AI_ASSESSMENT={items:[]}}
   drawChanges(DATA);
 }
-async function loadReviews(){if(!DATA)return;try{REVIEWS=await fetch(`${apiBase()}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}await loadAssessment();drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS)}
+async function loadReviews(){if(!DATA)return;try{REVIEWS=await fetch(`${apiBase()}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}await loadAssessment();drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS);if(REVIEW_DETAIL_MODAL_ID&&$('#reviewDetailModal')?.style.display==='flex')renderReviewDetailModal()}
 async function loadSnapshots(){if(!DOC_ID)return;try{const data=await fetch(`/api/documents/${DOC_ID}/snapshots`).then(r=>r.ok?r.json():{snapshots:[]});renderSnapshots(data.snapshots||[])}catch(e){renderSnapshots([])}}
 function renderSnapshots(items){const pane=$('#snapshotPane');if(!items.length){pane.innerHTML='<div class="empty">Save a snapshot to preserve the current review state.</div>';return}pane.innerHTML=items.map(s=>`<div class="snapshotRow"><div class="meta">${escapeHtml((s.created_at||'').slice(0,19).replace('T',' '))} · ${s.mode||'-'} · ${s.has_ai_assessment?'AI checked':'No AI check'}</div><div>${escapeHtml(s.label||s.filename||s.snapshot_id)}</div><div class="meta">${s.open_reviews||0} open / ${s.closed_reviews||0} closed</div><div class="rvActions"><button onclick="event.stopPropagation();openSnapshot('${s.snapshot_id}')">Open</button></div></div>`).join('')}
 window.saveSnapshot=async function(){if(!DOC_ID||!RUN_ID||SNAPSHOT_ID){toast('Open a live run before saving a snapshot.');return}try{const label=$('#snapshotLabel')?.value||'';const res=await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/snapshots`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Snapshot save failed');return}if($('#snapshotLabel'))$('#snapshotLabel').value='';setDirty(false);await loadSnapshots();toast('Snapshot saved')}catch(e){toast('Snapshot save failed')}}
@@ -894,10 +937,21 @@ function reviewComments(rv){
   if(comments.length)return comments;
   return (rv.comment||'').trim()?[{text:rv.comment,created_at:rv.created_at||''}]:[];
 }
+function summarizeToolTrace(item){
+  const trace=Array.isArray(item?.tool_trace)?item.tool_trace:[];
+  const read=trace.filter(t=>t&&t.tool==='read_section').length;
+  const search=trace.filter(t=>t&&t.tool==='search_markdown').length;
+  return {total:trace.length,read,search};
+}
+function renderToolTrace(item){
+  const s=summarizeToolTrace(item);
+  if(!s.total)return `<div class="toolTraceBox"><span class="toolTracePill">Tool calls: 0</span></div>`;
+  return `<div class="toolTraceBox"><span class="toolTracePill">Tool calls: ${s.total}</span>${s.read?`<span class="toolTracePill">read_section: ${s.read}</span>`:''}${s.search?`<span class="toolTracePill">search_markdown: ${s.search}</span>`:''}</div>`;
+}
 function renderNoteThread(rv){
   const comments=reviewComments(rv);
   if(!comments.length)return '<div class="noteComment">(No comment)</div>';
-  return `<div class="noteThread">${comments.map(c=>`<div class="noteComment"><div>${escapeHtml(c.text||'')}</div>${c.created_at?`<div class="noteCommentMeta">${escapeHtml(String(c.created_at).slice(0,16).replace('T',' '))}</div>`:''}</div>`).join('')}</div>`;
+  return `<div class="noteThread">${comments.map(c=>`<div class="noteComment"><div>${escapeHtml(c.text||'')}</div>${c.created_at?`<div class="noteCommentMeta">${escapeHtml(String(c.created_at).slice(0,16).replace('T',' '))}${c.edited_at?` · <span class="editedMark">V Edited</span> ${escapeHtml(String(c.edited_at).slice(0,16).replace('T',' '))}`:''}</div>`:''}</div>`).join('')}</div>`;
 }
 function renderNotePanelHtml(rv){
   const actions=READ_ONLY?'':`<div class="noteReply"><textarea placeholder="Comment"></textarea><div class="noteReplyActions"><button type="button" data-act="saveComment">Comment</button><button type="button" data-act="cancelComment">Cancel</button></div></div><div class="noteActions"><button type="button" data-act="add">Comment</button><button type="button" data-act="toggle">${isCleared(rv)?'Reopen':'Clear'}</button><button type="button" class="noteDelete" data-act="delete">Delete</button></div>`;
@@ -964,7 +1018,7 @@ function showListReply(id){const row=document.querySelector(`.reviewRow[data-rev
 function hideListReply(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),box=row?.querySelector('.rvReply'),ta=box?.querySelector('textarea');if(!box||!ta)return;box.style.display='none';ta.value=''}
 function refreshOpenNotePanels(id,rv){document.querySelectorAll(`.reviewNotePanel[data-review-id="${id}"] .noteBody`).forEach(body=>{body.innerHTML=renderNoteThread(rv)})}
 async function saveListComment(id){const row=document.querySelector(`.reviewRow[data-review-id="${id}"]`),ta=row?.querySelector('.rvReply textarea');const text=(ta?.value||'').trim();if(!text)return;try{const rv=await postComment(id,text);setDirty(true);refreshOpenNotePanels(id,rv);renderReviewList(REVIEWS);focusReviewById(id)}catch(e){toast('Failed to add comment')}}
-function askConfirm(message){return new Promise(resolve=>{const dlg=$('#confirmDialog'),msg=$('#confirmMsg'),yes=$('#confirmYes'),no=$('#confirmNo');msg.textContent=message;dlg.style.display='flex';const done=v=>{dlg.style.display='none';yes.onclick=null;no.onclick=null;resolve(v)};yes.onclick=()=>done(true);no.onclick=()=>done(false)})}
+function askConfirm(message,opts={}){return new Promise(resolve=>{const dlg=$('#confirmDialog'),msg=$('#confirmMsg'),yes=$('#confirmYes'),no=$('#confirmNo');msg.textContent=message;yes.textContent=opts.yesText||'Yes';no.textContent=opts.noText||'No';dlg.style.display='flex';const done=v=>{dlg.style.display='none';yes.onclick=null;no.onclick=null;yes.textContent='Yes';no.textContent='No';resolve(v)};yes.onclick=()=>done(true);no.onclick=()=>done(false)})}
 window.openChangeAiModal=function(changeId){
   const item=changeAiItemForId(changeId);
   if(!item){toast('No AI result for this change yet.');return}
@@ -977,10 +1031,56 @@ window.openChangeAiModal=function(changeId){
   const rec=verdict==='low'?'':String(item.recommended_comment||'').trim();
   const eOld=String(item.evidence_old||'').trim();
   const eNew=String(item.evidence_new||'').trim();
-  body.innerHTML=`${reason?`<div class="changeModalSection"><strong>Reasoning</strong><div>${escapeHtml(reason)}</div></div>`:''}${rec?`<div class="changeModalSection"><strong>Suggested review</strong><div>${escapeHtml(rec)}</div></div>`:''}${eOld?`<div class="changeModalSection"><strong>Evidence (old)</strong><div>${escapeHtml(eOld)}</div></div>`:''}${eNew?`<div class="changeModalSection"><strong>Evidence (new)</strong><div>${escapeHtml(eNew)}</div></div>`:''}${item.forwarded_review_id?`<div class="changeModalSection"><strong>Forwarded review</strong><div>${escapeHtml(item.forwarded_review_id)}</div></div>`:''}`;
+  body.innerHTML=`${reason?`<div class="changeModalSection"><strong>Reasoning</strong><div>${escapeHtml(reason)}</div></div>`:''}${rec?`<div class="changeModalSection"><strong>Suggested review</strong><div>${escapeHtml(rec)}</div></div>`:''}${eOld?`<div class="changeModalSection"><strong>Evidence (old)</strong><div>${escapeHtml(eOld)}</div></div>`:''}${eNew?`<div class="changeModalSection"><strong>Evidence (new)</strong><div>${escapeHtml(eNew)}</div></div>`:''}<div class="changeModalSection"><strong>Tool usage</strong>${renderToolTrace(item)}</div>${item.forwarded_review_id?`<div class="changeModalSection"><strong>Forwarded review</strong><div>${escapeHtml(item.forwarded_review_id)}</div></div>`:''}`;
   modal.style.display='flex';
 }
 window.closeChangeAiModal=function(){const modal=$('#changeAiModal');if(modal)modal.style.display='none'}
+function reviewById(id){return (REVIEWS||[]).find(r=>r.review_id===id)||null}
+function formatTs(ts){if(!ts)return '';return escapeHtml(String(ts).slice(0,19).replace('T',' '))}
+function renderReviewDetailModal(){
+  const rv=reviewById(REVIEW_DETAIL_MODAL_ID);
+  const body=$('#reviewDetailBody'),title=$('#reviewDetailTitle');
+  if(!body||!title)return;
+  if(!rv){body.innerHTML='<div class="empty">Comment not found.</div>';return}
+  const ai=aiItemForReview(rv.review_id);
+  title.textContent=`Comment ${rv.review_id}`;
+  const comments=reviewComments(rv);
+  const thread=`<div class="reviewModalThread">${comments.map((c,idx)=>{const cid=c.comment_id||`legacy-${idx+1}`;const editing=(REVIEW_EDITING_COMMENT_ID===cid)&&!READ_ONLY;const meta=`<div class="reviewModalMeta">${formatTs(c.created_at)}${c.edited_at?` · <span class="editedMark">V Edited</span> ${formatTs(c.edited_at)}`:''}</div>`;if(editing){return `<div class="reviewModalComment">${meta}<textarea id="editCommentText">${escapeHtml(c.text||'')}</textarea><div class="reviewModalActions"><button type="button" onclick="saveReviewCommentEdit('${rv.review_id}','${cid}')">Save</button><button type="button" class="secondary" onclick="cancelReviewCommentEdit()">Cancel</button></div></div>`}const editBtn=(!READ_ONLY&&c.comment_id)?`<div class="reviewModalActions"><button type="button" onclick="startReviewCommentEdit('${cid}')">Edit</button></div>`:'';return `<div class="reviewModalComment">${meta}<div>${escapeHtml(c.text||'')}</div>${editBtn}</div>`}).join('')}</div>`;
+  body.innerHTML=`<div class="changeModalSection"><strong>Status</strong><div>${escapeHtml(rv.status||'open')}</div></div><div class="changeModalSection"><strong>Selected text</strong><div>${escapeHtml(rv.text||'')}</div></div>${ai?`<div class="changeModalSection"><strong>AI opinion</strong>${renderAiReason(ai)}<div style="margin-top:6px">${renderToolTrace(ai)}</div></div>`:''}<div class="changeModalSection"><strong>Comment thread</strong>${thread}</div>`;
+}
+window.openReviewDetailModal=function(reviewId){
+  REVIEW_DETAIL_MODAL_ID=reviewId;
+  REVIEW_EDITING_COMMENT_ID=null;
+  const modal=$('#reviewDetailModal');
+  if(!modal)return;
+  modal.style.display='flex';
+  renderReviewDetailModal();
+}
+window.closeReviewDetailModal=function(){
+  const modal=$('#reviewDetailModal');
+  if(modal)modal.style.display='none';
+  REVIEW_DETAIL_MODAL_ID=null;
+  REVIEW_EDITING_COMMENT_ID=null;
+}
+window.startReviewCommentEdit=function(commentId){REVIEW_EDITING_COMMENT_ID=commentId;renderReviewDetailModal()}
+window.cancelReviewCommentEdit=function(){REVIEW_EDITING_COMMENT_ID=null;renderReviewDetailModal()}
+window.saveReviewCommentEdit=async function(reviewId,commentId){
+  if(READ_ONLY){toast('Snapshot is read-only');return}
+  const ta=$('#editCommentText');
+  const text=String(ta?.value||'').trim();
+  if(!text){toast('Comment text is required');return}
+  try{
+    const res=await fetch(`${apiBase()}/reviews/${reviewId}/comments/${commentId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const data=await res.json();
+    if(!res.ok||data.error){toast(data.error||'Edit failed');return}
+    setDirty(true);
+    REVIEW_EDITING_COMMENT_ID=null;
+    await loadReviews();
+    focusReviewById(reviewId);
+    if(REVIEW_DETAIL_MODAL_ID===reviewId)openReviewDetailModal(reviewId);
+    toast('Comment updated');
+  }catch(e){toast('Edit failed')}
+}
 function clearAnchorFocus(){document.querySelectorAll('.reviewAnchorFocus').forEach(e=>e.remove())}
 function clearAnchorHover(){document.querySelectorAll('.reviewAnchorHover').forEach(e=>e.remove())}
 function showAnchorHover(side,wordIds){clearAnchorHover();showAnchorFocus(side,wordIds,'reviewAnchorHover')}
@@ -1028,6 +1128,8 @@ window.setReviewSide=function(side){REVIEW_SIDE=side;updateReviewSubtabs();rende
 function reviewPreviewText(rv){const comments=reviewComments(rv);return comments.length?comments[comments.length-1].text:(rv.comment||'(No comment)')}
 function aiItemForReview(id){return (AI_ASSESSMENT.items||[]).find(x=>x.review_id===id)}
 function changeAiItemForId(id){return (CHANGE_AI_ASSESSMENT.items||[]).find(x=>Number(x.change_id)===Number(id))}
+function isReviewAiDone(id){const it=aiItemForReview(id);return !!(it&&it.status==='done'&&String(it.verdict||'').trim())}
+function isChangeAiDone(id){const it=changeAiItemForId(id);return !!(it&&it.status==='done'&&String(it.verdict||'').trim())}
 function normalizeChangeVerdict(v){
   const raw=String(v||'').toLowerCase().trim();
   if(raw==='risk')return 'medium';
@@ -1065,7 +1167,7 @@ function renderChangeAiReason(changeId,item){
   return `<div class="aiReason" onclick="event.stopPropagation();openChangeAiModal(${Number(changeId)})" title="Open full AI result"><div class="riskBadge"><span class="riskDot ${escapeHtml(verdict)}"></span><strong>${escapeHtml(verdictMap[verdict]||'Low')}</strong></div>${running?`<div><strong>AI running...</strong></div>`:''}${reasoningText?`<div>${escapeHtml(reasoningText)}</div>`:''}${recLine}${forwarded}</div>`;
 }
 function renderReviewSummary(rv){const comments=reviewComments(rv);const last=comments.length?comments[comments.length-1]:null;const more=Math.max(0,comments.length-1);const text=last?.text||rv.comment||'(No comment)';return `<div class="rvSummary"><div class="rvSummaryText">${escapeHtml(text)}</div>${more?`<span class="rvMoreCount">+${more}</span>`:''}</div>`}
-function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+(REVIEW_SIDE==='old'?'previous':'current')+' comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const isRunning=REVIEW_AI_RUNNING_IDS.has(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=(ai&&String(ai.verdict||'').toLowerCase()==='cleared')?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${isRunning?' · AI running...':''}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
+function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+(REVIEW_SIDE==='old'?'previous':'current')+' comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const isRunning=REVIEW_AI_RUNNING_IDS.has(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=(ai&&String(ai.verdict||'').toLowerCase()==='cleared')?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="openReviewDetailModal('${rv.review_id}');focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${isRunning?' · AI running...':''}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
 function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]?.length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
 function focusReview(rv,displaySide){
   clearAnchorFocus();
@@ -1097,27 +1199,38 @@ window.runAiAssessment=async function(){
   const visible=filteredSortedReviews(REVIEWS||[]);
   const reviewIds=[...new Set(visible.map(rv=>rv.review_id).filter(Boolean))];
   if(!reviewIds.length){toast('No filtered comments to run AI on.');return}
+  const doneIds=reviewIds.filter(id=>isReviewAiDone(id));
+  let skipExisting=true;
+  if(doneIds.length){
+    skipExisting=await askConfirm(
+      `Skip completed items? (${doneIds.length})`,
+      {yesText:'Yes',noText:'No'}
+    );
+  }
+  const targetIds=skipExisting?reviewIds.filter(id=>!isReviewAiDone(id)):reviewIds;
+  if(!targetIds.length){toast('All filtered comments are already AI processed.');return}
   REVIEW_AI_ABORT_CONTROLLER=new AbortController();
   updateAiButtons();
-  setReviewAiRunningIds(reviewIds);
-  setAiRunState({running:true,total:reviewIds.length,done:0,failed:0,message:`AI running... 0/${reviewIds.length}`});
+  setReviewAiRunningIds(targetIds);
+  setAiRunState({running:true,total:targetIds.length,done:0,failed:0,message:`AI running... 0/${targetIds.length}`});
   try{
-    const res=await fetch(`${apiBase()}/assess`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_ids:reviewIds}),signal:REVIEW_AI_ABORT_CONTROLLER.signal});
+    const res=await fetch(`${apiBase()}/assess`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_ids:targetIds,skip_existing:skipExisting}),signal:REVIEW_AI_ABORT_CONTROLLER.signal});
     const data=await res.json();
     if(!res.ok||data.error){throw new Error(data.error||'AI check failed')}
     AI_ASSESSMENT=data;
     setDirty(true);
     renderReviewList(REVIEWS);
-    const done=(data.items||[]).filter(i=>i.status==='done').length;
-    const failed=(data.items||[]).filter(i=>i.status==='error').length;
-    setAiRunState({running:false,done,failed,message:`AI complete: ${done}/${reviewIds.length}${failed?` (${failed} failed)`:''}`});
+    const targetSet=new Set(targetIds);
+    const done=(data.items||[]).filter(i=>targetSet.has(i.review_id)&&i.status==='done').length;
+    const failed=(data.items||[]).filter(i=>targetSet.has(i.review_id)&&i.status==='error').length;
+    setAiRunState({running:false,done,failed,message:`AI complete: ${done}/${targetIds.length}${failed?` (${failed} failed)`:''}`});
     toast(`AI check complete${failed?` (${failed} failed)`:''}`);
   }catch(e){
     if(e.name==='AbortError'){
       setAiRunState({running:false,done:0,failed:0,message:'AI stopped'});
       toast('AI stopped');
     }else{
-      setAiRunState({running:false,done:0,failed:reviewIds.length,message:'AI failed'});
+      setAiRunState({running:false,done:0,failed:targetIds.length,message:'AI failed'});
       toast(e.message||'AI check failed');
     }
   }finally{
@@ -1186,36 +1299,47 @@ window.runChangeAiOnAll=async function(){
   const changes=DATA?.changes||[];
   const changeIds=[...new Set(changes.map(c=>Number(c.id)).filter(n=>Number.isFinite(n)))];
   if(!changeIds.length){toast('No changes to run AI on.');return}
+  const doneIds=changeIds.filter(id=>isChangeAiDone(id));
+  let skipExisting=true;
+  if(doneIds.length){
+    skipExisting=await askConfirm(
+      `Skip completed items? (${doneIds.length})`,
+      {yesText:'Yes',noText:'No'}
+    );
+  }
+  const targetIds=skipExisting?changeIds.filter(id=>!isChangeAiDone(id)):changeIds;
+  if(!targetIds.length){toast('All changes are already AI processed.');return}
   CHANGE_AI_ABORT_CONTROLLER=new AbortController();
   updateAiButtons();
-  setChangeAiRunningIds(changeIds);
-  setChangeAiRunState({running:true,total:changeIds.length,done:0,failed:0,message:`AI running... 0/${changeIds.length}`});
+  setChangeAiRunningIds(targetIds);
+  setChangeAiRunState({running:true,total:targetIds.length,done:0,failed:0,message:`AI running... 0/${targetIds.length}`});
   try{
-    const grpRes=await fetch(`${apiBase()}/change-assess/groups`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({change_ids:changeIds}),signal:CHANGE_AI_ABORT_CONTROLLER.signal});
+    const grpRes=await fetch(`${apiBase()}/change-assess/groups`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({change_ids:targetIds}),signal:CHANGE_AI_ABORT_CONTROLLER.signal});
     const grpData=await grpRes.json();
     if(!grpRes.ok||grpData.error)throw new Error(grpData.error||'Change AI grouping failed');
     const groups=(grpData.groups||[]).filter(g=>Array.isArray(g.change_ids)&&g.change_ids.length);
+    const targetSet=new Set(targetIds);
     let done=0,failed=0;
     for(let i=0;i<groups.length;i++){
       const group=groups[i];
-      setChangeAiRunState({running:true,done,failed,message:`AI running... ${done}/${changeIds.length} (group ${i+1}/${groups.length})`});
+      setChangeAiRunState({running:true,done,failed,message:`AI running... ${done}/${targetIds.length} (group ${i+1}/${groups.length})`});
       const res=await fetch(`${apiBase()}/change-assess`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({change_ids:group.change_ids}),signal:CHANGE_AI_ABORT_CONTROLLER.signal});
       const data=await res.json();
       if(!res.ok||data.error)throw new Error(data.error||'Change AI failed');
       mergeChangeAssessmentItems(data.items||[]);
       setDirty(true);
       drawChanges(DATA);
-      done=(CHANGE_AI_ASSESSMENT.items||[]).filter(i=>i.status==='done').length;
-      failed=(CHANGE_AI_ASSESSMENT.items||[]).filter(i=>i.status==='error').length;
+      done=(CHANGE_AI_ASSESSMENT.items||[]).filter(i=>targetSet.has(Number(i.change_id))&&i.status==='done').length;
+      failed=(CHANGE_AI_ASSESSMENT.items||[]).filter(i=>targetSet.has(Number(i.change_id))&&i.status==='error').length;
     }
-    setChangeAiRunState({running:false,done,failed,message:`AI complete: ${done}/${changeIds.length}${failed?` (${failed} failed)`:''}`});
+    setChangeAiRunState({running:false,done,failed,message:`AI complete: ${done}/${targetIds.length}${failed?` (${failed} failed)`:''}`});
     toast(`Change AI complete${failed?` (${failed} failed)`:''}`);
   }catch(e){
     if(e.name==='AbortError'){
       setChangeAiRunState({running:false,done:0,failed:0,message:'AI stopped'});
       toast('Change AI stopped');
     }else{
-      setChangeAiRunState({running:false,done:0,failed:changeIds.length,message:'AI failed'});
+      setChangeAiRunState({running:false,done:0,failed:targetIds.length,message:'AI failed'});
       toast(e.message||'Change AI failed');
     }
   }finally{

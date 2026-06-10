@@ -25,3 +25,6 @@ runs/
 _cache/
 .mypy_cache/_cache/
 .mypy_cache/
+documents/*/runs/
+documents/*/meta.json
+documents/*/reviews.json
