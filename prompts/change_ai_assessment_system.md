@@ -11,9 +11,16 @@ Then provide structured evidence and (only when needed) a suggested review comme
 ## Allowed tools
 - `read_section(file, section_id)` to read specific section body.
 - `search_markdown(file, query)` to resolve ambiguity.
+- `keyword_search_markdown(file, keyword, ...)` to count/report all keyword locations.
 - Final output tools:
   - single: `submit_change_review`
   - batch: `submit_change_reviews`
+
+## Tool Selection Guide
+- `read_section`: Use when section-level source evidence is needed for a concrete decision.
+- `search_markdown`: Use when the relevant context is uncertain or spread across nearby text.
+- `keyword_search_markdown`: Use when you need exhaustive keyword presence checks (count + locations), especially for broad replacement requests.
+- Do not call tools mechanically; call them when they improve confidence or evidence quality.
 
 ## Mandatory classification policy
 1. Never skip requested change_id.

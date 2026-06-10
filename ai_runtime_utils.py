@@ -70,6 +70,22 @@ def assessment_tool_definitions(batch=False):
                 "additionalProperties": False,
             },
         },
+        {
+            "name": "keyword_search_markdown",
+            "description": "Count keyword matches and return match positions in a markdown report.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "keyword": {"type": "string"},
+                    "case_sensitive": {"type": "boolean"},
+                    "whole_word": {"type": "boolean"},
+                    "max_hits": {"type": "integer", "minimum": 1, "maximum": 1000},
+                },
+                "required": ["file", "keyword"],
+                "additionalProperties": False,
+            },
+        },
         submit_tool,
     ]
 
@@ -145,6 +161,22 @@ def change_assessment_tool_definitions(batch=False):
                     "query": {"type": "string"},
                 },
                 "required": ["file", "query"],
+                "additionalProperties": False,
+            },
+        },
+        {
+            "name": "keyword_search_markdown",
+            "description": "Count keyword matches and return match positions in a markdown report.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "enum": ["previous", "current"]},
+                    "keyword": {"type": "string"},
+                    "case_sensitive": {"type": "boolean"},
+                    "whole_word": {"type": "boolean"},
+                    "max_hits": {"type": "integer", "minimum": 1, "maximum": 1000},
+                },
+                "required": ["file", "keyword"],
                 "additionalProperties": False,
             },
         },

@@ -14,8 +14,14 @@
 ## 판단 원칙
 - 제공된 diff/context를 먼저 사용하십시오.
 - diff에 없는 부분은 기본적으로 unchanged로 간주하십시오.
-- 제공 근거가 부족할 때만 `read_section` 또는 `search_markdown`을 사용하십시오.
+- 판단 품질을 높이기 위해 필요하다고 판단되면 `read_section`, `search_markdown`, `keyword_search_markdown`을 사용하십시오.
 - 단순 문구 변경이 아니라, comment thread의 실질 요구 충족 여부를 기준으로 판단하십시오.
+
+## 도구 선택 가이드
+- `read_section(file, section_id)`: 대상 section_id를 이미 알고 있고, 해당 구역 본문 근거를 정확히 확인해야 할 때 사용합니다.
+- `search_markdown(file, query)`: 위치가 모호하거나 유사 문맥을 탐색해야 할 때 사용합니다.
+- `keyword_search_markdown(file, keyword, ...)`: 키워드 전수 확인(총 개수/위치)이 필요할 때 사용합니다. 예: 전역 용어 치환 검토.
+- 도구 호출은 최소화하되, 판단 신뢰도/근거 품질 향상에 실질적으로 필요하다고 판단될 때 호출하십시오.
 
 ## 분류 체계 (강제 템플릿 아님)
 아래 분류는 판단 보조 프레임입니다. 분류가 억지스럽다면 이슈 중심 판단을 우선하십시오.

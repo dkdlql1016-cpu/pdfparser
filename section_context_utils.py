@@ -109,3 +109,69 @@ def search_markdown_context(md_path: Path, query, limit=4):
                 break
     return hits
 
+
+def keyword_search_markdown(
+    md_path: Path,
+    section_map,
+    keyword,
+    *,
+    case_sensitive=False,
+    whole_word=True,
+    max_hits=200,
+):
+    if not md_path.exists() or not keyword:
+        return {
+            "keyword": str(keyword or ""),
+            "total_count": 0,
+            "truncated": False,
+            "matches": [],
+            "section_counts": {},
+        }
+    lines = strip_section_markers(read_md_lines(md_path))
+    max_hits = max(1, min(int(max_hits or 200), 1000))
+    escaped = re.escape(str(keyword))
+    if whole_word:
+        pattern = rf"(?<!\w){escaped}(?!\w)"
+    else:
+        pattern = escaped
+    flags = 0 if case_sensitive else re.IGNORECASE
+    regex = re.compile(pattern, flags)
+
+    matches = []
+    total_count = 0
+    section_counts = {}
+    sections = section_entries(section_map)
+
+    for idx, line in enumerate(lines, start=1):
+        line_text = str(line or "")
+        for m in regex.finditer(line_text):
+            total_count += 1
+            section_id = None
+            for section in sections:
+                start = int(section.get("start_line") or 1)
+                end = int(section.get("end_line") or len(lines))
+                if start <= idx <= end:
+                    section_id = section.get("section_id")
+                    break
+            if section_id:
+                section_counts[section_id] = section_counts.get(section_id, 0) + 1
+            if len(matches) < max_hits:
+                matches.append(
+                    {
+                        "line": idx,
+                        "column_start": m.start() + 1,
+                        "column_end": m.end(),
+                        "match_text": m.group(0),
+                        "section_id": section_id,
+                        "context": line_text[:500],
+                    }
+                )
+
+    return {
+        "keyword": str(keyword),
+        "total_count": total_count,
+        "truncated": total_count > len(matches),
+        "matches": matches,
+        "section_counts": section_counts,
+    }
+

@@ -14,8 +14,14 @@ Each prompt may contain one or more review bundles. A bundle includes:
 ## Working Principles
 - Use supplied diff/context first.
 - Treat non-diff content as unchanged by default.
-- Use `read_section` or `search_markdown` only when provided evidence is not enough.
+- Use `read_section`, `search_markdown`, or `keyword_search_markdown` when you judge the tool output is needed for a better decision.
 - Focus on whether the substantive user request is satisfied, not whether text merely changed.
+
+## Tool Selection Guide
+- `read_section(file, section_id)`: Use when you already know the target section and need exact section-body evidence.
+- `search_markdown(file, query)`: Use when you need contextual discovery (similar wording, nearby phrasing, unclear location).
+- `keyword_search_markdown(file, keyword, ...)`: Use when you need exhaustive counts/positions (for example global term replacement checks).
+- Keep tool usage minimal but sufficient. Call a tool when you judge it materially improves confidence or evidence quality.
 
 ## Category Framework (guidance, not rigid)
 Use these categories as a decision aid. Do not force classification when it hurts judgment.
