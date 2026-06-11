@@ -37,7 +37,8 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .tabBody{display:none;overflow:auto;flex:1;padding:10px;color:#6b7280;font-size:var(--ui-font);line-height:1.45}
 .tabBody.active{display:block}
 #tab-dashboard.tabBody.active{display:flex;flex-direction:column;min-height:0;padding:0}
-.sideListHead{padding:8px 10px;font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb;background:#f8fafc;flex:none}
+.sideListHead{padding:8px 10px;font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb;background:#f8fafc;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sideListCount{font-weight:700;color:#94a3b8;font-variant-numeric:tabular-nums;text-transform:none;letter-spacing:0}
 .sessionListPane{overflow:auto;flex:1;padding:8px;min-height:0}
 .sessionListRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:var(--ui-font)}
 .sessionListRow:hover{background:#f8fbff;border-color:#93c5fd}
@@ -64,32 +65,33 @@ body.mode-viewer #viewerMock{display:grid}
 .sessionTitle{font-size:16px;font-weight:800;color:#111827;line-height:1.3}
 .sessionMeta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11px;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9}
 .sessionMeta .k{color:#94a3b8;font-weight:700}.sessionMeta .v{color:#111827;font-weight:600;font-variant-numeric:tabular-nums}
-.panelHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f1f5f9;flex:none}
+.panelHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:8px;padding-bottom:0;border-bottom:0;flex:none}
 .panelHead h2{margin:0;font-size:15px;font-weight:800}
 .panelHead .sub{font-size:11px;color:#64748b;margin-top:2px}
-.panelHead .total{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;text-align:right}
-.panelHead .totalLabel{font-size:10px;color:#94a3b8;text-align:right}
-.deltaLine{font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:12px;font-variant-numeric:tabular-nums;flex:none}
-.deltaLine .add{color:var(--add)}.deltaLine .del{color:var(--del)}
-.riskHead{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;flex:none}
-.riskGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex:none}
-.riskCard{border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;background:#fafbfc;cursor:pointer;text-align:left;font:inherit}
+.changesStatsLine{display:flex;align-items:baseline;gap:16px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #f1f5f9;flex:none;font-variant-numeric:tabular-nums}
+.changesStatsLine .deltaBig{display:flex;align-items:baseline;gap:12px;font-size:17px;font-weight:800;line-height:1}
+.changesStatsLine .statLabel{font-weight:700;color:#64748b;margin-right:4px}
+.changesStatsLine .deltaBig .add{color:var(--add)}.changesStatsLine .deltaBig .del{color:var(--del)}
+.changesStatsLine .groupsBig{font-size:17px;font-weight:800;color:#111827;line-height:1}
+.changesStatsLine .groupsBig .groupsWord{font-weight:700;color:#64748b;margin-right:4px}
+.changesStatsLine.muted{font-size:14px;font-weight:600;color:#94a3b8}
+.riskGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex:none;margin-bottom:10px}
+.riskCard{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;background:#fafbfc;cursor:pointer;text-align:center;font:inherit}
 .riskCard:hover{background:#fff;border-color:#cbd5e1}
 .riskCard.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12);background:#fff}
-.riskCard .code{font-size:10px;font-weight:800;margin-bottom:6px}
+.riskCard .code{font-size:11px;font-weight:800;letter-spacing:.03em}
 .riskCard.high .code{color:var(--high)}.riskCard.medium .code{color:var(--medium)}
 .riskCard.low .code{color:var(--low)}.riskCard.na .code{color:#94a3b8}
-.riskCard .num{font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:#111827}
-.changeStream{flex:1;min-height:0;margin-top:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;overflow:hidden}
-.changeStream.show{display:flex;flex-direction:column}
-.streamHead{padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:10px;font-weight:800;color:#64748b;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
-.streamHead button{padding:4px 8px;font-size:10px}
+.riskCard .num{font-size:16px;font-weight:800;line-height:1.2;margin-top:4px;font-variant-numeric:tabular-nums;color:#111827}
+.changeStream{flex:1;min-height:0;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;flex-direction:column;overflow:hidden}
+.changeStream.show{display:flex}
 .streamBody{flex:1;overflow:auto;min-height:0}
 .streamItem{display:flex;gap:10px;padding:8px 12px;border-bottom:1px solid #e5e7eb;background:#fff;align-items:flex-start;cursor:pointer}
 .streamItem:last-child{border-bottom:0}
 .streamItem:hover{background:#f8fbff}
 .streamMain{flex:1;min-width:0}
-.streamMeta{font-size:10px;color:#6b7280;margin-bottom:3px}
+.streamMeta{font-size:10px;color:#6b7280;margin-bottom:3px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.streamMeta .metaSep{opacity:.55}
 .streamSummary{font-size:var(--ui-font);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}
 .addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
@@ -120,11 +122,12 @@ body.mode-viewer #viewerMock{display:grid}
 .originFilter{font-size:10px;padding:3px 9px;border:1px solid #e5e7eb;border-radius:999px;background:#fff;color:#64748b;font-weight:700;cursor:pointer;font:inherit}
 .originFilter:hover{border-color:#cbd5e1}
 .originFilter.active.new{color:var(--del);border-color:#fecaca;background:#fef2f2}
-.originFilter.active.forward{color:#64748b;border-color:#cbd5e1;background:#f1f5f9}
+.originFilter.forward{color:#7c3aed}
+.originFilter.active.forward{color:#6d28d9;border-color:#ddd6fe;background:#f5f3ff}
 .originFilter.active.all{color:var(--blue);border-color:#bfdbfe;background:#eef2ff}
-.rvBadge{font-size:9px;font-weight:800;margin-left:6px;text-transform:lowercase}
-.rvBadge.new{color:var(--del)}
-.rvBadge.forward{color:#64748b}
+.rvBadge{font-size:9px;font-weight:800;text-transform:lowercase;padding:2px 8px;border-radius:999px;line-height:1.35;flex:none}
+.rvBadge.new{color:#be123c;background:#ffe4e6}
+.rvBadge.forward{color:#6d28d9;background:#ede9fe}
 .reviewStat{border:1px solid #f1f5f9;border-radius:6px;padding:6px 4px;text-align:center;background:#fafbfc;cursor:pointer;font:inherit}
 .reviewStat:hover{border-color:#cbd5e1;background:#fff}
 .reviewStat.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.1);background:#fff}
@@ -132,6 +135,12 @@ body.mode-viewer #viewerMock{display:grid}
 .reviewStat .l{font-size:10px;font-weight:700;color:#64748b;margin-top:4px}
 .reviewStream{flex:1;min-width:0;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;overflow:hidden}
 .reviewStream.show{display:flex;flex-direction:column}
+.reviewStream .streamItem.cleared{opacity:.52;background:#fafbfc}
+.reviewStream .streamItem.cleared .streamMeta{color:#9ca3af}
+.reviewStream .streamItem.cleared .streamSummary{color:#6b7280}
+.reviewStream .streamItem.cleared .streamAi{opacity:.65;background:#f1f5f9;border-color:#e2e8f0;color:#94a3b8}
+.reviewStream .streamItem.cleared .streamAi.empty{color:#cbd5e1}
+.reviewStream .streamItem.cleared:hover{opacity:.68;background:#f8fafc}
 .changeModalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:3200;display:none;align-items:center;justify-content:center;padding:16px}
 .changeModalBackdrop.open{display:flex}
 .changeModalBox{width:min(880px,95vw);max-height:86vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
@@ -141,9 +150,8 @@ body.mode-viewer #viewerMock{display:grid}
 .changeModalItem:last-child{border-bottom:0}
 .changeSection{font-size:10px;font-weight:800;color:#6b7280;margin-bottom:2px;line-height:1.35}
 .changeModalDiff{line-height:1.45}
-.changeStreamActions{display:flex;gap:6px;margin-top:6px}
-.changeStreamActions button{padding:3px 8px;font-size:10px;background:#eef2ff;color:#3730a3;border:0;border-radius:6px;font-weight:700;cursor:pointer}
-.changeStreamActions button:hover{background:#e0e7ff}
+.streamMeta .indexLabel{color:#111827;font-weight:700}
+.streamMeta .indexTitle{color:#374151;font-weight:600}
 .reviewModalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:3250;display:none;align-items:center;justify-content:center;padding:16px}
 .reviewModalBackdrop.open{display:flex}
 .reviewModalBox{width:min(720px,92vw);max-height:80vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
@@ -187,7 +195,7 @@ body.mode-viewer #viewerMock{display:grid}
       <button class="tabBtn" data-tab="snapshot" type="button">History</button>
     </div>
     <div id="tab-dashboard" class="tabBody active">
-      <div class="sideListHead">Sessions</div>
+      <div class="sideListHead"><span>Sessions</span><span class="sideListCount" id="sessionListCount">0</span></div>
       <div id="sessionListPane" class="sessionListPane"></div>
     </div>
     <div id="tab-index" class="tabBody">Outline list would appear here.</div>
@@ -207,21 +215,18 @@ body.mode-viewer #viewerMock{display:grid}
         <section class="panel changesPanel">
           <div class="panelHead">
             <div><h2>Changes</h2></div>
-            <div><div class="total" id="changeTotal">83</div><div class="totalLabel">change groups</div></div>
           </div>
-          <div class="deltaLine" id="changeDelta"><span class="add">+76</span> · <span class="del">−73</span></div>
-          <div class="riskHead">Risk classification</div>
+          <div class="changesStatsLine" id="changesStatsLine">
+            <span class="deltaBig" id="changeDelta"><span class="add"><span class="statLabel">add</span>+76</span><span class="del"><span class="statLabel">del</span>−73</span></span>
+            <span class="groupsBig"><span class="groupsWord">change group</span><span id="changeTotal">40</span></span>
+          </div>
           <div class="riskGrid" id="riskGrid">
-            <button type="button" class="riskCard high" data-risk="high"><div class="code">High</div><div class="num">6</div></button>
-            <button type="button" class="riskCard medium" data-risk="medium"><div class="code">Medium</div><div class="num">11</div></button>
-            <button type="button" class="riskCard low" data-risk="low"><div class="code">Low</div><div class="num">28</div></button>
-            <button type="button" class="riskCard na" data-risk="na"><div class="code">N/A</div><div class="num">40</div></button>
+            <button type="button" class="riskCard high" data-risk="high"><div class="code">H</div><div class="num">6</div></button>
+            <button type="button" class="riskCard medium" data-risk="medium"><div class="code">M</div><div class="num">11</div></button>
+            <button type="button" class="riskCard low" data-risk="low"><div class="code">L</div><div class="num">12</div></button>
+            <button type="button" class="riskCard na" data-risk="na"><div class="code">N/A</div><div class="num">14</div></button>
           </div>
           <div class="changeStream" id="changeStream">
-            <div class="streamHead">
-              <span id="changeStreamTitle"></span>
-              <button type="button" class="secondary" id="changeStreamExpand">Expand</button>
-            </div>
             <div class="streamBody" id="changeStreamBody"></div>
           </div>
         </section>
@@ -240,7 +245,7 @@ body.mode-viewer #viewerMock{display:grid}
                   <span class="reportPickerName" id="reportPickerName">Report_v3</span>
                   <span class="reportPickerChev" id="reportPickerChev">▼</span>
                 </div>
-                <div class="reportPickerMeta" id="reportPickerMeta">Report_v3.pdf · 37 pages</div>
+                <div class="reportPickerMeta" id="reportPickerMeta">2026-06-11 05:24:30 · 37 pages</div>
               </button>
               <div class="reportPickerMenu" id="reportPickerMenu"></div>
             </div>
@@ -254,10 +259,6 @@ body.mode-viewer #viewerMock{display:grid}
                 <button type="button" class="originFilter new" data-origin="new">new</button>
                 <button type="button" class="originFilter forward" data-origin="forward">forward</button>
                 <button type="button" class="originFilter all active" data-origin="all">all</button>
-              </div>
-              <div class="streamHead">
-                <span id="reviewStreamTitle"></span>
-                <button type="button" class="secondary" id="reviewStreamExpand" style="display:none">Expand</button>
               </div>
               <div class="streamBody" id="reviewStreamBody"></div>
             </div>
@@ -311,15 +312,23 @@ body.mode-viewer #viewerMock{display:grid}
 
 <script>
 (function () {
-  var EXPAND_THRESHOLD = 5;
-
   var MOCK_REPORTS = {
-    old: { side: 'old', tag: 'Previous', name: 'Report_v1', file: 'Report_v1.pdf', pages: 36 },
-    new: { side: 'new', tag: 'Current', name: 'Report_v3', file: 'Report_v3.pdf', pages: 37 }
+    old: { side: 'old', tag: 'Previous', name: 'Report_v1', file: 'Report_v1.pdf', pages: 36, modified: '2026-06-09 14:22:18' },
+    new: { side: 'new', tag: 'Current', name: 'Report_v3', file: 'Report_v3.pdf', pages: 37, modified: '2026-06-11 05:24:30' }
   };
 
-  function mkRev(id, text, status, origin, ai) {
-    return { id: id, text: text, status: status, origin: origin, ai: ai || null };
+  var REVIEW_INDEX_LABELS = ['Note 4', 'Note 5', 'Note 2', 'MD&A', 'Note 6', 'Note 7', 'Note 8', 'Audit report'];
+
+  function mkRev(id, text, status, origin, ai, indexLabel) {
+    return {
+      id: id,
+      text: text,
+      status: status,
+      origin: origin,
+      ai: ai || null,
+      indexLabel: indexLabel,
+      indexTitle: MOCK_INDEX_TITLES[indexLabel] || ''
+    };
   }
 
   function buildReviewList(prefix, count, openCount, forwardCount) {
@@ -327,12 +336,14 @@ body.mode-viewer #viewerMock{display:grid}
     for (var i = 1; i <= count; i++) {
       var open = i <= openCount;
       var origin = i <= forwardCount ? 'forward' : 'new';
+      var idxLabel = REVIEW_INDEX_LABELS[(i - 1) % REVIEW_INDEX_LABELS.length];
       all.push(mkRev(
         prefix + '_' + i,
         'Comment #' + i + ': check figures in section ' + ((i % 12) + 1) + ' and footnote cross-refs.',
         open ? 'open' : 'cleared',
         origin,
-        i % 3 === 0 ? 'Anchor may have shifted — verify on current report.' : null
+        i % 3 === 0 ? 'Anchor may have shifted — verify on current report.' : null,
+        idxLabel
       ));
     }
     return all;
@@ -347,44 +358,63 @@ body.mode-viewer #viewerMock{display:grid}
     };
   }
 
+  var MOCK_INDEX_TITLES = {
+    'Note 2': 'Summary of significant accounting policies',
+    'Note 3': 'Revenue recognition',
+    'Note 4': 'Inventories',
+    'Note 5': 'Long-term debt',
+    'Note 6': 'Cash flow information',
+    'Note 7': 'Related party transactions',
+    'Note 8': 'Segment information',
+    'Note 9': 'Geographic disclosures',
+    'Note 10': 'Dividends',
+    'Note 11': 'Subsequent events',
+    'Note 12': 'Commitments and contingencies',
+    'MD&A': 'Management discussion and analysis',
+    'Audit report': "Independent auditor's report",
+    'Appendix A': 'Supplementary schedules'
+  };
+
   var MOCK_CHANGES = {
     high: [
-      { id: 42, section: 'FINANCIAL STATEMENT · p.8 · Consolidated Statements of Operations', old: 'Net revenue $12.4M', new: 'Net revenue $11.8M', ai: 'Material downward revision to headline revenue.' },
-      { id: 58, old: 'Operating margin 18.2%', new: 'Operating margin 15.1%', ai: 'Margin compression flagged as high risk.' },
-      { id: 61, old: 'Cash flow from ops $2.1M', new: 'Cash flow from ops $1.6M', ai: 'Significant cash flow decline vs prior period.' },
-      { id: 64, old: 'Debt ratio 42%', new: 'Debt ratio 48%', ai: 'Leverage increase may affect credit narrative.' },
-      { id: 71, old: 'EPS guidance $1.20', new: 'EPS guidance $0.95', ai: 'Guidance cut is material for investor section.' },
-      { id: 79, old: 'Segment A revenue +8%', new: 'Segment A revenue +2%', ai: 'Segment growth story weakened materially.' }
+      { id: 42, indexLabel: 'Note 4', section: 'FINANCIAL STATEMENT · p.8 · Consolidated Statements of Operations', old: 'Net revenue $12.4M', new: 'Net revenue $11.8M', ai: 'Material downward revision to headline revenue.' },
+      { id: 58, indexLabel: 'MD&A', old: 'Operating margin 18.2%', new: 'Operating margin 15.1%', ai: 'Margin compression flagged as high risk.' },
+      { id: 61, indexLabel: 'Note 6', old: 'Cash flow from ops $2.1M', new: 'Cash flow from ops $1.6M', ai: 'Significant cash flow decline vs prior period.' },
+      { id: 64, indexLabel: 'Note 5', old: 'Debt ratio 42%', new: 'Debt ratio 48%', ai: 'Leverage increase may affect credit narrative.' },
+      { id: 71, indexLabel: 'Note 3', old: 'EPS guidance $1.20', new: 'EPS guidance $0.95', ai: 'Guidance cut is material for investor section.' },
+      { id: 79, indexLabel: 'Note 8', old: 'Segment A revenue +8%', new: 'Segment A revenue +2%', ai: 'Segment growth story weakened materially.' }
     ],
     medium: [
-      { id: 7, old: 'FY2024 outlook stable', new: 'FY2024 outlook cautiously optimistic', ai: 'Tone shift may warrant a comment.' },
-      { id: 9, old: 'R&D spend flat YoY', new: 'R&D spend +4% YoY', ai: 'Moderate narrative change.' },
-      { id: 11, old: 'Customer churn 2.1%', new: 'Customer churn 2.8%', ai: 'Worth a review comment.' },
-      { id: 14, old: 'Headcount 1,240', new: 'Headcount 1,180', ai: 'Workforce reduction noted.' },
-      { id: 18, old: 'Geographic mix US 62%', new: 'Geographic mix US 58%', ai: 'Regional mix shift.' },
-      { id: 22, old: 'Inventory days 45', new: 'Inventory days 52', ai: 'Working capital impact.' },
-      { id: 25, old: 'Dividend $0.40', new: 'Dividend $0.38', ai: 'Minor payout change.' },
-      { id: 31, old: 'Audit opinion unqualified', new: 'Audit opinion unqualified with emphasis', ai: 'Emphasis paragraph added.' }
+      { id: 7, indexLabel: 'MD&A', old: 'FY2024 outlook stable', new: 'FY2024 outlook cautiously optimistic', ai: 'Tone shift may warrant a comment.' },
+      { id: 9, indexLabel: 'Note 2', old: 'R&D spend flat YoY', new: 'R&D spend +4% YoY', ai: 'Moderate narrative change.' },
+      { id: 11, indexLabel: 'Note 7', old: 'Customer churn 2.1%', new: 'Customer churn 2.8%', ai: 'Worth a review comment.' },
+      { id: 14, indexLabel: 'Note 4', old: 'Headcount 1,240', new: 'Headcount 1,180', ai: 'Workforce reduction noted.' },
+      { id: 18, indexLabel: 'Note 9', old: 'Geographic mix US 62%', new: 'Geographic mix US 58%', ai: 'Regional mix shift.' },
+      { id: 22, indexLabel: 'Note 5', old: 'Inventory days 45', new: 'Inventory days 52', ai: 'Working capital impact.' },
+      { id: 25, indexLabel: 'Note 10', old: 'Dividend $0.40', new: 'Dividend $0.38', ai: 'Minor payout change.' },
+      { id: 31, indexLabel: 'Audit report', old: 'Audit opinion unqualified', new: 'Audit opinion unqualified with emphasis', ai: 'Emphasis paragraph added.' }
     ],
     low: [
-      { id: 3, old: 'Table 2 headers', new: 'Table 2 revised headers', ai: 'Formatting-only change.' },
-      { id: 5, old: 'Page footer date', new: 'Page footer revised date', ai: 'Cosmetic.' },
-      { id: 8, old: 'Chart axis label Q1', new: 'Chart axis label Q1–Q4', ai: 'Label clarity.' },
-      { id: 12, old: 'Bullet list item 3', new: 'Bullet list item 3 reordered', ai: 'No numeric impact.' },
-      { id: 16, old: 'Section 2.1 title', new: 'Section 2.1 subtitle added', ai: 'Structure only.' },
-      { id: 19, old: 'Logo placement', new: 'Logo resized', ai: 'Visual only.' },
-      { id: 23, old: 'TOC entry Note 5', new: 'TOC entry Note 5 page', ai: 'Navigation fix.' },
-      { id: 27, old: 'Comma in paragraph 4', new: 'Comma removed', ai: 'Punctuation.' },
-      { id: 33, old: 'Figure 3 caption', new: 'Figure 3 caption updated', ai: 'Caption text.' },
-      { id: 36, old: 'Appendix A title', new: 'Appendix A renamed', ai: 'Naming only.' },
-      { id: 38, old: 'URL in footnote', new: 'URL updated', ai: 'Link update.' },
-      { id: 40, old: 'Whitespace in table', new: 'Table padding adjusted', ai: 'Layout.' }
+      { id: 3, indexLabel: 'Note 4', old: 'Table 2 headers', new: 'Table 2 revised headers', ai: 'Formatting-only change.' },
+      { id: 5, indexLabel: 'Note 2', old: 'Page footer date', new: 'Page footer revised date', ai: 'Cosmetic.' },
+      { id: 8, indexLabel: 'MD&A', old: 'Chart axis label Q1', new: 'Chart axis label Q1–Q4', ai: 'Label clarity.' },
+      { id: 12, indexLabel: 'Note 6', old: 'Bullet list item 3', new: 'Bullet list item 3 reordered', ai: 'No numeric impact.' },
+      { id: 16, indexLabel: 'Note 3', old: 'Section 2.1 title', new: 'Section 2.1 subtitle added', ai: 'Structure only.' },
+      { id: 19, indexLabel: 'Note 11', old: 'Logo placement', new: 'Logo resized', ai: 'Visual only.' },
+      { id: 23, indexLabel: 'Note 5', old: 'TOC entry Note 5', new: 'TOC entry Note 5 page', ai: 'Navigation fix.' },
+      { id: 27, indexLabel: 'Note 7', old: 'Comma in paragraph 4', new: 'Comma removed', ai: 'Punctuation.' },
+      { id: 33, indexLabel: 'Note 8', old: 'Figure 3 caption', new: 'Figure 3 caption updated', ai: 'Caption text.' },
+      { id: 36, indexLabel: 'Appendix A', old: 'Appendix A title', new: 'Appendix A renamed', ai: 'Naming only.' },
+      { id: 38, indexLabel: 'Note 12', old: 'URL in footnote', new: 'URL updated', ai: 'Link update.' },
+      { id: 40, indexLabel: 'Note 4', old: 'Whitespace in table', new: 'Table padding adjusted', ai: 'Layout.' }
     ],
     na: (function () {
       var list = [];
+      var labels = ['Note 4', 'Note 5', 'MD&A', 'Audit report', 'Note 6', 'Note 7'];
       for (var i = 1; i <= 14; i++) {
         list.push({
           id: 100 + i,
+          indexLabel: labels[i % labels.length],
           old: 'Paragraph block ' + i + ' opening',
           new: 'Paragraph block ' + i + ' revised opening',
           ai: null
@@ -444,7 +474,7 @@ body.mode-viewer #viewerMock{display:grid}
     }
   ];
   var activeSessionId = 's_v1_v3';
-  var activeRisk = null;
+  var activeRisk = 'high';
   var activeReportSide = 'new';
   var activeStatusFilter = 'total';
   var activeOriginNew = false;
@@ -463,6 +493,24 @@ body.mode-viewer #viewerMock{display:grid}
     return parts.join(' ') || '(empty)';
   }
 
+  function indexLabelFor(c) {
+    if (c.indexLabel) return c.indexLabel;
+    var labels = ['Note 4', 'Note 5', 'Note 6', 'MD&A', 'Audit report'];
+    return labels[c.id % labels.length];
+  }
+
+  function indexTitleFor(c) {
+    if (c.indexTitle) return c.indexTitle;
+    return MOCK_INDEX_TITLES[indexLabelFor(c)] || '';
+  }
+
+  function indexHeadingHtml(c) {
+    var label = indexLabelFor(c);
+    var title = indexTitleFor(c);
+    if (!title) return '<span class="indexLabel">' + esc(label) + '</span>';
+    return '<span class="indexLabel">' + esc(label) + '</span> · <span class="indexTitle">' + esc(title) + '</span>';
+  }
+
   function changeSectionFor(c) {
     if (c.section) return c.section;
     var types = ['FINANCIAL STATEMENT', 'NOTE', 'SECTION'];
@@ -476,9 +524,17 @@ body.mode-viewer #viewerMock{display:grid}
     return type + ' · p.' + page + ' · ' + labels[c.id % 3];
   }
 
+  function allChanges() {
+    var out = [];
+    Object.keys(MOCK_CHANGES).forEach(function (k) {
+      (MOCK_CHANGES[k] || []).forEach(function (c) { out.push(c); });
+    });
+    return out.sort(function (a, b) { return a.id - b.id; });
+  }
+
   function changeModalItemHtml(c) {
     return '<div class="changeModalItem"><div class="changeSection">' + esc(changeSectionFor(c)) + '</div>' +
-      '<div class="streamMeta">#' + c.id + '</div>' +
+      '<div class="streamMeta">#' + c.id + ' · ' + indexHeadingHtml(c) + '</div>' +
       '<div class="changeModalDiff">' + changeSummary(c) + '</div></div>';
   }
 
@@ -489,8 +545,8 @@ body.mode-viewer #viewerMock{display:grid}
     var summary = compact
       ? '<div class="streamSummary">' + changeSummary(c) + '</div>'
       : '<div>' + changeSummary(c) + '</div>';
-    var reviewBtn = '<div class="changeStreamActions"><button type="button" class="changeReviewBtn">Review</button></div>';
-    return '<div class="streamItem" data-change-id="' + c.id + '"><div class="streamMain"><div class="streamMeta">#' + c.id + '</div>' + summary + reviewBtn + '</div>' + (compact ? ai : '') + '</div>';
+    return '<div class="streamItem" data-change-id="' + c.id + '"><div class="streamMain"><div class="streamMeta">#' + c.id +
+      ' · ' + indexHeadingHtml(c) + '</div>' + summary + '</div>' + (compact ? ai : '') + '</div>';
   }
 
   function openChangeReviewModal(c, title) {
@@ -506,9 +562,9 @@ body.mode-viewer #viewerMock{display:grid}
   }
 
   function openReviewModal(r) {
-    document.getElementById('reviewModalTitle').textContent = 'Comment · ' + r.id;
+    document.getElementById('reviewModalTitle').textContent = 'Comment';
     document.getElementById('reviewModalBody').innerHTML =
-      '<div class="streamMeta">' + esc(r.status) + '</div><p>' + esc(r.text) + '</p>' +
+      '<div class="streamMeta">' + reviewMetaHtml(r) + '</div><p>' + esc(r.text) + '</p>' +
       (r.ai ? '<div style="margin-top:8px;padding:8px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px"><strong>AI</strong><br>' + esc(r.ai) + '</div>' : '');
     document.getElementById('reviewDetailModal').classList.add('open');
   }
@@ -516,7 +572,7 @@ body.mode-viewer #viewerMock{display:grid}
   function openReviewListModal(title, items) {
     document.getElementById('reviewListModalTitle').textContent = title + ' · ' + items.length;
     document.getElementById('reviewListModalBody').innerHTML = items.map(function (r) {
-      return '<div class="changeModalItem"><div class="streamMeta">' + esc(r.status) + ' · ' + esc(r.id) + '</div><p>' + esc(r.text) + '</p>' +
+      return '<div class="changeModalItem"><div class="streamMeta">' + reviewMetaHtml(r) + '</div><p>' + esc(r.text) + '</p>' +
         (r.ai ? '<div style="margin-top:6px;padding:6px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px">' + esc(r.ai) + '</div>' : '') + '</div>';
     }).join('');
     document.getElementById('reviewListModal').classList.add('open');
@@ -528,9 +584,23 @@ body.mode-viewer #viewerMock{display:grid}
       var num = el.querySelector('.num');
       if (num && MOCK_CHANGES[k]) num.textContent = String(MOCK_CHANGES[k].length);
     });
-    var total = changeGroupTotal();
+  }
+
+  function renderChangeStats(s) {
+    var session = s || getSession(activeSessionId);
     var totalEl = document.getElementById('changeTotal');
-    if (totalEl) totalEl.textContent = String(total);
+    var statsLine = document.getElementById('changesStatsLine');
+    var deltaEl = document.getElementById('changeDelta');
+    if (!session || !totalEl || !statsLine || !deltaEl) return;
+    totalEl.textContent = String(session.changes);
+    if (session.compared) {
+      statsLine.classList.remove('muted');
+      deltaEl.style.display = '';
+      deltaEl.innerHTML = '<span class="add"><span class="statLabel">add</span>+' + session.add + '</span><span class="del"><span class="statLabel">del</span>−' + session.del + '</span>';
+    } else {
+      statsLine.classList.add('muted');
+      deltaEl.style.display = 'none';
+    }
   }
 
   function renderReportPicker() {
@@ -559,7 +629,7 @@ body.mode-viewer #viewerMock{display:grid}
     var r = MOCK_REPORTS[side];
     document.getElementById('reportPickerTag').textContent = r.tag;
     document.getElementById('reportPickerName').textContent = r.name;
-    document.getElementById('reportPickerMeta').textContent = r.file + ' · ' + r.pages + ' pages';
+    document.getElementById('reportPickerMeta').textContent = (r.modified || '—') + ' · ' + r.pages + ' pages';
     renderReportPicker();
     updateReviewStats();
     renderReviewStream();
@@ -574,6 +644,18 @@ body.mode-viewer #viewerMock{display:grid}
     stats.forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.filter === activeStatusFilter);
     });
+  }
+
+  function reviewIndexHeadingHtml(r) {
+    var label = r.indexLabel || REVIEW_INDEX_LABELS[0];
+    var title = r.indexTitle || MOCK_INDEX_TITLES[label] || '';
+    if (!title) return '<span class="indexLabel">' + esc(label) + '</span>';
+    return '<span class="indexLabel">' + esc(label) + '</span> · <span class="indexTitle">' + esc(title) + '</span>';
+  }
+
+  function reviewMetaHtml(r) {
+    return '<span>' + esc(r.status) + '</span><span class="metaSep">·</span>' +
+      reviewIndexHeadingHtml(r) + reviewOriginBadge(r);
   }
 
   function reviewOriginBadge(r) {
@@ -604,33 +686,31 @@ body.mode-viewer #viewerMock{display:grid}
   function renderChangeStream() {
     var stream = document.getElementById('changeStream');
     var body = document.getElementById('changeStreamBody');
-    var title = document.getElementById('changeStreamTitle');
-    var expandBtn = document.getElementById('changeStreamExpand');
+    var session = getSession(activeSessionId);
     document.querySelectorAll('.riskCard').forEach(function (el) {
       el.classList.toggle('active', el.dataset.risk === activeRisk);
     });
+    if (!body || !stream) return;
+    if (!session || !session.compared) {
+      stream.classList.remove('show');
+      body.innerHTML = '';
+      return;
+    }
     if (!activeRisk) {
       stream.classList.remove('show');
       body.innerHTML = '';
       return;
     }
     var items = MOCK_CHANGES[activeRisk] || [];
-    var label = { high: 'High', medium: 'Medium', low: 'Low', na: 'N/A' }[activeRisk];
     stream.classList.add('show');
-    title.textContent = label + ' · ' + items.length;
-    expandBtn.style.display = items.length >= EXPAND_THRESHOLD ? '' : 'none';
-    expandBtn.onclick = function () { openChangeModal(label, items); };
     if (!items.length) {
       body.innerHTML = '<div style="padding:12px;color:#94a3b8">No items.</div>';
       return;
     }
     body.innerHTML = items.map(function (c) { return changeItemHtml(c, true); }).join('');
-    body.querySelectorAll('.changeReviewBtn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var row = btn.closest('.streamItem');
-        if (!row) return;
-        var id = Number(row.dataset.changeId);
+    body.querySelectorAll('.streamItem').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var id = Number(el.dataset.changeId);
         var c = items.find(function (x) { return x.id === id; });
         if (c) openChangeReviewModal(c);
       });
@@ -640,31 +720,21 @@ body.mode-viewer #viewerMock{display:grid}
   function renderReviewStream() {
     var stream = document.getElementById('reviewStream');
     var body = document.getElementById('reviewStreamBody');
-    var title = document.getElementById('reviewStreamTitle');
-    var expandBtn = document.getElementById('reviewStreamExpand');
     if (stream) stream.classList.add('show');
     updateOriginFilterUi();
     updateReviewStats();
     var bucket = reviewBucketForSide(activeReportSide);
     var baseItems = bucket[activeStatusFilter] || bucket.total || [];
     var items = filterReviewsByOrigin(baseItems);
-    var report = MOCK_REPORTS[activeReportSide];
-    var statusLabel = activeStatusFilter.charAt(0).toUpperCase() + activeStatusFilter.slice(1);
-    title.textContent = report.tag + ' · ' + statusLabel + ' · ' + items.length;
-    if (expandBtn) {
-      expandBtn.style.display = items.length >= EXPAND_THRESHOLD ? '' : 'none';
-      expandBtn.onclick = function () {
-        openReviewListModal(report.tag + ' · ' + statusLabel, items);
-      };
-    }
     if (!items.length) {
       body.innerHTML = '<div style="padding:12px;color:#94a3b8">No comments match.</div>';
       return;
     }
     body.innerHTML = items.map(function (r) {
       var ai = r.ai ? '<div class="streamAi">' + esc(r.ai) + '</div>' : '<div class="streamAi empty">No AI</div>';
-      return '<div class="streamItem" data-review-id="' + esc(r.id) + '"><div class="streamMain"><div class="streamMeta">' +
-        esc(r.status) + ' · ' + esc(r.id) + reviewOriginBadge(r) + '</div><div class="streamSummary">' + esc(r.text) + '</div></div>' + ai + '</div>';
+      var clearedCls = r.status === 'cleared' ? ' cleared' : '';
+      return '<div class="streamItem' + clearedCls + '" data-review-id="' + esc(r.id) + '"><div class="streamMain"><div class="streamMeta">' +
+        reviewMetaHtml(r) + '</div><div class="streamSummary">' + esc(r.text) + '</div></div>' + ai + '</div>';
     }).join('');
     body.querySelectorAll('.streamItem').forEach(function (el) {
       el.addEventListener('click', function () {
@@ -681,6 +751,8 @@ body.mode-viewer #viewerMock{display:grid}
 
   function renderSessionList() {
     var pane = document.getElementById('sessionListPane');
+    var countEl = document.getElementById('sessionListCount');
+    if (countEl) countEl.textContent = String(MOCK_SESSIONS.length);
     if (!pane) return;
     pane.innerHTML = MOCK_SESSIONS.map(function (s) {
       var active = s.id === activeSessionId ? ' active' : '';
@@ -697,7 +769,7 @@ body.mode-viewer #viewerMock{display:grid}
     var s = getSession(id);
     if (!s) return;
     activeSessionId = id;
-    activeRisk = null;
+    activeRisk = s.compared ? 'high' : null;
     activeStatusFilter = 'total';
     activeOriginNew = false;
     activeOriginForward = false;
@@ -705,22 +777,14 @@ body.mode-viewer #viewerMock{display:grid}
     document.getElementById('sessionMetaBar').innerHTML =
       '<span><span class="k">created_at</span> <span class="v">' + esc(s.created) + '</span></span>' +
       '<span><span class="k">updated_at</span> <span class="v">' + esc(s.updated) + '</span></span>';
-    document.getElementById('changeTotal').textContent = String(s.changes);
-    var delta = document.getElementById('changeDelta');
-    if (s.compared) {
-      delta.innerHTML = '<span class="add">+' + s.add + '</span> · <span class="del">−' + s.del + '</span>';
-      delta.style.color = '';
-    } else {
-      delta.innerHTML = 'No comparison — upload an updated report.';
-      delta.style.color = '#94a3b8';
-    }
-    document.getElementById('changeStream').classList.remove('show');
+    renderChangeStats(s);
     renderSessionList();
     renderChangeStream();
     renderReviewStream();
   }
 
   renderRiskCounts();
+  renderChangeStats();
   renderReportPicker();
   selectReportSide(activeReportSide);
   renderSessionList();
