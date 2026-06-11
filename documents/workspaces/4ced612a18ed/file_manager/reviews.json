@@ -1,0 +1,218 @@
+[
+  {
+    "review_id": "r-35aeab76",
+    "anchor_id": "a-6c1ed5ea",
+    "workspace_id": "4ced612a18ed",
+    "status": "open",
+    "created_run_id": "6e761e27473d",
+    "is_floating": false,
+    "text": "DEMO INTERNATIONAL, INC. Financial Statements December 31, 2024 and 2023 (With Independent Auditors’ Report Thereon)",
+    "comments": [
+      {
+        "comment_id": "c-64662aac",
+        "author": "user",
+        "text": "안녕하세요",
+        "created_at": "2026-06-11T05:36:18.234292+00:00"
+      }
+    ],
+    "anchors": {
+      "6e761e27473d": {
+        "run_id": "6e761e27473d",
+        "side": "old",
+        "word_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "old_word_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "new_word_ids": [],
+        "page": 1,
+        "bbox": [
+          150.56631469726562,
+          195.63656616210938,
+          348.2193298339844,
+          303.9331970214844
+        ],
+        "rect": [
+          131.75432171053288,
+          128.70797901202346,
+          404.401993227127,
+          360.2300240987402
+        ],
+        "text": "DEMO INTERNATIONAL, INC. Financial Statements December 31, 2024 and 2023 (With Independent Auditors’ Report Thereon)",
+        "floating": false,
+        "md_anchor": {
+          "source": "selection_equal",
+          "section_id": null,
+          "old_lines": [
+            3,
+            5,
+            7
+          ],
+          "new_lines": [
+            3,
+            5,
+            7
+          ],
+          "segment_ids": [],
+          "equal_refs": [
+            {
+              "old_word_id": 1,
+              "new_word_id": 1,
+              "old_line": 3,
+              "new_line": 3,
+              "segment_id": null,
+              "text": "INTERNATIONAL,"
+            },
+            {
+              "old_word_id": 2,
+              "new_word_id": 2,
+              "old_line": 3,
+              "new_line": 3,
+              "segment_id": null,
+              "text": "INC."
+            },
+            {
+              "old_word_id": 3,
+              "new_word_id": 3,
+              "old_line": 3,
+              "new_line": 3,
+              "segment_id": null,
+              "text": "Financial"
+            },
+            {
+              "old_word_id": 4,
+              "new_word_id": 4,
+              "old_line": 3,
+              "new_line": 3,
+              "segment_id": null,
+              "text": "Statements"
+            },
+            {
+              "old_word_id": 5,
+              "new_word_id": 5,
+              "old_line": 5,
+              "new_line": 5,
+              "segment_id": null,
+              "text": "December"
+            },
+            {
+              "old_word_id": 6,
+              "new_word_id": 6,
+              "old_line": 5,
+              "new_line": 5,
+              "segment_id": null,
+              "text": "31,"
+            },
+            {
+              "old_word_id": 7,
+              "new_word_id": 7,
+              "old_line": 5,
+              "new_line": 5,
+              "segment_id": null,
+              "text": "2024"
+            },
+            {
+              "old_word_id": 8,
+              "new_word_id": 8,
+              "old_line": 5,
+              "new_line": 5,
+              "segment_id": null,
+              "text": "and"
+            },
+            {
+              "old_word_id": 9,
+              "new_word_id": 9,
+              "old_line": 5,
+              "new_line": 5,
+              "segment_id": null,
+              "text": "2023"
+            },
+            {
+              "old_word_id": 10,
+              "new_word_id": 10,
+              "old_line": 7,
+              "new_line": 7,
+              "segment_id": null,
+              "text": "(With"
+            },
+            {
+              "old_word_id": 11,
+              "new_word_id": 11,
+              "old_line": 7,
+              "new_line": 7,
+              "segment_id": null,
+              "text": "Independent"
+            },
+            {
+              "old_word_id": 12,
+              "new_word_id": 12,
+              "old_line": 7,
+              "new_line": 7,
+              "segment_id": null,
+              "text": "Auditors’"
+            },
+            {
+              "old_word_id": 13,
+              "new_word_id": 13,
+              "old_line": 7,
+              "new_line": 7,
+              "segment_id": null,
+              "text": "Report"
+            },
+            {
+              "old_word_id": 14,
+              "new_word_id": 14,
+              "old_line": 7,
+              "new_line": 7,
+              "segment_id": null,
+              "text": "Thereon)"
+            }
+          ]
+        },
+        "section_id": null,
+        "old_lines": [
+          3,
+          5,
+          7
+        ],
+        "new_lines": [
+          3,
+          5,
+          7
+        ],
+        "segment_ids": []
+      }
+    },
+    "created_at": "2026-06-11T05:35:35.878645+00:00",
+    "updated_at": "2026-06-11T05:36:18.234321+00:00"
+  }
+]

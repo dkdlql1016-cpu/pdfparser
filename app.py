@@ -1237,6 +1237,14 @@ def index():
     return Response("static/index.html not found", status=404, mimetype="text/plain")
 
 
+@app.route("/dashboard")
+def dashboard():
+    dashboard_path = BASE_DIR / "static" / "dashboard.html"
+    if dashboard_path.exists():
+        return send_file(dashboard_path)
+    return Response("static/dashboard.html not found", status=404, mimetype="text/plain")
+
+
 def document_blueprint_deps():
     return {
         "get_uploaded_pdf_fn": get_uploaded_pdf,

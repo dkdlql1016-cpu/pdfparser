@@ -1,0 +1,28 @@
+{
+  "workspace_id": "989d999cb11b",
+  "title": "Demo_FY24_Report_v2_clean",
+  "is_saved": false,
+  "created_at": "2026-06-11T10:44:20.611864+00:00",
+  "updated_at": "2026-06-11T10:46:01.445986+00:00",
+  "runs": [
+    {
+      "run_id": "18602fff80cb",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-11T10:44:20.611864+00:00",
+      "filename": "Demo_FY24_Report_v2_clean.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "0e1a12470fa7",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-11T10:45:53.114392+00:00",
+      "filename": "Demo_FY24_Report_v3_clean.pdf",
+      "previous_run_id": "18602fff80cb",
+      "has_diff": true,
+      "has_ai_assessment": false
+    }
+  ]
+}

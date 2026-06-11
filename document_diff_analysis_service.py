@@ -349,7 +349,7 @@ def merge_highlight_rects_server(highlights, y_tolerance=5.5, max_gap=42, pad_x=
         x0, y0, x1, y1 = h["bbox"]
         hh = dict(h)
         hh["_cy"] = (y0 + y1) / 2
-        groups.setdefault((h["page"], h["type"]), []).append(hh)
+        groups.setdefault((h["page"], h["type"], h["change_id"]), []).append(hh)
     merged = []
     for items in groups.values():
         items.sort(key=lambda h: (h["_cy"], h["bbox"][0]))
@@ -372,11 +372,12 @@ def merge_highlight_rects_server(highlights, y_tolerance=5.5, max_gap=42, pad_x=
                 nonlocal chunk
                 if not chunk:
                     return
+                change_id = chunk["change_ids"][0]
                 merged.append(
                     {
                         "id": "__".join(chunk["ids"]),
-                        "change_id": chunk["change_ids"][0],
-                        "change_ids": sorted(set(chunk["change_ids"])),
+                        "change_id": change_id,
+                        "change_ids": [change_id],
                         "type": chunk["type"],
                         "page": chunk["page"],
                         "bbox": [

@@ -12,7 +12,7 @@
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
 #status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 48px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
 .sidebarRail{display:none;position:static;flex:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center}body.sidebarCollapsed .sidebarRail{display:inline-block}
-aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease}body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}.sideHeader{display:flex;align-items:center;gap:8px;height:38px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.workspaceTitleRow{display:flex;align-items:center;gap:6px;min-width:0;width:100%}.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sideTitleInput{flex:none;min-width:0;max-width:180px;width:auto;height:24px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:var(--ui-font) system-ui;color:#111827}.sideIconBtn{width:24px;height:24px;padding:0;border-radius:6px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1}.sideCollapse{margin-left:auto;width:24px;height:24px;padding:0;border-radius:6px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 4px;font-size:var(--ui-font-sm);line-height:1.2}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
+aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease}body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}.sideHeader{display:flex;align-items:center;gap:8px;height:40px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.workspaceTitleRow{display:flex;align-items:center;gap:7px;min-width:0;width:100%}.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sideTitleInput{flex:none;min-width:0;max-width:180px;width:auto;height:26px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:var(--ui-font) system-ui;color:#111827}.sideIconBtn{width:28px;height:28px;padding:0;border-radius:7px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;border:0;cursor:pointer;flex:none;transition:background .12s ease,color .12s ease}.sideIconBtn:hover{background:#d1d5db}.sideIconBtn svg{width:15px;height:15px;display:block;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.sideIconBtnDashboard,.sideIconBtnAnalysis{font-weight:800;font-size:12px;letter-spacing:-.02em}.sideIconBtnDashboard.active,.sideIconBtnAnalysis.active{background:#eef2ff;color:#1d4ed8}.sideIconBtnDashboard.active:hover,.sideIconBtnAnalysis.active:hover{background:#e0e7ff}.sideCollapse{margin-left:auto;width:28px;height:28px;padding:0;border-radius:7px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex:none}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 4px;font-size:var(--ui-font-sm);line-height:1.2}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
 .tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:8px 11px;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700}.addStat{color:var(--green)}.delStat{color:var(--red)}
 #changes,#indexList,#reviewPane,#snapshotPane{overflow:auto;padding:8px}.indexItem,.change,.snapshotRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:var(--ui-font)}.indexItem:hover,.change:hover,.snapshotRow:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:var(--ui-font-sm);color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.snapshotBar{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border-bottom:1px solid #e5e7eb}.snapshotBar input{min-width:0;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:var(--ui-font) system-ui}.snapshotBar button{font-size:var(--ui-font)}.readonlyBadge{background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 8px;font-size:var(--ui-font-sm);font-weight:800}
 .changeActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.changeActions button{padding:4px 8px;font-size:var(--ui-font-sm);background:#eef2ff;color:#3730a3}.changeActions .noteDelete{background:#fee2e2!important;color:#991b1b!important}
@@ -72,7 +72,7 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
 </div>
 <main>
   <aside>
-    <div class="sideHeader"><div class="workspaceTitleRow"><button id="workspaceHomeBtn" class="sideIconBtn" type="button" title="Home">⌂</button><button id="workspaceFilesBtn" class="sideIconBtn" type="button" title="File manager">☷</button><button id="workspaceRenameBtn" class="sideIconBtn" type="button" title="Rename workspace">✎</button><span id="workspaceTitle" class="sideTitle">Workspace</span></div><button id="sidebarCollapseBtn" class="sideCollapse" type="button" title="Collapse panel">‹</button></div>
+    <div class="sideHeader"><div class="workspaceTitleRow"><button id="workspaceHomeBtn" class="sideIconBtn" type="button" title="Home" aria-label="Home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.5 12 4.5l7.5 6"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5V14h4v5.5"/></svg></button><button id="workspaceDashboardBtn" class="sideIconBtn sideIconBtnDashboard" type="button" title="Dashboard">D</button><button id="workspaceAnalysisBtn" class="sideIconBtn sideIconBtnAnalysis active" type="button" title="Analysis">A</button><button id="workspaceFilesBtn" class="sideIconBtn" type="button" title="File manager" aria-label="File manager"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.38 3.13 2.5 7 2.5s7-1.12 7-2.5V5"/><path d="M5 9c0 1.38 3.13 2.5 7 2.5s7-1.12 7-2.5"/><path d="M5 13c0 1.38 3.13 2.5 7 2.5s7-1.12 7-2.5"/></svg></button><button id="workspaceRenameBtn" class="sideIconBtn" type="button" title="Rename workspace">✎</button><span id="workspaceTitle" class="sideTitle">Workspace</span></div><button id="sidebarCollapseBtn" class="sideCollapse" type="button" title="Collapse panel">‹</button></div>
     <div class="tabs">
       <button class="tabBtn active" data-tab="index">Outline</button>
       <button class="tabBtn" data-tab="diff">Changes</button>
@@ -204,6 +204,19 @@ function setSidebarCollapsed(collapsed){document.body.classList.toggle('sidebarC
 $('#sidebarCollapseBtn').addEventListener('click',()=>setSidebarCollapsed(true));
 $('#sidebarRail').addEventListener('click',()=>setSidebarCollapsed(false));
 $('#workspaceHomeBtn').addEventListener('click',()=>openHomeView());
+$('#workspaceDashboardBtn').addEventListener('click',()=>{
+  if(!DOC_ID){toast('Open a workspace first.');return}
+  const q=new URLSearchParams();q.set('doc',DOC_ID);if(RUN_ID)q.set('run',RUN_ID);
+  location.href='/dashboard?'+q.toString();
+});
+$('#workspaceAnalysisBtn').addEventListener('click',()=>{
+  if(document.body.classList.contains('homeMode')){closeHomeView();return}
+  if(!DOC_ID){toast('Open a workspace first.');return}
+  const q=new URLSearchParams();q.set('doc',DOC_ID);if(RUN_ID)q.set('run',RUN_ID);
+  const target='/?'+q.toString();
+  if(location.pathname==='/'&&location.search==='?'+q.toString())return;
+  location.href=target;
+});
 $('#workspaceFilesBtn').addEventListener('click',()=>openFileManager('manage'));
 $('#workspaceRenameBtn').addEventListener('click',startWorkspaceRename);
 window.addEventListener('resize',()=>{if(DATA)draw(DATA)});
@@ -307,6 +320,22 @@ function filenameForSide(side){
   return CUR_REPORT_FILENAME||DATA?.new_filename||DATA?.filename||'Current PDF';
 }
 function titleFromFilename(name){return String(name||'Workspace').replace(/\.pdf$/i,'')}
+const INTERNAL_PDF_NAMES=new Set(['source.pdf','report.pdf','prev_report.pdf','old.pdf','new.pdf','']);
+function publicReportFilename(name,fallback){
+  const n=String(name||'').trim();
+  return INTERNAL_PDF_NAMES.has(n.toLowerCase())?(fallback||'report.pdf'):n;
+}
+function applyReportFilenamesFromMeta(meta,runId,viewer){
+  const runs=Array.isArray(meta?.runs)?meta.runs:[];
+  const runMeta=runs.find(r=>r.run_id===runId)||{};
+  const prevMeta=runMeta.previous_run_id?runs.find(r=>r.run_id===runMeta.previous_run_id):null;
+  CUR_REPORT_FILENAME=publicReportFilename(runMeta.filename,publicReportFilename(viewer?.new_filename||viewer?.filename,CUR_REPORT_FILENAME||'report.pdf'));
+  PREV_REPORT_FILENAME=publicReportFilename(prevMeta?.filename,publicReportFilename(viewer?.old_filename,PREV_REPORT_FILENAME||'previous.pdf'));
+}
+function updateWorkspaceNavButtons(){
+  const a=$('#workspaceAnalysisBtn');
+  if(a)a.classList.toggle('active',!document.body.classList.contains('homeMode'));
+}
 function setAiRunState(next){
   AI_RUN_STATE={...AI_RUN_STATE,...next};
   if(AI_RUN_STATUS_TIMER){
@@ -371,11 +400,13 @@ function renderHomeCards(){
 window.openHomeView=function(){
   HOME_RETURN_COLLAPSED=document.body.classList.contains('sidebarCollapsed');
   document.body.classList.add('homeMode');
+  updateWorkspaceNavButtons();
   renderHomeCards();
 }
 window.closeHomeView=function(){
   document.body.classList.remove('homeMode');
   setSidebarCollapsed(HOME_RETURN_COLLAPSED);
+  updateWorkspaceNavButtons();
 }
 window.openWorkspaceFromHome=function(){
   closeHomeView();
@@ -1445,6 +1476,44 @@ window.saveAsWorkspace=async function(side='new'){
     toast('Saved as new workspace');
   }catch(e){toast('Save As failed')}
 }
+
+function viewerUrlParams(){
+  const q=new URLSearchParams();
+  if(DOC_ID)q.set('doc',DOC_ID);
+  if(RUN_ID)q.set('run',RUN_ID);
+  return q;
+}
+
+async function bootstrapFromQuery(){
+  const params=new URLSearchParams(location.search);
+  const docId=params.get('doc');
+  if(!docId)return;
+  DOC_ID=docId;
+  let runId=params.get('run');
+  try{
+    const meta=await fetch(`/api/documents/${docId}`).then(r=>{if(!r.ok)throw new Error('workspace not found');return r.json()});
+    WORKSPACE_TITLE=meta.title||'Workspace';
+    updateWorkspaceTitle();
+    if(!runId&&Array.isArray(meta.runs)&&meta.runs.length)runId=meta.runs[meta.runs.length-1].run_id;
+    if(!runId)return;
+    RUN_ID=runId;LIVE_RUN_ID=runId;SNAPSHOT_ID=null;READ_ONLY=false;
+    const viewer=await fetch(`/api/documents/${docId}/runs/${runId}`).then(r=>{if(!r.ok)throw new Error('run not found');return r.json()});
+    DATA=viewer;
+    applyReportFilenamesFromMeta(meta,runId,viewer);
+    $('#createForm').style.display='none';
+    $('#updateForm').style.display='flex';
+    draw(DATA);
+    await loadSnapshots();
+    const tab=params.get('tab');
+    if(tab)activateTab(tab);
+    const changeId=params.get('change');
+    if(changeId&&isDiff())goChange(Number(changeId));
+    const reviewId=params.get('review');
+    if(reviewId){activateTab('review');focusReviewById(reviewId)}
+    setBusy(false,DOC_ID?'Ready':'Idle');
+  }catch(e){toast('Failed to open workspace from link')}
+}
+bootstrapFromQuery();
 </script>
 </body>
 </html>

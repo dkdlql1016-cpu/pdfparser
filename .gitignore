@@ -19,13 +19,7 @@ Thumbs.db
 .pytest_cache/
 .mypy_cache/
 
-# Project specific
-runs/
 # input/ PDFs are tracked (seed reports). Runtime PDFs live under documents/ (ignored below).
 _cache/
 .mypy_cache/_cache/
 .mypy_cache/
-documents/*
-documents/*/runs/
-documents/*/meta.json
-documents/*/reviews.json
