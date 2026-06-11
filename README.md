@@ -1,5 +1,23 @@
 # PDF Review Workspace
 
+## Prerequisites
+
+Install these **before** `pip install -r requirements.txt`. That file lists Python packages only; it does not install Python or Java for you.
+
+| Requirement | Notes |
+|-------------|--------|
+| **Python 3.11+** | Used to run the Flask app. 3.14 has been tested locally. |
+| **Java 17+** (OpenJDK or compatible) | Required by [`opendataloader-pdf`](https://pypi.org/project/opendataloader-pdf/) for PDF → markdown conversion. |
+
+Check that both are on your `PATH`:
+
+```powershell
+python --version
+java -version
+```
+
+Optional (for AI review/change assessment): copy `.env.example` to `.env` and set API keys. The viewer and diff pipeline work without them.
+
 ## Run
 
 ```powershell
@@ -16,9 +34,9 @@ Open in a browser:
 http://127.0.0.1:8000
 ```
 
-For maintainers/handoff, see `ARCHITECTURE.md`, `RUN_LAYOUT.md`, and `CHARS_API_CONTRACT.md`.
+For maintainers/handoff, see `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_KOR.md`, `docs/RUN_LAYOUT.md`, and `docs/CHARS_API_CONTRACT.md`.
 
-On file-manager bootstrap, the app uses only one default seed source (`DEFAULT_FILE_MANAGER_INPUTS` first existing file). If a matching seed document already exists, it appends a new run to that same seed document instead of creating another document folder.
+File Manager lists only workspaces that were explicitly saved. Analysis sessions and History snapshots stay on disk under the workspace, but do not auto-register new File Manager entries.
 
 ## Project Structure
 

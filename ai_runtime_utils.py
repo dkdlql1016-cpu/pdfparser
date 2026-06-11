@@ -1,24 +1,39 @@
 def assessment_tool_definitions(batch=False):
     submit_tool = {
         "name": "submit_verdict",
-        "description": "Submit the structured assessment verdict.",
+        "description": (
+            "Submit whether the reviewer's requested change is present in the current report. "
+            "Default to cleared or not_cleared; partial and unclear are narrow exceptions."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
+                "verdict": {
+                    "type": "string",
+                    "enum": ["cleared", "partial", "unclear", "not_cleared"],
+                    "description": (
+                        "cleared: the requested change is present in the current report; "
+                        "not_cleared: the requested change is absent; "
+                        "partial: ONLY when the review explicitly asks for multiple separable changes and some but not all are made (never to express uncertainty); "
+                        "unclear: ONLY when the review text itself has no actionable request (never because evidence is thin)"
+                    ),
+                },
                 "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 "reasoning": {"type": "string"},
-                "evidence_old": {"type": "string"},
-                "evidence_new": {"type": "string"},
             },
-            "required": ["verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
+            "required": ["verdict", "confidence", "reasoning"],
             "additionalProperties": False,
         },
     }
     if batch:
         submit_tool = {
             "name": "submit_verdicts",
-            "description": "Submit one structured assessment verdict for each review_id in the batch.",
+            "description": (
+                "Submit one verdict per review_id. Default to cleared (requested change present) "
+                "or not_cleared (requested change absent). Use partial only when the review explicitly "
+                "asks for multiple separable changes and some but not all are made; use unclear only when "
+                "the review text itself has no actionable request."
+            ),
             "input_schema": {
                 "type": "object",
                 "properties": {
@@ -31,10 +46,8 @@ def assessment_tool_definitions(batch=False):
                                 "verdict": {"type": "string", "enum": ["cleared", "partial", "unclear", "not_cleared"]},
                                 "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                                 "reasoning": {"type": "string"},
-                                "evidence_old": {"type": "string"},
-                                "evidence_new": {"type": "string"},
                             },
-                            "required": ["review_id", "verdict", "confidence", "reasoning", "evidence_old", "evidence_new"],
+                            "required": ["review_id", "verdict", "confidence", "reasoning"],
                             "additionalProperties": False,
                         },
                     }
@@ -91,27 +104,38 @@ def assessment_tool_definitions(batch=False):
 
 
 def change_assessment_tool_definitions(batch=False):
+    verdict_description = (
+        "Risk that the change makes the report fail accounting/auditing standards: "
+        "high=clearly a significant compliance risk a reviewer would require fixing; "
+        "medium=plausibly affects compliance and needs verification but not clearly a violation "
+        "(uncertainty counts as medium, not low); "
+        "low=no meaningful compliance risk (editorial, or consistent and well-supported)."
+    )
     submit_tool = {
         "name": "submit_change_review",
-        "description": "Submit one structured change-risk assessment and recommended review comment.",
+        "description": (
+            "Submit one change-risk assessment. Decide high/medium/low by whether the change "
+            "creates a significant risk of failing accounting/auditing standards."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "verdict": {"type": "string", "enum": ["high", "medium", "low"]},
+                "verdict": {"type": "string", "enum": ["high", "medium", "low"], "description": verdict_description},
                 "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                 "reasoning": {"type": "string"},
                 "recommended_comment": {"type": "string"},
-                "evidence_old": {"type": "string"},
-                "evidence_new": {"type": "string"},
             },
-            "required": ["verdict", "confidence", "reasoning", "recommended_comment", "evidence_old", "evidence_new"],
+            "required": ["verdict", "confidence", "reasoning", "recommended_comment"],
             "additionalProperties": False,
         },
     }
     if batch:
         submit_tool = {
             "name": "submit_change_reviews",
-            "description": "Submit one structured change-risk assessment for each change_id in the batch.",
+            "description": (
+                "Submit one change-risk assessment per change_id. Decide high/medium/low by whether "
+                "each change creates a significant risk of failing accounting/auditing standards."
+            ),
             "input_schema": {
                 "type": "object",
                 "properties": {
@@ -121,14 +145,12 @@ def change_assessment_tool_definitions(batch=False):
                             "type": "object",
                             "properties": {
                                 "change_id": {"type": "integer"},
-                                "verdict": {"type": "string", "enum": ["high", "medium", "low"]},
+                                "verdict": {"type": "string", "enum": ["high", "medium", "low"], "description": verdict_description},
                                 "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                                 "reasoning": {"type": "string"},
                                 "recommended_comment": {"type": "string"},
-                                "evidence_old": {"type": "string"},
-                                "evidence_new": {"type": "string"},
                             },
-                            "required": ["change_id", "verdict", "confidence", "reasoning", "recommended_comment", "evidence_old", "evidence_new"],
+                            "required": ["change_id", "verdict", "confidence", "reasoning", "recommended_comment"],
                             "additionalProperties": False,
                         },
                     }

@@ -1,6 +1,17 @@
 import os
 from pathlib import Path
 
+DEFAULT_AI_MODEL = "gpt-5.4"
+
+
+def resolve_ai_model(env_name, *, fallback=None):
+    value = os.environ.get(env_name)
+    if value is not None and str(value).strip():
+        return str(value).strip()
+    if fallback is not None and str(fallback).strip():
+        return str(fallback).strip()
+    return DEFAULT_AI_MODEL
+
 
 def ai_provider_for_model(model_name):
     model = str(model_name or "").strip().lower()

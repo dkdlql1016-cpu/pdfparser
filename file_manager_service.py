@@ -130,108 +130,81 @@ def canonical_review_from_anchor(
     }
 
 
-def reviews_for_single_file_side(
-    source_workspace_id,
-    source_run_id,
-    side,
-    target_workspace_id,
-    file_run_id,
-    *,
-    document_run_dir_fn,
-    document_reviews_for_run_fn,
-    anchor_for_selection_fn,
-    canonical_review_from_anchor_fn,
-):
-    """Copy the reviews shown on one side of a run into a saved single-file document."""
-    side_norm = "old" if side in ("old", "prev", "previous") else "new"
-    source_run_dir = document_run_dir_fn(source_workspace_id, source_run_id)
-    out = []
-    seen_source_ids = set()
-    for proj in document_reviews_for_run_fn(source_workspace_id, source_run_id):
-        ids = list((proj.get("old_word_ids") if side_norm == "old" else proj.get("new_word_ids")) or [])
-        if not ids:
-            continue
-        source_review_id = proj.get("review_id")
-        if source_review_id in seen_source_ids:
-            continue
-        anchor = anchor_for_selection_fn(source_run_dir, file_run_id, side_norm, ids, (proj.get("selection") or {}).get("rect"))
-        if not anchor:
-            continue
-        seen_source_ids.add(source_review_id)
-        anchor["side"] = "new"
-        anchor["old_word_ids"] = []
-        anchor["new_word_ids"] = list(anchor.get("word_ids") or ids)
-        out.append(
-            canonical_review_from_anchor_fn(
-                target_workspace_id,
-                file_run_id,
-                anchor,
-                status=proj.get("status", "open"),
-                comments=proj.get("comments"),
-                text=proj.get("text", ""),
-                source_review_id=source_review_id,
-                source_side=side_norm,
-                created_at=proj.get("created_at"),
-            )
+def _existing_workspace_pdf(workspace_id, file_id, filename, *, workspace_stored_pdf_fn):
+    named = workspace_stored_pdf_fn(workspace_id, file_id, filename)
+    if named.exists():
+        return named
+    source = workspace_stored_pdf_fn(workspace_id, file_id, None)
+    if source.exists():
+        return source
+    file_dir = named.parent
+    if file_dir.exists():
+        pdfs = sorted(
+            (path for path in file_dir.iterdir() if path.is_file() and path.suffix.lower() == ".pdf"),
+            key=lambda path: path.name.lower(),
         )
-    return out
+        if pdfs:
+            return pdfs[0]
+    return named
 
 
-def write_single_file_document(
+def _upsert_workspace_file(
+    meta,
+    *,
     workspace_id,
     pdf_path: Path,
-    filename: str,
-    title: str,
-    *,
-    document_dir_fn,
-    document_run_dir_fn,
-    reviews_for_single_file_side_fn,
+    save_title: str,
+    save_filename: str,
+    workspace_stored_pdf_fn,
     utc_now_fn,
-    normalize_document_title_fn,
-    save_document_meta_fn,
-    save_document_reviews_fn,
-    source_workspace_id=None,
-    source_run_id=None,
-    source_side="new",
-    replace=False,
+    existing_entry=None,
 ):
-    doc_path = document_dir_fn(workspace_id)
-    run_id = uuid.uuid4().hex[:12]
-    reviews = (
-        reviews_for_single_file_side_fn(source_workspace_id, source_run_id, source_side, workspace_id, run_id)
-        if source_workspace_id and source_run_id
-        else []
-    )
-    if replace and doc_path.exists():
-        shutil.rmtree(doc_path, ignore_errors=True)
-    run_dir = document_run_dir_fn(workspace_id, run_id)
-    run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
-    shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
     now = utc_now_fn()
-    meta = {
-        "workspace_id": workspace_id,
-        "title": normalize_document_title_fn(title)[:120] or Path(filename).stem or "Workspace",
-        "is_saved": True,
-        "created_at": now,
-        "updated_at": now,
-        "source_workspace_id": source_workspace_id,
-        "source_run_id": source_run_id,
-        "runs": [
-            {
-                "run_id": run_id,
-                "kind": "file",
-                "status": "ready",
-                "created_at": now,
-                "filename": filename or "report.pdf",
-                "has_diff": False,
-                "has_ai_assessment": False,
-            }
-        ],
-    }
-    save_document_meta_fn(meta)
-    if reviews:
-        save_document_reviews_fn(workspace_id, reviews)
-    return meta, run_id
+    meta.setdefault("files", [])
+    if existing_entry:
+        file_id = existing_entry.get("file_id")
+        target_pdf = workspace_stored_pdf_fn(workspace_id, file_id, save_filename)
+        target_pdf.parent.mkdir(parents=True, exist_ok=True)
+        old_pdf = workspace_stored_pdf_fn(
+            workspace_id,
+            file_id,
+            existing_entry.get("filename"),
+        )
+        if old_pdf != target_pdf and old_pdf.exists():
+            old_pdf.unlink(missing_ok=True)
+        (target_pdf.parent / "source.pdf").unlink(missing_ok=True)
+        shutil.copy2(pdf_path, target_pdf)
+        for entry in meta["files"]:
+            if entry.get("file_id") != file_id:
+                continue
+            entry["filename"] = save_filename
+            entry["title"] = save_title
+            entry["saved_at"] = now
+            entry["updated_at"] = now
+            entry["status"] = "ready"
+            break
+        meta["updated_at"] = now
+        meta["is_saved"] = True
+        return file_id, True
+
+    file_id = uuid.uuid4().hex[:12]
+    target_pdf = workspace_stored_pdf_fn(workspace_id, file_id, save_filename)
+    target_pdf.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(pdf_path, target_pdf)
+    meta["files"].append(
+        {
+            "file_id": file_id,
+            "title": save_title,
+            "filename": save_filename,
+            "status": "ready",
+            "created_at": now,
+            "saved_at": now,
+            "updated_at": now,
+        }
+    )
+    meta["updated_at"] = now
+    meta["is_saved"] = True
+    return file_id, False
 
 
 def save_run_side_file(
@@ -241,69 +214,208 @@ def save_run_side_file(
     *,
     document_run_dir_fn,
     run_side_pdf_info_fn,
-    find_workspace_id_by_title_fn,
     load_document_meta_fn,
-    public_report_filename_fn,
-    write_single_file_document_fn,
+    find_file_in_workspace_fn,
     normalize_document_title_fn,
-    document_title_exists_fn,
-    target_workspace_id=None,
+    workspace_file_title_exists_fn,
+    save_document_meta_fn,
+    workspace_stored_pdf_fn,
+    utc_now_fn,
     title=None,
     overwrite_existing=False,
+    target_file_id=None,
 ):
+    meta = load_document_meta_fn(workspace_id)
+    if not meta:
+        return {"error": "workspace not found"}, 404
+
     run_dir = document_run_dir_fn(workspace_id, run_id)
     pdf_path, filename = run_side_pdf_info_fn(workspace_id, run_id, run_dir, side)
     if not pdf_path or not pdf_path.exists():
         return {"error": "report file not found for side"}, 404
 
-    # Save (without an explicit target) onto an existing name overwrites that document.
-    if not target_workspace_id and overwrite_existing and title:
-        target_workspace_id = find_workspace_id_by_title_fn(title)
-
-    if target_workspace_id:
-        target_meta = load_document_meta_fn(target_workspace_id)
-        if not target_meta:
-            return {"error": "target document not found"}, 404
-        target_runs = target_meta.get("runs", []) or []
-        target_latest = target_runs[-1] if target_runs else {}
-        save_title = target_meta.get("title") or title or Path(filename).stem
-        save_filename = public_report_filename_fn(target_meta, target_latest) or filename
-        meta, new_run_id = write_single_file_document_fn(
-            target_workspace_id,
-            pdf_path,
-            save_filename,
-            save_title,
-            source_workspace_id=workspace_id,
-            source_run_id=run_id,
-            source_side=side,
-            replace=True,
+    explicit_title = bool(title and str(title).strip())
+    # A plain Save targets the File Manager file the run is already bound to (resolved by the
+    # caller and passed as target_file_id): overwrite it in place, keeping its existing title and
+    # filename, so Save never forks a duplicate entry. Save As (explicit title) creates a new file.
+    existing_entry = None
+    if target_file_id:
+        existing_entry = next(
+            (e for e in (meta.get("files") or []) if e.get("file_id") == target_file_id), None
         )
-        return {
-            "saved": True,
-            "overwritten": True,
-            "workspace_id": target_workspace_id,
-            "run_id": new_run_id,
-            "title": meta.get("title"),
-        }, 200
-
-    save_title = normalize_document_title_fn(title or Path(filename).stem)
-    if document_title_exists_fn(save_title):
+    if existing_entry and not explicit_title:
+        save_filename = existing_entry.get("filename") or (
+            f"{Path(filename).stem}.pdf"
+        )
+        save_title = normalize_document_title_fn(
+            existing_entry.get("title") or Path(save_filename).stem
+        )
+    else:
+        save_title = normalize_document_title_fn(title or Path(filename).stem)
+        save_filename = save_title if save_title.lower().endswith(".pdf") else f"{save_title}.pdf"
+        save_title = normalize_document_title_fn(Path(save_filename).stem)
+    if existing_entry is None and overwrite_existing:
+        existing_entry = find_file_in_workspace_fn(meta, save_title)
+    if not existing_entry and workspace_file_title_exists_fn(workspace_id, save_title):
         return {"error": "duplicate title"}, 409
-    save_filename = save_title if save_title.lower().endswith(".pdf") else f"{save_title}.pdf"
-    new_workspace_id = uuid.uuid4().hex[:12]
-    meta, new_run_id = write_single_file_document_fn(
-        new_workspace_id,
-        pdf_path,
-        save_filename,
-        save_title,
-        source_workspace_id=workspace_id,
-        source_run_id=run_id,
-        source_side=side,
+
+    file_id, overwritten = _upsert_workspace_file(
+        meta,
+        workspace_id=workspace_id,
+        pdf_path=pdf_path,
+        save_title=save_title,
+        save_filename=save_filename,
+        workspace_stored_pdf_fn=workspace_stored_pdf_fn,
+        utc_now_fn=utc_now_fn,
+        existing_entry=existing_entry,
     )
+    save_document_meta_fn(meta)
     return {
         "saved": True,
-        "created": True,
-        "workspace_id": new_workspace_id,
-        "run_id": new_run_id,
-        "title": meta.get("title"),
-    }, 201
+        "overwritten": overwritten,
+        "created": not overwritten,
+        "workspace_id": workspace_id,
+        "file_id": file_id,
+        "run_id": file_id,
+        "title": save_title,
+        "filename": save_filename,
+    }, 200 if overwritten else 201
+
+
+def delete_workspace_file(
+    workspace_id,
+    file_id,
+    *,
+    load_document_meta_fn,
+    workspace_file_dir_fn,
+    save_document_meta_fn,
+    find_file_by_id_fn,
+    utc_now_fn,
+):
+    meta = load_document_meta_fn(workspace_id)
+    if not meta:
+        return {"error": "workspace not found"}, 404
+    entry = find_file_by_id_fn(meta, file_id)
+    if not entry:
+        return {"error": "file not found"}, 404
+    file_dir = workspace_file_dir_fn(workspace_id, file_id)
+    if file_dir.exists():
+        shutil.rmtree(file_dir, ignore_errors=True)
+    meta["files"] = [item for item in (meta.get("files") or []) if item.get("file_id") != file_id]
+    meta["updated_at"] = utc_now_fn()
+    save_document_meta_fn(meta)
+    return {"ok": True, "workspace_id": workspace_id, "file_id": file_id, "run_id": file_id}, 200
+
+
+def rename_workspace_file(
+    workspace_id,
+    file_id,
+    title,
+    *,
+    load_document_meta_fn,
+    save_document_meta_fn,
+    find_file_by_id_fn,
+    normalize_document_title_fn,
+    workspace_file_title_exists_fn,
+    workspace_stored_pdf_fn,
+    utc_now_fn,
+):
+    meta = load_document_meta_fn(workspace_id)
+    if not meta:
+        return {"error": "workspace not found"}, 404
+    entry = find_file_by_id_fn(meta, file_id)
+    if not entry:
+        return {"error": "file not found"}, 404
+    next_title = normalize_document_title_fn(title)
+    if not next_title:
+        return {"error": "title required"}, 400
+    save_filename = next_title if next_title.lower().endswith(".pdf") else f"{next_title}.pdf"
+    next_title = normalize_document_title_fn(Path(save_filename).stem)
+    current_title = normalize_document_title_fn(entry.get("title") or "")
+    if not current_title:
+        filename = str(entry.get("filename") or "").strip()
+        if filename:
+            current_title = normalize_document_title_fn(Path(filename).stem)
+    if next_title.casefold() != current_title.casefold() and workspace_file_title_exists_fn(
+        workspace_id, next_title
+    ):
+        return {"error": "duplicate title"}, 409
+    old_path = _existing_workspace_pdf(
+        workspace_id,
+        file_id,
+        entry.get("filename"),
+        workspace_stored_pdf_fn=workspace_stored_pdf_fn,
+    )
+    new_path = workspace_stored_pdf_fn(workspace_id, file_id, save_filename)
+    if old_path.exists() and old_path != new_path:
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        if new_path.exists():
+            old_path.unlink(missing_ok=True)
+        else:
+            old_path.rename(new_path)
+    (new_path.parent / "source.pdf").unlink(missing_ok=True)
+    entry["title"] = next_title
+    entry["filename"] = save_filename
+    entry["updated_at"] = utc_now_fn()
+    meta["updated_at"] = utc_now_fn()
+    save_document_meta_fn(meta)
+    return {
+        "ok": True,
+        "workspace_id": workspace_id,
+        "file_id": file_id,
+        "run_id": file_id,
+        "title": next_title,
+        "filename": save_filename,
+    }, 200
+
+
+def open_workspace_saved_file(
+    workspace_id,
+    file_id,
+    *,
+    document_run_dir_fn,
+    load_document_meta_fn,
+    find_file_by_id_fn,
+    resolve_workspace_file_pdf_fn,
+    process_single_document_run_fn,
+    read_json_fn,
+    document_reviews_for_run_fn,
+    semantic_save_reviews_fn,
+):
+    meta = load_document_meta_fn(workspace_id)
+    if not meta:
+        return {"error": "workspace not found"}, 404
+    entry = find_file_by_id_fn(meta, file_id)
+    if not entry:
+        return {"error": "file not found"}, 404
+    pdf_path = resolve_workspace_file_pdf_fn(workspace_id, file_id, entry=entry)
+    if not pdf_path or not pdf_path.exists():
+        return {"error": "pdf file missing on disk"}, 404
+
+    run_id = str(file_id)
+    run_dir = document_run_dir_fn(workspace_id, run_id)
+    viewer_path = run_layout.viewer_path(run_dir)
+    filename = str(entry.get("filename") or pdf_path.name)
+
+    if not viewer_path.exists():
+        run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+        target_pdf = run_layout.source_pdf(run_dir, "current")
+        shutil.copy2(pdf_path, target_pdf)
+        viewer_data = process_single_document_run_fn(
+            run_dir,
+            target_pdf,
+            doc_id=workspace_id,
+            run_id=run_id,
+            filename=filename,
+        )
+    else:
+        viewer_data = read_json_fn(viewer_path, {}) or {}
+
+    semantic_save_reviews_fn(run_dir, document_reviews_for_run_fn(workspace_id, run_id))
+    return {
+        "workspace_id": workspace_id,
+        "run_id": run_id,
+        "file_id": file_id,
+        "filename": filename,
+        "result": viewer_data,
+    }, 200

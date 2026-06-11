@@ -1,0 +1,45 @@
+:root{--blue:#2563eb;--ui-font:12px;--ui-font-sm:11px}
+*{box-sizing:border-box}
+button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}
+button.secondary{background:#374151}
+.sidebarRail{display:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center;cursor:pointer}
+body.sidebarCollapsed .sidebarRail{display:inline-block}
+aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;display:flex;flex-direction:column;transition:transform .18s ease;overflow:hidden}
+body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}
+.sideHeader{display:flex;align-items:center;gap:8px;height:40px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}
+.workspaceTitleRow{display:flex;align-items:center;gap:7px;min-width:0;width:100%}
+.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sideTitleInput{flex:none;min-width:0;max-width:180px;width:auto;height:26px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:var(--ui-font) system-ui;color:#111827}
+.sideIconBtn{width:28px;height:28px;padding:0;border-radius:7px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0;cursor:pointer;flex:none;transition:background .12s ease,color .12s ease}
+.sideIconBtn:hover{background:#d1d5db}
+.sideIconBtn svg{width:15px;height:15px;display:block;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.sideIconBtnDashboard,.sideIconBtnAnalysis{font-weight:800;font-size:12px;letter-spacing:-.02em;line-height:1}
+.sideIconBtnDashboard.active,.sideIconBtnAnalysis.active{background:#eef2ff;color:#1d4ed8}
+.sideIconBtnDashboard.active:hover,.sideIconBtnAnalysis.active:hover{background:#e0e7ff}
+.sideCollapse{margin-left:auto;width:28px;height:28px;padding:0;border-radius:7px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;border:0;cursor:pointer;flex:none}
+.fmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.36);z-index:3000;display:none;align-items:center;justify-content:center}
+.fmBox{width:min(1040px,92vw);max-height:78vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:12px}
+.fmHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+.fmHeadTitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fmHeadTitle strong{font-size:var(--ui-font)}
+.fmViewTabs{display:flex;gap:6px;flex-wrap:wrap}
+.fmViewTabs button{padding:4px 8px;font-size:var(--ui-font-sm)}
+.fmViewTabs button.active{background:#eef2ff;color:#1d4ed8}
+.fmTable{width:100%;border-collapse:collapse;font-size:var(--ui-font);table-layout:fixed}
+.fmTable th,.fmTable td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:middle}
+.fmTable th{font-size:var(--ui-font-sm);color:#6b7280}
+.fmTable td:first-child{overflow:hidden;text-overflow:ellipsis}
+.fmTable td:last-child{width:180px}
+.fmTable .meta{font-size:11px;color:#6b7280;margin-top:2px}
+.fmActions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fmActions button:disabled{opacity:.45;cursor:not-allowed}
+.empty{padding:20px;color:#6b7280;line-height:1.45}
+.aiReason{margin-top:5px;padding:6px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:var(--ui-font-sm);line-height:1.35}
+.riskBadge{display:inline-flex;align-items:center;gap:6px;margin-top:4px;margin-bottom:2px;font-weight:800}
+.riskDot{width:9px;height:9px;border-radius:999px;display:inline-block}
+.riskDot.high{background:#cf222e}.riskDot.medium{background:#f59e0b}.riskDot.low{background:#16a34a}
+.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}
+.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:var(--ui-font);z-index:4000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}
+#toast.show{opacity:1}
+.modalBackdrop.open,.changeModalBackdrop.open,.reviewModalBackdrop.open{display:flex}

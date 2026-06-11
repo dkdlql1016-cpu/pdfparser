@@ -10,11 +10,11 @@
 .topbar{min-height:48px;background:#111827;color:white;display:flex;align-items:center;gap:8px;padding:5px 10px;flex-wrap:wrap;transition:margin-left .18s ease}
 .uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-left:0}.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}.fileLabel input{display:none}.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:pointer;user-select:none;outline:none}.fileName{display:inline-block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;font-size:var(--ui-font-sm)}
 button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}button.secondary{background:#374151}button:disabled{opacity:.45;cursor:not-allowed}
-#status{font-size:12px;color:#d1d5db;min-width:90px}main{height:calc(100vh - 48px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
+#status{font-size:12px;color:#d1d5db;min-width:90px}.resetRunBtn{margin-left:auto;background:#374151;color:#f9fafb;border:1px solid #4b5563;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer}.resetRunBtn:hover{background:#4b5563}main{height:calc(100vh - 48px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}body:not(.sidebarCollapsed) .topbar{margin-left:320px}body:not(.sidebarCollapsed) main{margin-left:320px}body.sidebarCollapsed main{margin-left:0}
 .sidebarRail{display:none;position:static;flex:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center}body.sidebarCollapsed .sidebarRail{display:inline-block}
 aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;background:white;border-right:1px solid #d1d5db;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s ease}body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}.sideHeader{display:flex;align-items:center;gap:8px;height:40px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}.workspaceTitleRow{display:flex;align-items:center;gap:7px;min-width:0;width:100%}.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sideTitleInput{flex:none;min-width:0;max-width:180px;width:auto;height:26px;border:1px solid #cbd5e1;border-radius:6px;padding:2px 6px;font:var(--ui-font) system-ui;color:#111827}.sideIconBtn{width:28px;height:28px;padding:0;border-radius:7px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;border:0;cursor:pointer;flex:none;transition:background .12s ease,color .12s ease}.sideIconBtn:hover{background:#d1d5db}.sideIconBtn svg{width:15px;height:15px;display:block;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.sideIconBtnDashboard,.sideIconBtnAnalysis{font-weight:800;font-size:12px;letter-spacing:-.02em}.sideIconBtnDashboard.active,.sideIconBtnAnalysis.active{background:#eef2ff;color:#1d4ed8}.sideIconBtnDashboard.active:hover,.sideIconBtnAnalysis.active:hover{background:#e0e7ff}.sideCollapse{margin-left:auto;width:28px;height:28px;padding:0;border-radius:7px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;flex:none}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border-bottom:1px solid #e5e7eb}.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 4px;font-size:var(--ui-font-sm);line-height:1.2}.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
 .tabBody{display:none;overflow:auto;flex:1}.tabBody.active{display:block}.diffStats{padding:8px 11px;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:700}.addStat{color:var(--green)}.delStat{color:var(--red)}
-#changes,#indexList,#reviewPane,#snapshotPane{overflow:auto;padding:8px}.indexItem,.change,.snapshotRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:var(--ui-font)}.indexItem:hover,.change:hover,.snapshotRow:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:var(--ui-font-sm);color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.snapshotBar{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border-bottom:1px solid #e5e7eb}.snapshotBar input{min-width:0;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:var(--ui-font) system-ui}.snapshotBar button{font-size:var(--ui-font)}.readonlyBadge{background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 8px;font-size:var(--ui-font-sm);font-weight:800}
+#changes,#indexList,#reviewPane,#snapshotPane{overflow:auto;padding:8px}.indexItem,.change,.snapshotRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:white;font-size:var(--ui-font)}.indexItem:hover,.change:hover,.snapshotRow:hover{background:#f8fbff;border-color:#93c5fd}.indexItem .type{font-size:var(--ui-font-sm);color:#6b7280;font-weight:800;margin-bottom:3px}.change.active,.indexItem.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}.snapshotBar{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px;border-bottom:1px solid #e5e7eb}.snapshotBar input{min-width:0;border:1px solid #d1d5db;border-radius:7px;padding:6px;font:var(--ui-font) system-ui}.snapshotBar button{font-size:var(--ui-font)}.readonlyBadge{background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 8px;font-size:var(--ui-font-sm);font-weight:800}.snapshotRow .snapTitle{font-weight:700;color:#111827;line-height:1.35;margin:2px 0}.snapshotRow .snapStats{display:flex;align-items:baseline;gap:12px;margin:5px 0;font-variant-numeric:tabular-nums;font-weight:700}.snapshotRow .snapStats .snapDelta{display:flex;gap:8px}.snapshotRow .snapStats .add{color:#059669}.snapshotRow .snapStats .del{color:#dc2626}.snapshotRow .snapStats .snapGroups{color:#111827}.snapshotRow .snapStats .snapGroups .gw{color:#64748b;font-weight:600;margin-right:3px}.snapshotRow .rvActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.snapshotRow .rvActions button{padding:4px 8px;font-size:var(--ui-font-sm);background:#eef2ff;color:#3730a3}.snapshotRow .rvActions button.danger{background:#fef2f2;color:#b91c1c}
 .changeActions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.changeActions button{padding:4px 8px;font-size:var(--ui-font-sm);background:#eef2ff;color:#3730a3}.changeActions .noteDelete{background:#fee2e2!important;color:#991b1b!important}
 .riskBadge{display:inline-flex;align-items:center;gap:6px;margin-top:4px;margin-bottom:2px;font-weight:800}
 .riskDot{width:9px;height:9px;border-radius:999px;display:inline-block}
@@ -51,7 +51,7 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
 .reviewSubtabs{display:flex;border-bottom:1px solid #e5e7eb}.reviewSubtab{flex:1;border-radius:0;background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:8px;font-size:var(--ui-font)}.reviewSubtab.active{background:#eef2ff;color:#1d4ed8;box-shadow:inset 0 -2px 0 var(--blue)}.filterBar{display:flex;gap:5px;align-items:center;padding:7px 8px;border-bottom:1px solid #e5e7eb;background:#f8fafc;flex-wrap:wrap}.filterBar select,.filterBar button{font-size:var(--ui-font-sm);padding:4px 6px;border-radius:6px}.filterBar select{border:1px solid #cbd5e1;background:white;color:#374151;min-width:70px}.filterBar button{background:#e5e7eb;color:#374151}.confirmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:2500;display:none;align-items:center;justify-content:center}.confirmBox{width:310px;background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.32);padding:14px}.confirmMsg{font-size:var(--ui-font);line-height:1.45;color:#111827;margin-bottom:12px}.confirmActions{display:flex;gap:8px;justify-content:flex-end}.confirmActions button{padding:6px 12px}.confirmActions .cancel{background:#e5e7eb;color:#374151}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:9px 14px;border-radius:8px;font-size:var(--ui-font);z-index:2000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}#toast.show{opacity:1}
 .titleActions{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.titleActions button{padding:3px 6px;font-size:var(--ui-font-sm);background:#e5e7eb;color:#111827;border-radius:6px}
 .zoomControls{display:flex;align-items:center;gap:4px;margin-right:6px}.zoomControls button{background:#374151!important;color:#fff!important;border:1px solid #4b5563}.zoomInput{width:42px;height:24px;border:1px solid #4b5563;border-radius:6px;background:#111827;color:#e5e7eb;padding:2px 4px;font-size:var(--ui-font-sm);text-align:right}.zoomInput::-webkit-outer-spin-button,.zoomInput::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.zoomInput[type=number]{-moz-appearance:textfield;appearance:textfield}.zoomSuffix{font-size:var(--ui-font-sm);color:#cbd5e1;min-width:10px;text-align:left}
-.fmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.36);z-index:3000;display:none;align-items:center;justify-content:center}.fmBox{width:min(1040px,92vw);max-height:78vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:12px}.fmHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.fmTable{width:100%;border-collapse:collapse;font-size:var(--ui-font)}.fmTable th,.fmTable td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}.fmTable th{font-size:var(--ui-font-sm);color:#6b7280}.fmActions{display:flex;gap:6px;flex-wrap:wrap}
+.fmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.36);z-index:3000;display:none;align-items:center;justify-content:center}.fmBox{width:min(1040px,92vw);max-height:78vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:12px}.fmHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}.fmHeadTitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fmHeadTitle strong{font-size:var(--ui-font)}.fmViewTabs{display:flex;gap:6px;flex-wrap:wrap}.fmViewTabs button{padding:4px 8px;font-size:var(--ui-font-sm)}.fmViewTabs button.active{background:#eef2ff;color:#1d4ed8}.fmTable{width:100%;border-collapse:collapse;font-size:var(--ui-font)}.fmTable th,.fmTable td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}.fmTable th{font-size:var(--ui-font-sm);color:#6b7280}.fmActions{display:flex;gap:6px;flex-wrap:wrap}
 .sourcePicker{position:fixed;z-index:3100;display:none;background:#fff;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.24);padding:8px;gap:6px;flex-direction:column;min-width:140px}.sourcePicker button{width:100%;text-align:left;background:#f8fafc;color:#111827;border:1px solid #e5e7eb;padding:6px 8px}
 .homeView{display:none;flex:1;overflow:auto;background:#f8fafc;padding:14px 16px}.homeHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.homeTitle{font-size:16px;font-weight:800;color:#111827}.homeSub{font-size:var(--ui-font-sm);color:#6b7280}.homeGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.homeCard{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s}.homeCard:hover{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(37,99,235,.12)}.homeCardTitle{font-size:13px;font-weight:700;color:#111827;margin-bottom:6px}.homeCardMeta{font-size:var(--ui-font-sm);color:#6b7280;line-height:1.45}body.homeMode .topbar{display:none!important}body.homeMode main{height:100vh!important;margin-left:0!important}body.homeMode aside{display:none!important}body.homeMode #viewer{display:none!important}body.homeMode #homeView{display:block}body.homeMode .sidebarRail{display:none!important}
 *::-webkit-scrollbar-button{display:none;width:0;height:0}*{scrollbar-width:thin}
@@ -60,15 +60,16 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
 <body class="sidebarCollapsed">
 <div class="topbar">
   <button id="sidebarRail" class="sidebarRail" type="button" title="Open panel">☰</button>
-  <form id="createForm" class="uploadForm">
-    <label class="fileLabel">Base Report <input id="initialFile" type="file" name="pdf" accept="application/pdf"><button id="baseUploadBtn" class="fileBtn" type="button">Upload</button><span id="baseSelectedName" class="fileName"></span></label>
+  <form id="createForm" class="uploadForm" autocomplete="off">
+    <label class="fileLabel">Base Report <input id="initialFile" type="file" name="pdf" accept="application/pdf" autocomplete="off"><button id="baseUploadBtn" class="fileBtn" type="button">Upload</button><span id="baseSelectedName" class="fileName"></span></label>
     <button id="createBtn" type="submit">Analysis</button>
   </form>
-  <form id="updateForm" class="uploadForm" style="display:none">
-    <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf"><button id="updateUploadBtn" class="fileBtn" type="button">Upload</button><span id="updateSelectedName" class="fileName"></span></label>
+  <form id="updateForm" class="uploadForm" style="display:none" autocomplete="off">
+    <label class="fileLabel">Updated Report <input id="updateFile" type="file" name="pdf" accept="application/pdf" autocomplete="off"><button id="updateUploadBtn" class="fileBtn" type="button">Upload</button><span id="updateSelectedName" class="fileName"></span></label>
     <button id="updateBtn" type="submit">Compare</button>
   </form>
   <span id="status">Idle</span>
+  <button id="resetRunBtn" class="resetRunBtn" type="button" title="Reset run">run 초기화</button>
 </div>
 <main>
   <aside>
@@ -81,12 +82,12 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
     </div>
     <div id="tab-index" class="tabBody active"><div id="indexList"><div class="empty">Upload a report to view the outline.</div></div></div>
     <div id="tab-diff" class="tabBody"><div id="diffStats" class="diffStats"><span class="addStat">+ 0</span> / <span class="delStat">-0</span></div><div id="changeAiBar" class="aiBar"><button id="runChangeAiBtn" onclick="runChangeAiOnAll()">Run AI on All</button><button id="forwardAllChangesBtn" onclick="forwardAllChangeAi()">Forward All</button></div><div id="changeAiRunStatus" class="aiRunStatus"><span class="aiSpinner"></span><span id="changeAiRunText"></span></div><div id="changeFilterBar" class="filterBar"><select id="changeFilterAi" onchange="setChangeFilter('ai',this.value)"><option value="all">AI</option><option value="checked">AI Done</option><option value="unchecked">No AI</option></select><select id="changeFilterRisk" onchange="setChangeFilter('risk',this.value)"><option value="all">Risk</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><button type="button" onclick="resetChangeFilters()">Reset</button></div><div id="changes"><div class="empty">Upload an updated report to compare changes.</div></div></div>
-    <div id="tab-review" class="tabBody"><div id="reviewSubtabs" class="reviewSubtabs"><button id="reviewPrevTab" class="reviewSubtab" onclick="setReviewSide('old')">Previous</button><button id="reviewCurrentTab" class="reviewSubtab active" onclick="setReviewSide('new')">Current</button></div><div id="aiBar" class="aiBar"><button id="runAiBtn" onclick="runAiAssessment()">Run AI on All</button><button id="moveOpenBtn" onclick="moveOpenPreviousReviewsToCurrent()">Forward All</button></div><div id="aiRunStatus" class="aiRunStatus"><span class="aiSpinner"></span><span id="aiRunText"></span></div><div id="reviewFilterBar" class="filterBar"><select id="filterStatus" onchange="setReviewFilter('status',this.value)"><option value="all">Status</option><option value="open">Open</option><option value="cleared">Cleared</option></select><select id="filterAi" onchange="setReviewFilter('ai',this.value)"><option value="all">AI</option><option value="checked">AI Done</option><option value="unchecked">No AI</option></select><select id="filterMatch" onchange="setReviewFilter('match',this.value)"><option value="all">Match</option><option value="matched">Matched</option><option value="unmatched">Floating</option></select><select id="filterSort" onchange="setReviewFilter('sort',this.value)"><option value="default">Sort</option><option value="comments_desc">Most Comments</option><option value="comments_asc">Fewest Comments</option></select><button type="button" onclick="resetReviewFilters()">Reset</button></div><div id="reviewPane"><div class="reviewPlaceholder">No comments yet.</div></div></div>
+    <div id="tab-review" class="tabBody"><div id="reviewSubtabs" class="reviewSubtabs"><button id="reviewPrevTab" class="reviewSubtab" onclick="setReviewSide('old')">Current</button><button id="reviewCurrentTab" class="reviewSubtab active" onclick="setReviewSide('new')">Update</button></div><div id="aiBar" class="aiBar"><button id="runAiBtn" onclick="runAiAssessment()">Run AI on All</button><button id="moveOpenBtn" onclick="moveOpenPreviousReviewsToCurrent()">Forward All</button></div><div id="aiRunStatus" class="aiRunStatus"><span class="aiSpinner"></span><span id="aiRunText"></span></div><div id="reviewFilterBar" class="filterBar"><select id="filterStatus" onchange="setReviewFilter('status',this.value)"><option value="all">Status</option><option value="open">Open</option><option value="cleared">Cleared</option></select><select id="filterAi" onchange="setReviewFilter('ai',this.value)"><option value="all">AI</option><option value="checked">AI Done</option><option value="unchecked">No AI</option></select><select id="filterMatch" onchange="setReviewFilter('match',this.value)"><option value="all">Match</option><option value="matched">Matched</option><option value="unmatched">Floating</option></select><select id="filterSort" onchange="setReviewFilter('sort',this.value)"><option value="default">Sort</option><option value="comments_desc">Most Comments</option><option value="comments_asc">Fewest Comments</option></select><button type="button" onclick="resetReviewFilters()">Reset</button></div><div id="reviewPane"><div class="reviewPlaceholder">No comments yet.</div></div></div>
     <div id="tab-snapshot" class="tabBody"><div class="snapshotBar"><input id="snapshotLabel" placeholder="Optional snapshot label"><button onclick="saveSnapshot()">Save Snapshot</button></div><div id="snapshotPane"><div class="empty">Save a snapshot to preserve the current review state.</div></div></div>
   </aside>
   <section id="viewer" class="viewer single">
-    <div id="oldPane" class="pane"><div class="paneTitle"><span id="oldTitle">Previous PDF</span><div class="titleActions"><div class="zoomControls" data-side="old"><button type="button" data-zoom-act="fit" title="Fit to pane">⛶</button><button type="button" data-zoom-act="in">+</button><button type="button" data-zoom-act="out">-</button><input id="oldZoomInput" class="zoomInput" type="number" min="30" max="300" step="5" value="100" title="Zoom percent"><span class="zoomSuffix">%</span></div><button type="button" onclick="saveWorkspace('old')">Save</button><button type="button" onclick="saveAsWorkspace('old')">Save As</button><button type="button" onclick="exportPdf('old')">Export</button></div></div><div id="oldPages" class="pages"></div></div>
-    <div id="newPane" class="pane"><div class="paneTitle"><span id="newTitle">Current PDF</span><div class="titleActions"><div class="zoomControls" data-side="new"><button type="button" data-zoom-act="fit" title="Fit to pane">⛶</button><button type="button" data-zoom-act="in">+</button><button type="button" data-zoom-act="out">-</button><input id="newZoomInput" class="zoomInput" type="number" min="30" max="300" step="5" value="100" title="Zoom percent"><span class="zoomSuffix">%</span></div><button type="button" onclick="saveWorkspace('new')">Save</button><button type="button" onclick="saveAsWorkspace('new')">Save As</button><button type="button" onclick="exportPdf('new')">Export</button></div></div><div id="newPages" class="pages"></div></div>
+    <div id="oldPane" class="pane"><div class="paneTitle"><span id="oldTitle">Current report</span><div class="titleActions"><div class="zoomControls" data-side="old"><button type="button" data-zoom-act="fit" title="Fit to pane">⛶</button><button type="button" data-zoom-act="in">+</button><button type="button" data-zoom-act="out">-</button><input id="oldZoomInput" class="zoomInput" type="number" min="30" max="300" step="5" value="100" title="Zoom percent"><span class="zoomSuffix">%</span></div><button type="button" onclick="saveWorkspace('old')">Save</button><button type="button" onclick="saveAsWorkspace('old')">Save As</button><button type="button" onclick="exportPdf('old')">Export</button></div></div><div id="oldPages" class="pages"></div></div>
+    <div id="newPane" class="pane"><div class="paneTitle"><span id="newTitle">Update report</span><div class="titleActions"><div class="zoomControls" data-side="new"><button type="button" data-zoom-act="fit" title="Fit to pane">⛶</button><button type="button" data-zoom-act="in">+</button><button type="button" data-zoom-act="out">-</button><input id="newZoomInput" class="zoomInput" type="number" min="30" max="300" step="5" value="100" title="Zoom percent"><span class="zoomSuffix">%</span></div><button type="button" onclick="saveWorkspace('new')">Save</button><button type="button" onclick="saveAsWorkspace('new')">Save As</button><button type="button" onclick="exportPdf('new')">Export</button></div></div><div id="newPages" class="pages"></div></div>
   </section>
   <section id="homeView" class="homeView">
     <div class="homeHead">
@@ -123,8 +124,10 @@ aside{position:fixed;left:0;top:0;width:320px;height:100vh;z-index:1500;backgrou
 </div>
 <div id="toast"></div>
 <div id="sourcePicker" class="sourcePicker"><button id="sourceFileManagerBtn" type="button">File Manager</button><button id="sourceExternalBtn" type="button">External</button></div>
-<div id="fmDialog" class="fmBackdrop"><div class="fmBox"><div class="fmHead"><strong>File Manager</strong><button type="button" class="secondary" onclick="closeFileManager()">Close</button></div><div id="fmTableWrap"></div></div></div>
+<div id="fmDialog" class="fmBackdrop"><div class="fmBox"><div class="fmHead"><div id="fmDialogTitle" class="fmHeadTitle"><strong>Files</strong></div><button type="button" class="secondary" id="fmCloseBtn">Close</button></div><div id="fmTableWrap"></div></div></div>
+<script src="/static/shared.js?v=20260612-1"></script>
 <script>
+const {FileManager, updateFilesBtnLabel, ensureDefaultWorkspace: ensureDefaultWorkspaceShared}=PdfShared;
 let ZOOM={old:1,new:1};
 let ZOOM_CUSTOM={old:false,new:false};
 const $=s=>document.querySelector(s);
@@ -160,7 +163,6 @@ let UPDATE_UPLOAD_NAME='';
 let PENDING_BASE_FILE=null;
 let PENDING_UPDATE_FILE=null;
 let PENDING_BASE_SOURCE_WORKSPACE_ID=null;
-let FILE_MANAGER_MODE='manage';
 let SAVE_TARGET_WORKSPACE_ID=null;
 let UPDATE_SAVE_TARGET_WORKSPACE_ID=null;
 
@@ -217,14 +219,14 @@ $('#workspaceAnalysisBtn').addEventListener('click',()=>{
   if(location.pathname==='/'&&location.search==='?'+q.toString())return;
   location.href=target;
 });
-$('#workspaceFilesBtn').addEventListener('click',()=>openFileManager('manage'));
+$('#workspaceFilesBtn').addEventListener('click',()=>FileManager.open('manage'));
 $('#workspaceRenameBtn').addEventListener('click',startWorkspaceRename);
 window.addEventListener('resize',()=>{if(DATA)draw(DATA)});
 $('#baseUploadBtn').addEventListener('click',e=>{e.preventDefault();openSourcePicker('base',e.currentTarget)});
 $('#updateUploadBtn').addEventListener('click',e=>{e.preventDefault();openSourcePicker('update',e.currentTarget)});
 $('#initialFile').addEventListener('change',()=>{PENDING_BASE_FILE=null;PENDING_BASE_SOURCE_WORKSPACE_ID=null;SAVE_TARGET_WORKSPACE_ID=null;BASE_UPLOAD_NAME=selectedInputName('#initialFile');updateUploadFileNames()});
 $('#updateFile').addEventListener('change',()=>{PENDING_UPDATE_FILE=null;UPDATE_SAVE_TARGET_WORKSPACE_ID=null;UPDATE_UPLOAD_NAME=selectedInputName('#updateFile');updateUploadFileNames()});
-$('#sourceFileManagerBtn').addEventListener('click',()=>{closeSourcePicker();openFileManager('upload')});
+$('#sourceFileManagerBtn').addEventListener('click',()=>{closeSourcePicker();FileManager.open('upload')});
 $('#sourceExternalBtn').addEventListener('click',()=>{const id=UPLOAD_CONTEXT==='base'?'#initialFile':'#updateFile';closeSourcePicker();$(id).click()});
 document.addEventListener('click',e=>{const picker=$('#sourcePicker');if(!picker||picker.style.display==='none')return;if(picker.contains(e.target)||e.target.id==='baseUploadBtn'||e.target.id==='updateUploadBtn')return;closeSourcePicker()});
 document.addEventListener('click',e=>{const modal=$('#changeAiModal');if(!modal||modal.style.display!=='flex')return;if(e.target===modal)closeChangeAiModal()});
@@ -237,7 +239,7 @@ function closeTopOverlayOnEscape(){
   const sourcePicker=$('#sourcePicker');
   if(sourcePicker&&sourcePicker.style.display!=='none'){closeSourcePicker();return true}
   const fmDialog=$('#fmDialog');
-  if(fmDialog&&fmDialog.style.display==='flex'){closeFileManager();return true}
+  if(fmDialog&&fmDialog.style.display==='flex'){FileManager.close();return true}
   const confirmDialog=$('#confirmDialog');
   if(confirmDialog&&confirmDialog.style.display==='flex'){
     const noBtn=$('#confirmNo');
@@ -306,9 +308,11 @@ function updateUploadFileNames(){
   if(baseEl)baseEl.textContent=BASE_UPLOAD_NAME||'';
   if(updateEl)updateEl.textContent=UPDATE_UPLOAD_NAME||'';
 }
+function sideRoleLabel(side){return side==='old'?'Current report':(isDiff()?'Update report':'Current report')}
+function sideRoleShort(side){return side==='old'?'current':(isDiff()?'update':'current')}
 function updatePaneTitles(){
-  const defaultOld='Previous PDF';
-  const defaultNew='Current PDF';
+  const defaultOld=sideRoleLabel('old');
+  const defaultNew=sideRoleLabel('new');
   const oldTitle=PREV_REPORT_FILENAME||DATA?.old_filename||defaultOld;
   const newTitle=CUR_REPORT_FILENAME||DATA?.new_filename||DATA?.filename||defaultNew;
   const oldEl=$('#oldTitle'),newEl=$('#newTitle');
@@ -316,8 +320,8 @@ function updatePaneTitles(){
   if(newEl)newEl.textContent=newTitle;
 }
 function filenameForSide(side){
-  if(side==='old')return PREV_REPORT_FILENAME||DATA?.old_filename||'Previous PDF';
-  return CUR_REPORT_FILENAME||DATA?.new_filename||DATA?.filename||'Current PDF';
+  if(side==='old')return PREV_REPORT_FILENAME||DATA?.old_filename||sideRoleLabel('old');
+  return CUR_REPORT_FILENAME||DATA?.new_filename||DATA?.filename||sideRoleLabel('new');
 }
 function titleFromFilename(name){return String(name||'Workspace').replace(/\.pdf$/i,'')}
 const INTERNAL_PDF_NAMES=new Set(['source.pdf','report.pdf','prev_report.pdf','old.pdf','new.pdf','']);
@@ -331,6 +335,75 @@ function applyReportFilenamesFromMeta(meta,runId,viewer){
   const prevMeta=runMeta.previous_run_id?runs.find(r=>r.run_id===runMeta.previous_run_id):null;
   CUR_REPORT_FILENAME=publicReportFilename(runMeta.filename,publicReportFilename(viewer?.new_filename||viewer?.filename,CUR_REPORT_FILENAME||'report.pdf'));
   PREV_REPORT_FILENAME=publicReportFilename(prevMeta?.filename,publicReportFilename(viewer?.old_filename,PREV_REPORT_FILENAME||'previous.pdf'));
+}
+function workspaceHasComparison(meta){return (meta?.runs||[]).some(r=>r.has_diff)}
+function syncUploadFormsFromMeta(meta){
+  const createForm=$('#createForm'),updateForm=$('#updateForm');
+  if(!createForm||!updateForm)return;
+  if(workspaceHasComparison(meta)){
+    createForm.style.display='none';
+    updateForm.style.display='flex';
+    return;
+  }
+  const runs=meta?.runs||[];
+  const hasReadyInitial=runs.some(r=>r.kind==='initial'&&r.status==='ready');
+  createForm.style.display=hasReadyInitial?'none':'flex';
+  updateForm.style.display=hasReadyInitial?'flex':'none';
+}
+async function loadWorkspaceRun(docId,meta,runId){
+  if(!runId)return null;
+  const viewer=await fetch(`/api/documents/${docId}/runs/${runId}`).then(r=>{if(!r.ok)throw new Error('run not found');return r.json()});
+  RUN_ID=runId;LIVE_RUN_ID=runId;SNAPSHOT_ID=null;READ_ONLY=false;DATA=viewer;
+  applyReportFilenamesFromMeta(meta,runId,viewer);
+  syncUploadFormsFromMeta(meta);
+  draw(viewer);
+  history.replaceState(null,'','/?'+viewerUrlParams().toString());
+  return viewer;
+}
+function clearUploadSelections(){
+  // Wipe any file the browser silently restored into the hidden inputs across F5/bfcache,
+  // plus the pending-file vars and visible name spans, so no ghost base report can be re-submitted.
+  PENDING_BASE_FILE=null;PENDING_UPDATE_FILE=null;
+  PENDING_BASE_SOURCE_WORKSPACE_ID=null;
+  SAVE_TARGET_WORKSPACE_ID=null;UPDATE_SAVE_TARGET_WORKSPACE_ID=null;
+  BASE_UPLOAD_NAME='';UPDATE_UPLOAD_NAME='';
+  const baseInput=$('#initialFile');if(baseInput)baseInput.value='';
+  const updateInput=$('#updateFile');if(updateInput)updateInput.value='';
+  updateUploadFileNames();
+}
+function resetRunSession(meta){
+  RUN_ID=null;LIVE_RUN_ID=null;SNAPSHOT_ID=null;DATA=null;READ_ONLY=false;DIRTY=false;
+  REVIEWS=[];AI_ASSESSMENT={items:[]};CHANGE_AI_ASSESSMENT={items:[]};
+  PREV_REPORT_FILENAME='';CUR_REPORT_FILENAME='';
+  clearUploadSelections();
+  resetZoomState();
+  clearReviewMarkers();
+  renderReviewList(REVIEWS);
+  $('#viewer').classList.add('single');
+  $('#oldPages').innerHTML='';
+  $('#newPages').innerHTML='';
+  $('#indexList').innerHTML='<div class="empty">Upload a report to view the outline.</div>';
+  $('#changes').innerHTML=meta&&workspaceHasComparison(meta)?'<div class="empty">Use Updated Report upload to start a new comparison.</div>':'<div class="empty">Upload an updated report to compare changes.</div>';
+  $('#diffStats').innerHTML='';
+  $('#reviewSubtabs').style.display='none';
+  $('#reviewPane').innerHTML='<div class="reviewPlaceholder">No comments yet.</div>';
+  $('#status').textContent='Ready';
+  // Reset always returns to a fresh base-report upload, regardless of whether the workspace
+  // already has runs/comparisons -- the base-upload UI must never disappear on reset.
+  $('#createForm').style.display='flex';
+  $('#updateForm').style.display='none';
+  if(DOC_ID)history.replaceState(null,'','/?'+viewerUrlParams().toString());
+}
+async function openWorkspaceSession(docId){
+  const meta=await fetch(`/api/documents/${docId}`).then(r=>{if(!r.ok)throw new Error('workspace not found');return r.json()});
+  if(meta.is_saved===false&&!(meta.files||[]).length)throw new Error('workspace not saved');
+  DOC_ID=docId;
+  WORKSPACE_TITLE=meta.title||'Workspace';
+  updateWorkspaceTitle();
+  updateFilesBtnLabel(DOC_ID);
+  resetRunSession(meta);
+  await loadSnapshots();
+  return meta;
 }
 function updateWorkspaceNavButtons(){
   const a=$('#workspaceAnalysisBtn');
@@ -395,7 +468,7 @@ function renderHomeCards(){
   const current=CUR_REPORT_FILENAME||'report.pdf';
   const previous=PREV_REPORT_FILENAME||'prev_report.pdf';
   const status=DOC_ID?'Ready':'Not started';
-  grid.innerHTML=`<button type="button" class="homeCard" data-home-open="1"><div class="homeCardTitle">${escapeHtml(title)}</div><div class="homeCardMeta">Mode: ${escapeHtml(mode)}<br>Status: ${escapeHtml(status)}<br>Current: ${escapeHtml(current)}${isDiff()?`<br>Previous: ${escapeHtml(previous)}`:''}</div></button>`;
+  grid.innerHTML=`<button type="button" class="homeCard" data-home-open="1"><div class="homeCardTitle">${escapeHtml(title)}</div><div class="homeCardMeta">Mode: ${escapeHtml(mode)}<br>Status: ${escapeHtml(status)}<br>Current report: ${escapeHtml(isDiff()?previous:current)}${isDiff()?`<br>Update report: ${escapeHtml(current)}`:''}</div></button>`;
 }
 window.openHomeView=function(){
   HOME_RETURN_COLLAPSED=document.body.classList.contains('sidebarCollapsed');
@@ -432,22 +505,29 @@ function openSourcePicker(context,anchor){
 function closeSourcePicker(){const picker=$('#sourcePicker');if(picker)picker.style.display='none'}
 
 function formatDate(s){if(!s)return '-';const t=String(s).replace('T',' ').slice(0,19);return t||'-'}
-function closeFileManager(){const dlg=$('#fmDialog');if(dlg)dlg.style.display='none'}
+function closeFileManager(){FileManager.close()}
 window.closeFileManager=closeFileManager;
 
 async function fetchManagerReportFile(item){
-  const workspaceId=item?.workspace_id;
-  if(!workspaceId||!item?.latest_run_id)throw new Error('No available file');
-  const fileRes=await fetch(`/api/documents/${workspaceId}/runs/${item.latest_run_id}/file/report`);
-  if(!fileRes.ok)throw new Error('Failed to fetch file from manager');
+  const workspaceId=item?.workspace_id||DOC_ID;
+  const fileId=item?.file_id||item?.run_id||item?.latest_run_id;
+  const downloadName=item?.filename||item?.latest_filename||item?.name||'report.pdf';
+  if(!workspaceId||!fileId)throw new Error('No available file');
+  const fileRes=await fetch(`/api/documents/${workspaceId}/files/${fileId}/report`);
+  if(!fileRes.ok){
+    let msg='Failed to fetch file from manager';
+    try{const data=await fileRes.json();if(data.error)msg=data.error}catch(e){}
+    throw new Error(msg);
+  }
   const blob=await fileRes.blob();
-  return new File([blob], item.latest_filename||item.name||'report.pdf', {type:'application/pdf'});
+  return new File([blob], downloadName, {type:'application/pdf'});
 }
 
 async function runCreateWithBlob(blob,fileName){
   const file = new File([blob], fileName || 'report.pdf', {type:'application/pdf'});
   if(!file)return;
-  const sourceWorkspaceId=PENDING_BASE_SOURCE_WORKSPACE_ID;
+  // Single workspace: a base upload always starts a fresh analysis in the current workspace.
+  if(!DOC_ID){try{const ws=await ensureDefaultWorkspaceShared();DOC_ID=ws.workspace_id;WORKSPACE_TITLE=ws.title||'Workspace';updateWorkspaceTitle();updateFilesBtnLabel(DOC_ID)}catch(e){setBusy(false,'Error: workspace unavailable');return}}
   REVIEWS=[];
   AI_ASSESSMENT={items:[]};
   clearReviewMarkers();
@@ -457,16 +537,15 @@ async function runCreateWithBlob(blob,fileName){
   setBusy(true,'Processing base report');
   $('#indexList').innerHTML='<div class="empty">Running OpenDataLoader and building the outline...</div>';
   $('#changes').innerHTML='<div class="empty">The base report has no comparison yet.</div>';
-  const fd=new FormData(); fd.append('pdf',file,file.name); fd.append('title',file.name.replace(/\.pdf$/i,''));
+  const fd=new FormData(); fd.append('pdf',file,file.name);
   resetZoomState();
   try{
-    const res=await fetch('/api/documents',{method:'POST',body:fd});
+    const res=await fetch(`/api/documents/${DOC_ID}/runs/initial`,{method:'POST',body:fd});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
-    DOC_ID=data.workspace_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
-    if(sourceWorkspaceId){
-      await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/import-reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_workspace_id:sourceWorkspaceId})});
-    }
+    RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
+    history.replaceState(null,'','/?'+viewerUrlParams().toString());
+    updateFilesBtnLabel(DOC_ID);
     CUR_REPORT_FILENAME=file.name||CUR_REPORT_FILENAME;
     PREV_REPORT_FILENAME='';
     // Keep workspace name independent from uploaded/analyzed report filename.
@@ -503,68 +582,77 @@ async function useManagerFileAsBase(item){
   }catch(e){toast('Failed to select base file')}
 }
 
-async function renameFileManagerItem(docId){
-  const item=(window.__fmItems||[]).find(x=>x.workspace_id===docId);
-  if(!item)return;
-  const title=prompt('Rename workspace', item.title||item.name||'Workspace');
-  if(title===null)return;
-  const next=String(title||'').trim();
-  if(!next){toast('Name is required');return}
-  const res=await fetch(`/api/file-manager/${docId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:next})});
-  const data=await res.json();
-  if(!res.ok){toast(data.error==='duplicate title'?'Name already exists':(data.error||'Rename failed'));return}
-  toast('Renamed');
-  await renderFileManager('manage');
-}
-
-async function deleteFileManagerItem(docId){
-  if(!confirm('Delete this workspace file?'))return;
-  const res=await fetch(`/api/file-manager/${docId}`,{method:'DELETE'});
-  const data=await res.json();
-  if(!res.ok){toast(data.error||'Delete failed');return}
-  toast('Deleted');
-  await renderFileManager('manage');
-}
-
-function exportFileManagerItem(docId,runId){
-  if(!docId||!runId){toast('No file to export');return}
-  window.open(`/api/documents/${docId}/runs/${runId}/file/report`,'_blank');
-}
-
-async function renderFileManager(mode){
-  const wrap=$('#fmTableWrap');
-  if(!wrap)return;
-  FILE_MANAGER_MODE=mode||'manage';
-  wrap.innerHTML='<div class="empty">Loading files...</div>';
+async function openManagerFile(item){
+  const workspaceId=item?.workspace_id||DOC_ID;
+  const fileId=item?.file_id||item?.run_id||item?.latest_run_id;
+  if(!workspaceId||!fileId){toast('No file selected');return}
+  closeFileManager();
+  setBusy(true,'Opening saved file');
   try{
-    const res=await fetch('/api/file-manager');
+    if(workspaceId!==DOC_ID){
+      DOC_ID=workspaceId;
+      const wsMeta=await fetch(`/api/documents/${workspaceId}`).then(r=>r.json());
+      WORKSPACE_TITLE=wsMeta.title||'Workspace';
+      updateWorkspaceTitle();
+      updateFilesBtnLabel(DOC_ID);
+    }
+    const res=await fetch(`/api/documents/${workspaceId}/files/${fileId}/open`,{method:'POST'});
     const data=await res.json();
-    const items=data.items||[];
-    if(!items.length){wrap.innerHTML='<div class="empty">No files in manager.</div>';return}
-    wrap.innerHTML=`<table class="fmTable"><thead><tr><th>Name</th><th>Imported on</th><th>Runs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${items.map(item=>{const name=escapeHtml(item.latest_filename||item.name||'report.pdf');const date=escapeHtml(formatDate(item.updated_at||item.created_at));const status=escapeHtml(item.latest_status||'-');const runId=escapeHtmlAttr(item.latest_run_id||'');const workspaceId=escapeHtmlAttr(item.workspace_id||'');const useBtn=`<button type="button" data-fm-action="select" data-doc-id="${workspaceId}" data-run-id="${runId}">Select</button>`;const manageBtns=`<button type="button" data-fm-action="rename" data-doc-id="${workspaceId}">Rename</button><button type="button" data-fm-action="delete" data-doc-id="${workspaceId}">Delete</button><button type="button" data-fm-action="export" data-doc-id="${workspaceId}" data-run-id="${runId}">Export</button>`;return `<tr><td>${name}</td><td>${date}</td><td>${item.run_count||0}</td><td>${status}</td><td class="fmActions">${mode==='upload'?useBtn:manageBtns}</td></tr>`}).join('')}</tbody></table>`;
-    window.__fmItems=items;
-  }catch(e){
-    wrap.innerHTML='<div class="empty">Failed to load file manager.</div>';
-  }
+    if(!res.ok)throw new Error(data.error||res.status);
+    const meta=await fetch(`/api/documents/${workspaceId}`).then(r=>r.json());
+    RUN_ID=data.run_id;LIVE_RUN_ID=data.run_id;SNAPSHOT_ID=null;READ_ONLY=false;DATA=data.result;
+    SAVE_TARGET_WORKSPACE_ID=null;PENDING_BASE_FILE=null;PENDING_UPDATE_FILE=null;
+    applyReportFilenamesFromMeta(meta,data.run_id,data.result);
+    syncUploadFormsFromMeta(meta);
+    resetZoomState();
+    setSidebarCollapsed(false);
+    draw(DATA);
+    await loadSnapshots();
+    history.replaceState(null,'','/?'+viewerUrlParams().toString());
+    activateTab('review');
+    setBusy(false,'Ready');
+    toast('Opened with saved reviews');
+  }catch(e){setBusy(false,'Error: '+(e.message||'Failed to open file'))}
 }
-function useManagerFileById(docId,runId){
-  const item=(window.__fmItems||[]).find(x=>x.workspace_id===docId&&x.latest_run_id===runId);
-  if(!item)return;
-  if(UPLOAD_CONTEXT==='base')useManagerFileAsBase(item);else compareWithManagerFile(item);
+
+async function openWorkspaceFromManager(docId){
+  if(!docId)return;
+  try{
+    const meta=await fetch(`/api/documents/${docId}`).then(r=>{if(!r.ok)throw new Error('workspace not found');return r.json()});
+    if(meta.is_saved===false&&!(meta.files||[]).length){
+      toast('Saved workspace not found');
+      return;
+    }
+    await openWorkspaceSession(docId);
+    toast('Workspace opened');
+  }catch(e){toast('Failed to open workspace')}
 }
-async function openFileManager(mode){const dlg=$('#fmDialog');if(!dlg)return;dlg.style.display='flex';await renderFileManager(mode)}
-$('#fmTableWrap').addEventListener('click',e=>{
-  const btn=e.target.closest('button[data-fm-action]');
-  if(!btn)return;
-  const action=btn.dataset.fmAction;
-  const docId=btn.dataset.docId||'';
-  const runId=btn.dataset.runId||'';
-  if(action==='select'){useManagerFileById(docId,runId);return}
-  if(FILE_MANAGER_MODE==='upload')return;
-  if(action==='rename'){renameFileManagerItem(docId);return}
-  if(action==='delete'){deleteFileManagerItem(docId);return}
-  if(action==='export'){exportFileManagerItem(docId,runId)}
+
+FileManager.init({
+  getCtx:()=>({docId:DOC_ID,workspaceTitle:WORKSPACE_TITLE}),
+  onOpenFile:openManagerFile,
+  onSelectFile:async item=>{
+    const baseAllowed=$('#createForm')&&$('#createForm').style.display!=='none';
+    if(UPLOAD_CONTEXT==='base'&&baseAllowed)await useManagerFileAsBase(item);
+    else await compareWithManagerFile(item);
+  },
+  onOpenWorkspace:openWorkspaceFromManager,
+  onRenamed:async (docId,title)=>{if(DOC_ID===docId){WORKSPACE_TITLE=title;updateWorkspaceTitle()}},
+  onDeleted:async docId=>{
+    if(DOC_ID!==docId)return;
+    DOC_ID=null;RUN_ID=null;LIVE_RUN_ID=null;SNAPSHOT_ID=null;DATA=null;READ_ONLY=false;
+    updateFilesBtnLabel(null);
+    try{
+      const ws=await ensureDefaultWorkspaceShared();
+      DOC_ID=ws.workspace_id;
+      WORKSPACE_TITLE=ws.title||'Workspace';
+      updateWorkspaceTitle();
+      updateFilesBtnLabel(DOC_ID);
+      await loadSnapshots();
+    }catch(e){}
+  },
 });
+updateFilesBtnLabel(null);
 
 $('#createForm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -613,6 +701,12 @@ $('#updateForm').addEventListener('submit',async e=>{
   const updateInput=$('#updateFile');
   if(updateInput)updateInput.value='';
   updateUploadFileNames();
+});
+$('#resetRunBtn').addEventListener('click',async()=>{
+  let meta=null;
+  if(DOC_ID){try{meta=await fetch(`/api/documents/${DOC_ID}`).then(r=>r.ok?r.json():null)}catch(e){meta=null}}
+  resetRunSession(meta);
+  setBusy(false,'Ready');
 });
 
 function draw(d){
@@ -679,7 +773,7 @@ function drawChanges(d){
   $('#changes').innerHTML=filtered.map(c=>{
     const ai=changeAiItemForId(c.id);
     const actions=READ_ONLY?'':`<div class="changeActions"><button onclick="event.stopPropagation();runSingleChangeAi(${Number(c.id)})">AI</button><button onclick="event.stopPropagation();forwardChangeAi(${Number(c.id)})">Forward</button></div>`;
-    return `<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} previous p.${c.old_page||'-'} / current p.${c.new_page||'-'} · removed ${c.old_highlight_ids?.length||0} · added ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}${renderChangeAiReason(c.id,ai)}${actions}</div>`;
+    return `<div class="change" data-id="${c.id}" onclick="goChange(${c.id})"><div class="meta">#${c.id} current p.${c.old_page||'-'} / update p.${c.new_page||'-'} · removed ${c.old_highlight_ids?.length||0} · added ${c.new_highlight_ids?.length||0}</div>${c.old_text?`<div><span class="delText">- ${escapeHtml(trim(c.old_text))}</span></div>`:''}${c.new_text?`<div><span class="addText">+ ${escapeHtml(trim(c.new_text))}</span></div>`:''}${renderChangeAiReason(c.id,ai)}${actions}</div>`;
   }).join('');
 }
 function drawPages(side,count,sizes,highlights){const z=zoomFor(side);const root=side==='old'?$('#oldPages'):$('#newPages');root.innerHTML='';const byPage=new Map();for(const h of highlights||[]){if(!byPage.has(h.page))byPage.set(h.page,[]);byPage.get(h.page).push(h)}for(let p=1;p<=count;p++){const size=sizes[p-1];if(!size)continue;const page=document.createElement('div');page.className='page';page.id=`${side}-page-${p}`;page.style.width=`${size.width*z}px`;page.style.height=`${size.height*z}px`;const img=document.createElement('img');img.loading='lazy';img.draggable=false;img.src=`${apiBase()}/page/${side}/${p}?zoom=${z}`;page.appendChild(img);for(const h of byPage.get(p)||[]){const[x0,y0,x1,y1]=h.bbox;const el=document.createElement('div');el.className=`hl ${h.type}`;el.id=h.id;el.dataset.changeId=h.change_id;el.dataset.changeIds=(h.change_ids||[h.change_id]).join(',');el.style.left=`${x0*z}px`;el.style.top=`${y0*z}px`;el.style.width=`${Math.max(1,(x1-x0)*z)}px`;el.style.height=`${Math.max(2,(y1-y0)*z)}px`;page.appendChild(el)}root.appendChild(page)}}
@@ -870,7 +964,15 @@ async function loadChangeAssessment(){
 }
 async function loadReviews(){if(!DATA)return;try{REVIEWS=await fetch(`${apiBase()}/reviews`).then(r=>r.ok?r.json():[])}catch(e){REVIEWS=[]}await loadAssessment();drawReviewMarkers(REVIEWS);renderReviewList(REVIEWS);if(REVIEW_DETAIL_MODAL_ID&&$('#reviewDetailModal')?.style.display==='flex')renderReviewDetailModal()}
 async function loadSnapshots(){if(!DOC_ID)return;try{const data=await fetch(`/api/documents/${DOC_ID}/snapshots`).then(r=>r.ok?r.json():{snapshots:[]});renderSnapshots(data.snapshots||[])}catch(e){renderSnapshots([])}}
-function renderSnapshots(items){const pane=$('#snapshotPane');if(!items.length){pane.innerHTML='<div class="empty">Save a snapshot to preserve the current review state.</div>';return}pane.innerHTML=items.map(s=>`<div class="snapshotRow"><div class="meta">${escapeHtml((s.created_at||'').slice(0,19).replace('T',' '))} · ${s.mode||'-'} · ${s.has_ai_assessment?'AI checked':'No AI check'}</div><div>${escapeHtml(s.label||s.filename||s.snapshot_id)}</div><div class="meta">${s.open_reviews||0} open / ${s.closed_reviews||0} closed</div><div class="rvActions"><button onclick="event.stopPropagation();openSnapshot('${s.snapshot_id}')">Open</button></div></div>`).join('')}
+function snapshotStatsHtml(s){
+  const isDiffSnap=s.mode==='diff'||s.has_diff;
+  const groups=`<span class="snapGroups"><span class="gw">change group</span>${s.change_groups||0}</span>`;
+  if(!isDiffSnap)return `<div class="snapStats">${groups}</div>`;
+  return `<div class="snapStats"><span class="snapDelta"><span class="add">+${s.added||0}</span><span class="del">−${s.deleted||0}</span></span>${groups}</div>`;
+}
+function renderSnapshots(items){const pane=$('#snapshotPane');if(!items.length){pane.innerHTML='<div class="empty">Save a snapshot to preserve the current review state.</div>';return}pane.innerHTML=items.map(s=>{const id=escapeHtmlAttr(s.snapshot_id);const title=escapeHtml(s.label||s.filename||s.snapshot_id);return `<div class="snapshotRow"><div class="meta">${escapeHtml((s.created_at||'').slice(0,19).replace('T',' '))}</div><div class="snapTitle">${title}</div>${snapshotStatsHtml(s)}<div class="meta">${s.open_reviews||0} open / ${s.closed_reviews||0} closed</div><div class="rvActions"><button onclick="event.stopPropagation();openSnapshot('${id}')">Open</button><button onclick="event.stopPropagation();renameSnapshot('${id}')">Rename</button><button class="danger" onclick="event.stopPropagation();deleteSnapshot('${id}')">Delete</button></div></div>`}).join('')}
+window.renameSnapshot=async function(id){if(!DOC_ID)return;const next=window.prompt('Rename snapshot');if(next===null)return;try{const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:next.trim()})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Rename failed');return}await loadSnapshots();toast('Snapshot renamed')}catch(e){toast('Rename failed')}}
+window.deleteSnapshot=async function(id){if(!DOC_ID)return;const ok=await askConfirm('Delete this snapshot?',{yesText:'Delete',noText:'Cancel'});if(!ok)return;try{const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`,{method:'DELETE'});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Delete failed');return}if(SNAPSHOT_ID===id){SNAPSHOT_ID=null;READ_ONLY=false}await loadSnapshots();toast('Snapshot deleted')}catch(e){toast('Delete failed')}}
 window.saveSnapshot=async function(){if(!DOC_ID||!RUN_ID||SNAPSHOT_ID){toast('Open a live run before saving a snapshot.');return}try{const label=$('#snapshotLabel')?.value||'';const res=await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/snapshots`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Snapshot save failed');return}if($('#snapshotLabel'))$('#snapshotLabel').value='';setDirty(false);await loadSnapshots();toast('Snapshot saved')}catch(e){toast('Snapshot save failed')}}
 window.openSnapshot=async function(id){try{const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`);const data=await res.json();if(!res.ok||data.error){toast(data.error||'Snapshot open failed');return}SNAPSHOT_ID=id;RUN_ID=data.snapshot?.run_id||RUN_ID;if(!LIVE_RUN_ID)LIVE_RUN_ID=RUN_ID;READ_ONLY=true;DATA=data.result;draw(DATA);activateTab('review');toast('Snapshot opened')}catch(e){toast('Snapshot open failed')}}
 function clearReviewMarkers(){document.querySelectorAll('.review:not(.preview),.reviewNote,.reviewNotePanel,.reviewAnchorHover').forEach(e=>e.remove())}
@@ -1061,9 +1163,7 @@ window.openChangeAiModal=function(changeId){
   title.textContent=`Change #${Number(changeId)} - ${verdictMap[verdict]||'Low'}`;
   const reason=String(item.reasoning||'').trim();
   const rec=verdict==='low'?'':String(item.recommended_comment||'').trim();
-  const eOld=String(item.evidence_old||'').trim();
-  const eNew=String(item.evidence_new||'').trim();
-  body.innerHTML=`${reason?`<div class="changeModalSection"><strong>Reasoning</strong><div>${escapeHtml(reason)}</div></div>`:''}${rec?`<div class="changeModalSection"><strong>Suggested review</strong><div>${escapeHtml(rec)}</div></div>`:''}${eOld?`<div class="changeModalSection"><strong>Evidence (old)</strong><div>${escapeHtml(eOld)}</div></div>`:''}${eNew?`<div class="changeModalSection"><strong>Evidence (new)</strong><div>${escapeHtml(eNew)}</div></div>`:''}<div class="changeModalSection"><strong>Tool usage</strong>${renderToolTrace(item)}</div>${item.forwarded_review_id?`<div class="changeModalSection"><strong>Forwarded review</strong><div>${escapeHtml(item.forwarded_review_id)}</div></div>`:''}`;
+  body.innerHTML=`${reason?`<div class="changeModalSection"><strong>Reasoning</strong><div>${escapeHtml(reason)}</div></div>`:''}${rec?`<div class="changeModalSection"><strong>Suggested review</strong><div>${escapeHtml(rec)}</div></div>`:''}<div class="changeModalSection"><strong>Tool usage</strong>${renderToolTrace(item)}</div>${item.forwarded_review_id?`<div class="changeModalSection"><strong>Forwarded review</strong><div>${escapeHtml(item.forwarded_review_id)}</div></div>`:''}`;
   modal.style.display='flex';
 }
 window.closeChangeAiModal=function(){const modal=$('#changeAiModal');if(modal)modal.style.display='none'}
@@ -1172,11 +1272,25 @@ function normalizeChangeVerdict(v){
 }
 function verdictLabel(value){return String(value||'unclear').replace(/_/g,' ').toUpperCase()}
 function decisionToReviewStatus(decision){return String(decision||'').toLowerCase()==='cleared'?'cleared':'open'}
+function reviewVerdictClass(value){
+  const raw=String(value||'').toLowerCase().trim();
+  if(raw==='cleared')return 'low';      // green
+  if(raw==='not_cleared')return 'high'; // red
+  return 'medium';                       // yellow: partial / unclear / anything else
+}
+function reviewVerdictText(value){
+  const raw=String(value||'').toLowerCase().trim();
+  const map={cleared:'Cleared',not_cleared:'Not cleared',partial:'Partial',unclear:'Unclear'};
+  if(map[raw])return map[raw];
+  const s=verdictLabel(value).toLowerCase();
+  return s.charAt(0).toUpperCase()+s.slice(1);
+}
 function renderAiReason(item){
   if(!item)return '';
   const modelVerdict=item.verdict||'unclear';
   const finalVerdict=item.human_decision||modelVerdict;
-  const verdictLine=`<strong>Verdict: ${escapeHtml(verdictLabel(finalVerdict))}</strong>`;
+  const verdictClass=reviewVerdictClass(finalVerdict);
+  const verdictLine=`<div class="riskBadge"><span class="riskDot ${verdictClass}"></span><strong>${escapeHtml(reviewVerdictText(finalVerdict))}</strong></div>`;
   let reasoningText=String(item.reasoning||'');
   if(String(finalVerdict).toLowerCase()==='unclear'){
     reasoningText=reasoningText.replace(/\s+/g,' ').trim();
@@ -1199,7 +1313,7 @@ function renderChangeAiReason(changeId,item){
   return `<div class="aiReason" onclick="event.stopPropagation();openChangeAiModal(${Number(changeId)})" title="Open full AI result"><div class="riskBadge"><span class="riskDot ${escapeHtml(verdict)}"></span><strong>${escapeHtml(verdictMap[verdict]||'Low')}</strong></div>${running?`<div><strong>AI running...</strong></div>`:''}${reasoningText?`<div>${escapeHtml(reasoningText)}</div>`:''}${recLine}${forwarded}</div>`;
 }
 function renderReviewSummary(rv){const comments=reviewComments(rv);const last=comments.length?comments[comments.length-1]:null;const more=Math.max(0,comments.length-1);const text=last?.text||rv.comment||'(No comment)';return `<div class="rvSummary"><div class="rvSummaryText">${escapeHtml(text)}</div>${more?`<span class="rvMoreCount">+${more}</span>`:''}</div>`}
-function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+(REVIEW_SIDE==='old'?'previous':'current')+' comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const isRunning=REVIEW_AI_RUNNING_IDS.has(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=(ai&&String(ai.verdict||'').toLowerCase()==='cleared')?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="openReviewDetailModal('${rv.review_id}');focusReviewById('${rv.review_id}')"><div class="meta">${REVIEW_SIDE==='old'?'previous':'current'} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${isRunning?' · AI running...':''}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
+function renderReviewList(reviews){const visible=filteredSortedReviews(reviews);const total=(reviews||[]).filter(rv=>reviewBelongsToSide(rv,REVIEW_SIDE)).length;const pane=$('#reviewPane');if(!visible.length){pane.innerHTML=`<div class="reviewPlaceholder">${total?'No comments match the current filters.':'No '+sideRoleShort(REVIEW_SIDE)+'-report comments yet. Drag text on the report to add one.'}</div>`;return}pane.innerHTML=visible.map(rv=>{const ai=aiItemForReview(rv.review_id);const isRunning=REVIEW_AI_RUNNING_IDS.has(rv.review_id);const oldActions=REVIEW_SIDE==='old'?`<button onclick="event.stopPropagation();moveReviewToCurrent('${rv.review_id}')">Forward</button><button onclick="event.stopPropagation();runReviewAiAssessment('${rv.review_id}')">AI</button>`:'';const accept=(ai&&String(ai.verdict||'').toLowerCase()==='cleared')?`<button onclick="event.stopPropagation();saveAssessmentDecision('${rv.review_id}','${escapeHtml(ai.verdict||'unclear')}')">Accept</button>`:'';const actions=READ_ONLY?'':`<div class="rvActions"><button onclick="event.stopPropagation();addComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();toggleReview('${rv.review_id}','${isCleared(rv)?'open':'cleared'}')">${isCleared(rv)?'Reopen':'Clear'}</button>${oldActions}${accept}<button class="noteDelete" onclick="event.stopPropagation();deleteReview('${rv.review_id}')">Del</button></div><div class="rvReply" onclick="event.stopPropagation()"><textarea placeholder="Comment"></textarea><div class="rvReplyActions"><button onclick="event.stopPropagation();saveListComment('${rv.review_id}')">Comment</button><button onclick="event.stopPropagation();hideListReply('${rv.review_id}')">Cancel</button></div></div>`;const loc=reviewHasLocation(rv,REVIEW_SIDE)?`p.${firstPage(REVIEW_SIDE,rv)}`:'Floating';return `<div class="reviewRow ${isCleared(rv)?'cleared':'open'}" data-review-id="${rv.review_id}" onclick="openReviewDetailModal('${rv.review_id}');focusReviewById('${rv.review_id}')"><div class="meta">${sideRoleShort(REVIEW_SIDE)} ${loc} · ${reviewComments(rv).length} comment${reviewComments(rv).length===1?'':'s'} · ${isCleared(rv)?'cleared':'open'}${isRunning?' · AI running...':''}</div>${renderReviewSummary(rv)}${renderAiReason(ai)}${actions}</div>`}).join('')}
 function firstPage(side,rv){const ids=rv[side+'_word_ids']||[];if(!ids.length||!WORDS[side]?.length)return '-';const w=WORDS[side][ids[0]];return w?w.page:'-'}
 function focusReview(rv,displaySide){
   clearAnchorFocus();
@@ -1219,8 +1333,8 @@ window.focusReviewById=function(id){const matches=REVIEWS.filter(r=>r.review_id=
 window.toggleReview=async function(id,status){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});setDirty(true);await loadReviews()}catch(e){toast('Failed to update status')}}
 window.addComment=function(id){if(READ_ONLY){toast('Snapshot is read-only');return}showListReply(id)}
 window.deleteReview=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}try{await fetch(`${apiBase()}/reviews/${id}`,{method:'DELETE'});setDirty(true);await loadReviews();clearAnchorFocus()}catch(e){toast('Failed to delete review')}}
-window.moveReviewToCurrent=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}const ok=await askConfirm('Move this previous review to Current?');if(!ok)return;try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:id})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Move failed');return}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();const movedId=data?.review?.review_id||id;focusReviewById(movedId);toast(data.already_current?'Already in Current':'Copied to Current')}catch(e){toast('Move failed')}}
-window.moveOpenPreviousReviewsToCurrent=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}const visible=filteredSortedReviews(REVIEWS||[]);const targets=[...new Map(visible.filter(rv=>reviewBelongsToSide(rv,'old')&&!isCleared(rv)).map(rv=>[rv.review_id,rv])).values()];if(!targets.length){toast('No open previous comments to forward in current filter.');return}const ok=await askConfirm(`Forward ${targets.length} open previous comment${targets.length===1?'':'s'} to Current?`);if(!ok)return;const btn=$('#moveOpenBtn');if(btn){btn.disabled=true;btn.textContent='Forwarding...'}let moved=0,failed=0,lastError='';try{for(const rv of targets){try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:rv.review_id})});const data=await res.json();if(!res.ok||data.error){failed++;lastError=data.error||String(res.status)}else moved++}catch(e){failed++;lastError=e.message||'request failed'}}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();toast(`Forwarded ${moved}${failed?`, ${failed} failed${lastError?`: ${lastError}`:''}`:''}`)}finally{if(btn){btn.disabled=false;btn.textContent='Forward All'}}}
+window.moveReviewToCurrent=async function(id){if(READ_ONLY){toast('Snapshot is read-only');return}const ok=await askConfirm('Forward this comment to the update report?');if(!ok)return;try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:id})});const data=await res.json();if(!res.ok||data.error){toast(data.error||'Move failed');return}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();const movedId=data?.review?.review_id||id;focusReviewById(movedId);toast(data.already_current?'Already in update report':'Copied to update report')}catch(e){toast('Move failed')}}
+window.moveOpenPreviousReviewsToCurrent=async function(){if(READ_ONLY){toast('Snapshot is read-only');return}const visible=filteredSortedReviews(REVIEWS||[]);const targets=[...new Map(visible.filter(rv=>reviewBelongsToSide(rv,'old')&&!isCleared(rv)).map(rv=>[rv.review_id,rv])).values()];if(!targets.length){toast('No open current-report comments to forward.');return}const ok=await askConfirm(`Forward ${targets.length} open current-report comment${targets.length===1?'':'s'} to the update report?`);if(!ok)return;const btn=$('#moveOpenBtn');if(btn){btn.disabled=true;btn.textContent='Forwarding...'}let moved=0,failed=0,lastError='';try{for(const rv of targets){try{const res=await fetch(`${apiBase()}/migrate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({review_id:rv.review_id})});const data=await res.json();if(!res.ok||data.error){failed++;lastError=data.error||String(res.status)}else moved++}catch(e){failed++;lastError=e.message||'request failed'}}setDirty(true);REVIEW_SIDE='new';await loadReviews();updateReviewSubtabs();toast(`Forwarded ${moved}${failed?`, ${failed} failed${lastError?`: ${lastError}`:''}`:''}`)}finally{if(btn){btn.disabled=false;btn.textContent='Forward All'}}}
 window.runAiAssessment=async function(){
   if(READ_ONLY){toast('Snapshot is read-only');return}
   if(!isDiff()){toast('Compare reports before running AI.');return}
@@ -1473,7 +1587,7 @@ window.saveAsWorkspace=async function(side='new'){
     const data=await res.json();
     if(!res.ok||data.error){toast(data.error==='duplicate title'?'Name already exists':(data.error||'Save As failed'));return}
     if(data.workspace_id)setSaveTargetForSide(side,data.workspace_id);
-    toast('Saved as new workspace');
+    toast('Saved as new file');
   }catch(e){toast('Save As failed')}
 }
 
@@ -1484,35 +1598,54 @@ function viewerUrlParams(){
   return q;
 }
 
+async function restoreRunFromQuery(runId){
+  // Re-open a live run (e.g. when coming back from the Dashboard, where the viewer is a
+  // fresh page load) so the current run is not reset to the upload screen. The run dir
+  // survives in-session navigation; if it was purged we fall back to the reset state.
+  if(!DOC_ID||!runId)return false;
+  try{
+    const res=await fetch(`/api/documents/${DOC_ID}/runs/${runId}`);
+    if(!res.ok)return false;
+    const data=await res.json();
+    if(!data||data.error||!data.mode)return false;
+    const meta=await fetch(`/api/documents/${DOC_ID}`).then(r=>r.ok?r.json():null);
+    RUN_ID=runId;LIVE_RUN_ID=runId;SNAPSHOT_ID=null;READ_ONLY=false;setDirty(false);DATA=data;
+    if(meta){applyReportFilenamesFromMeta(meta,runId,data);syncUploadFormsFromMeta(meta)}
+    resetZoomState();
+    setSidebarCollapsed(false);
+    draw(DATA);
+    history.replaceState(null,'','/?'+viewerUrlParams().toString());
+    activateTab(isDiff()?'diff':'review');
+    return true;
+  }catch(e){return false}
+}
 async function bootstrapFromQuery(){
   const params=new URLSearchParams(location.search);
   const docId=params.get('doc');
-  if(!docId)return;
-  DOC_ID=docId;
-  let runId=params.get('run');
+  const runId=params.get('run');
+  const snapshotId=params.get('snapshot');
   try{
-    const meta=await fetch(`/api/documents/${docId}`).then(r=>{if(!r.ok)throw new Error('workspace not found');return r.json()});
-    WORKSPACE_TITLE=meta.title||'Workspace';
-    updateWorkspaceTitle();
-    if(!runId&&Array.isArray(meta.runs)&&meta.runs.length)runId=meta.runs[meta.runs.length-1].run_id;
-    if(!runId)return;
-    RUN_ID=runId;LIVE_RUN_ID=runId;SNAPSHOT_ID=null;READ_ONLY=false;
-    const viewer=await fetch(`/api/documents/${docId}/runs/${runId}`).then(r=>{if(!r.ok)throw new Error('run not found');return r.json()});
-    DATA=viewer;
-    applyReportFilenamesFromMeta(meta,runId,viewer);
-    $('#createForm').style.display='none';
-    $('#updateForm').style.display='flex';
-    draw(DATA);
-    await loadSnapshots();
-    const tab=params.get('tab');
-    if(tab)activateTab(tab);
-    const changeId=params.get('change');
-    if(changeId&&isDiff())goChange(Number(changeId));
-    const reviewId=params.get('review');
-    if(reviewId){activateTab('review');focusReviewById(reviewId)}
-    setBusy(false,DOC_ID?'Ready':'Idle');
-  }catch(e){toast('Failed to open workspace from link')}
+    if(docId)await openWorkspaceSession(docId);
+    else{
+      const ws=await ensureDefaultWorkspaceShared();
+      await openWorkspaceSession(ws.workspace_id);
+    }
+    if(snapshotId)await openSnapshot(snapshotId);
+    else if(runId)await restoreRunFromQuery(runId);
+    setBusy(false,'Ready');
+  }catch(e){
+    try{
+      const ws=await ensureDefaultWorkspaceShared();
+      await openWorkspaceSession(ws.workspace_id);
+      setBusy(false,'Ready');
+    }catch(_){toast('Failed to open workspace')}
+  }
 }
+window.addEventListener('pagehide',()=>{if(DOC_ID)history.replaceState(null,'','/?'+viewerUrlParams().toString())});
+// On reload/bfcache restore the browser can silently put the previously uploaded file back into the
+// hidden inputs; wipe it so no ghost base report survives the refresh.
+window.addEventListener('pageshow',e=>{if(e.persisted)clearUploadSelections()});
+clearUploadSelections();
 bootstrapFromQuery();
 </script>
 </body>

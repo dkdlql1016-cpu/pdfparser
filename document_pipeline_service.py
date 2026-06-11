@@ -5,6 +5,14 @@ import fitz
 import run_layout
 
 
+def prune_opendataloader_cache(run_dir: Path):
+    import shutil
+
+    cache_dir = run_layout.opendataloader_cache_dir(run_dir)
+    if cache_dir.exists():
+        shutil.rmtree(cache_dir, ignore_errors=True)
+
+
 def copy_if_exists(src: Path, dst: Path):
     if src.exists():
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -120,6 +128,7 @@ def process_single_document_run(
         "semantic_map": {"unit": "word", "equal_words": []},
     }
     write_json_fn(run_layout.viewer_path(run_dir), viewer_data)
+    prune_opendataloader_cache(run_dir)
     return viewer_data
 
 
@@ -211,4 +220,5 @@ def process_document_diff_run(
         "carried_review_count": len(projected_reviews),
     }
     write_json_fn(run_layout.viewer_path(run_dir), viewer_data)
+    prune_opendataloader_cache(run_dir)
     return viewer_data

@@ -18,8 +18,6 @@ def normalize_assessment_payload(data):
         "verdict": verdict,
         "confidence": data.get("confidence"),
         "reasoning": str(data.get("reasoning", ""))[:2000],
-        "evidence_old": str(data.get("evidence_old", ""))[:1200],
-        "evidence_new": str(data.get("evidence_new", ""))[:1200],
     }
 
 
@@ -64,48 +62,7 @@ def normalize_change_assessment_payload(data):
         "confidence": data.get("confidence"),
         "reasoning": str(data.get("reasoning", ""))[:2200],
         "recommended_comment": recommended_comment,
-        "evidence_old": str(data.get("evidence_old", ""))[:1200],
-        "evidence_new": str(data.get("evidence_new", ""))[:1200],
     }
-
-
-def enforce_change_verdict_policy(item):
-    verdict = normalize_change_verdict(item.get("verdict", "low"))
-    reasoning = str(item.get("reasoning", "") or "")
-    evidence_old = str(item.get("evidence_old", "") or "")
-    evidence_new = str(item.get("evidence_new", "") or "")
-    text = f"{reasoning}\n{evidence_old}\n{evidence_new}".lower()
-
-    global_markers = (
-        "entire report", "report-wide", "across all sections", "all sections", "company-wide", "global",
-    )
-    clear_error_markers = (
-        "must fix", "critical", "material misstatement", "wrong legal entity", "definitely incorrect",
-    )
-    uncertainty_markers = (
-        "might", "may", "possibly", "unclear", "uncertain",
-    )
-    has_global = any(m in text for m in global_markers)
-    has_clear = any(m in text for m in clear_error_markers)
-    has_uncertain = any(m in text for m in uncertainty_markers)
-
-    old_text = str(item.get("old_text", "") or "").strip()
-    new_text = str(item.get("new_text", "") or "").strip()
-    old_norm = re.sub(r"[^a-z0-9]", "", old_text.lower())
-    new_norm = re.sub(r"[^a-z0-9]", "", new_text.lower())
-    name_like = bool(old_norm and new_norm and old_norm != new_norm and old_norm.isalpha() and new_norm.isalpha())
-
-    if verdict == "high" and not (has_global and has_clear):
-        verdict = "medium"
-    if verdict == "medium" and (has_uncertain and not has_clear):
-        verdict = "low"
-    if name_like and not (has_global and has_clear):
-        verdict = "low"
-
-    item["verdict"] = verdict
-    if verdict == "low":
-        item["recommended_comment"] = ""
-    return item
 
 
 def normalized_change_signature(item):

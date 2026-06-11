@@ -169,24 +169,116 @@ def assessment_anchor_for_previous_side(review, prev_run_id, run_id):
     return None, None
 
 
-def document_reviews_for_run(doc_id, run_id, *, load_document_meta_fn, load_document_reviews_fn):
+def fallback_review_projection(review):
+    """Project a review from its home anchor when no anchor is keyed to the active run.
+
+    Reviews belong to a File Manager file, but their anchors are keyed by the run_id that
+    created them. Runs are ephemeral and get a fresh run_id every session, so after a
+    re-analysis (or simply reopening a file whose anchors drifted to an older run_id) the
+    exact-key lookups miss. Without this fallback the review would silently vanish even
+    though it is still stored on the file. Analysis (parse + diff) must never drop reviews.
+    """
+    anchors = review.get("anchors") or {}
+    if not anchors:
+        return None
+    created = str(review.get("created_run_id") or "")
+    key = created if created in anchors else next(iter(anchors))
+    anchor = anchors.get(key) or {}
+    return review_projection_for_anchor(review, key, anchor.get("side", "new"))
+
+
+def _home_anchor_key(review):
+    anchors = review.get("anchors") or {}
+    if not anchors:
+        return None
+    created = str(review.get("created_run_id") or "")
+    return created if created in anchors else next(iter(anchors))
+
+
+def document_reviews_for_run(
+    doc_id,
+    run_id,
+    *,
+    load_document_meta_fn,
+    load_reviews_for_run_fn,
+    resolve_file_ids_for_run_session_fn=None,
+    load_file_reviews_fn=None,
+):
     meta = load_document_meta_fn(doc_id) or {}
     run_meta = next((r for r in meta.get("runs", []) if r.get("run_id") == run_id), {})
     prev_run_id = run_meta.get("previous_run_id")
+
+    # Prefer projecting by SOURCE report. Reviews are stored per File Manager file but anchored by
+    # the ephemeral run id that authored them; once that run is purged the anchor key no longer
+    # resolves, so the per-review home-anchor fallback below would place a previous-report review
+    # (home side 'new', because it was the current report when authored) onto the NEW pane — i.e.
+    # running a compare drags the current report's reviews onto the update report. Resolving which
+    # file backs each side and binding old/new strictly to the previous/current report file fixes
+    # that without depending on anchor keys surviving run purges.
+    file_ids = []
+    if resolve_file_ids_for_run_session_fn and load_file_reviews_fn:
+        file_ids = resolve_file_ids_for_run_session_fn(meta, run_id) or []
+    if file_ids:
+        current_file = file_ids[-1]
+        projected = []
+        seen = set()
+
+        def emit(projection):
+            if not projection:
+                return
+            key = (projection.get("review_id"), projection.get("side"))
+            if key in seen:
+                return
+            seen.add(key)
+            projected.append(projection)
+
+        for file_id in file_ids:
+            is_current_report = file_id == current_file
+            for review in load_file_reviews_fn(doc_id, file_id):
+                explicit_old = review_projection_for_anchor(review, run_side_anchor_key(run_id, "old"), "old")
+                emit(explicit_old)
+                if is_current_report:
+                    # The update report: project on the NEW pane via the live run anchor, or the
+                    # review's home anchor when it predates this run (still the current report).
+                    current_projection = review_projection_for_anchor(review, run_id)
+                    if current_projection:
+                        emit(current_projection)
+                    elif not explicit_old:
+                        emit(fallback_review_projection(review))
+                else:
+                    # The previous report: always project on the OLD pane. Prefer the diff-mapped
+                    # previous anchor so old-side word ids line up with the previous document.
+                    prev_projection = None
+                    if prev_run_id and prev_run_id != run_id:
+                        prev_projection = review_projection_for_anchor(review, prev_run_id, "old")
+                    if not prev_projection:
+                        prev_projection = review_projection_for_anchor(review, _home_anchor_key(review), "old")
+                    emit(prev_projection)
+        return projected
+
+    # No File Manager backing (a pure ephemeral run): fall back to anchor-keyed projection.
     projected = []
-    for review in load_document_reviews_fn(doc_id):
+    for review in load_reviews_for_run_fn(doc_id, run_id):
+        matched = False
         explicit_old_projection = review_projection_for_anchor(review, run_side_anchor_key(run_id, "old"), "old")
         if explicit_old_projection:
             projected.append(explicit_old_projection)
+            matched = True
         elif prev_run_id and prev_run_id != run_id:
             prev_anchor = (review.get("anchors") or {}).get(prev_run_id)
             if prev_anchor and prev_anchor.get("side") != "old":
                 prev_projection = review_projection_for_anchor(review, prev_run_id, "old")
                 if prev_projection:
                     projected.append(prev_projection)
+                    matched = True
         current_projection = review_projection_for_anchor(review, run_id)
         if current_projection:
             projected.append(current_projection)
+            matched = True
+        if not matched:
+            fallback = fallback_review_projection(review)
+            if fallback:
+                projected.append(fallback)
     return projected
 
 
@@ -307,6 +399,7 @@ def migrate_previous_review_to_current(
     update_run_meta_fn,
     document_run_dir_fn,
     load_document_reviews_fn,
+    load_reviews_for_run_fn=None,
     read_json_fn,
     document_semantic_map_fn,
     map_anchor_to_current_md_anchor_fn,
@@ -334,7 +427,8 @@ def migrate_previous_review_to_current(
     if not run_dir.exists():
         return {"error": "run not found"}, 404
 
-    reviews = load_document_reviews_fn(doc_id)
+    load_fn = load_reviews_for_run_fn or (lambda doc, rid: load_document_reviews_fn(doc, rid))
+    reviews = load_fn(doc_id, run_id)
     source_review = next((r for r in reviews if r.get("review_id") == review_id), None)
     if not source_review:
         return {"error": "review not found"}, 404
@@ -357,6 +451,15 @@ def migrate_previous_review_to_current(
     if not prev_anchor and anchors.get(run_id, {}).get("side") == "old":
         source_anchor_run_id = run_id
         prev_anchor = anchors.get(run_id)
+    if not prev_anchor and str(source_review.get("created_run_id") or "") != str(run_id) and run_id not in anchors:
+        # The previous-report review is anchored by the run/file id that authored it, which rarely
+        # equals prev_run_id once a run is purged or the base was opened as a File Manager file. Its
+        # home anchor's word ids reference the previous document, so use it instead of failing with
+        # "previous anchor not found". The guard excludes the current report's own comments.
+        home_key = _home_anchor_key(source_review)
+        if home_key:
+            source_anchor_run_id = home_key
+            prev_anchor = anchors.get(home_key)
     if not prev_anchor:
         return {"error": "previous anchor not found"}, 404
 
@@ -397,6 +500,6 @@ def migrate_previous_review_to_current(
         "updated_at": now,
     }
     reviews.append(copied_review)
-    save_document_reviews_fn(doc_id, reviews)
+    save_document_reviews_fn(doc_id, run_id, reviews)
     semantic_module.save_reviews(run_dir, document_reviews_for_run_fn(doc_id, run_id))
     return {"review": review_projection_for_anchor(copied_review, run_id), "already_current": False}, 200

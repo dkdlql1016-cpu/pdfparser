@@ -11,7 +11,7 @@ from flask import Flask, Response, jsonify, request, send_file
 
 import document_semantic as semantic
 import run_layout
-from ai_config_utils import load_system_prompt, required_ai_api_key, required_ai_api_key_name
+from ai_config_utils import load_system_prompt, required_ai_api_key, required_ai_api_key_name, resolve_ai_model
 from ai_callers import (
     call_ai_assessment as callers_call_ai_assessment,
     call_ai_assessment_batch as callers_call_ai_assessment_batch,
@@ -31,23 +31,29 @@ from assessment_prompt_builders import (
 )
 from assessment_normalizers import (
     anchor_section_id,
-    enforce_change_verdict_policy,
     harmonize_change_items,
     run_meta_for,
 )
 from file_manager_repo import (
-    find_workspace_id_by_title as repo_find_workspace_id_by_title,
+    ensure_default_workspace as repo_ensure_default_workspace,
+    find_file_by_id as repo_find_file_by_id,
+    find_file_in_meta as repo_find_file_in_meta,
     list_documents_for_manager as repo_list_documents_for_manager,
-    public_report_filename as repo_public_report_filename,
+    list_workspace_files as repo_list_workspace_files,
+    migrate_workspace_files as repo_migrate_workspace_files,
+    prune_ephemeral_workspaces as repo_prune_ephemeral_workspaces,
+    resolve_workspace_file_pdf as repo_resolve_workspace_file_pdf,
+    workspace_file_title_exists as repo_workspace_file_title_exists,
     workspace_title_exists as repo_workspace_title_exists,
 )
 from file_manager_service import (
     canonical_review_from_anchor as service_canonical_review_from_anchor,
+    delete_workspace_file as service_delete_workspace_file,
+    open_workspace_saved_file as service_open_workspace_saved_file,
     overwrite_saved_document as service_overwrite_saved_document,
-    reviews_for_single_file_side as service_reviews_for_single_file_side,
+    rename_workspace_file as service_rename_workspace_file,
     run_side_pdf_info as service_run_side_pdf_info,
     save_run_side_file as service_save_run_side_file,
-    write_single_file_document as service_write_single_file_document,
 )
 from document_pipeline_service import (
     build_chars_from_words as pipeline_build_chars_from_words,
@@ -80,7 +86,6 @@ from document_diff_analysis_service import (
     weighted_jaccard as analysis_weighted_jaccard,
 )
 from document_index_service import (
-    PAGE_MARKER_RE,
     build_new_pdf_index as index_build_new_pdf_index,
     clean_structural_text as index_clean_structural_text,
     detect_notes_start_page as index_detect_notes_start_page,
@@ -106,6 +111,21 @@ from document_index_service import (
     title_match_score as index_title_match_score,
 )
 from document_export_service import export_annotated_pdf as service_export_annotated_pdf
+from document_review_store_service import (
+    append_review_for_run as store_append_review_for_run,
+    attach_run_reviews_to_file as store_attach_run_reviews_to_file,
+    delete_review_in_run_storage as store_delete_review_in_run_storage,
+    load_all_workspace_reviews as store_load_all_workspace_reviews,
+    load_file_reviews as store_load_file_reviews,
+    load_reviews_for_run as store_load_reviews_for_run,
+    migrate_legacy_workspace_reviews as store_migrate_legacy_workspace_reviews,
+    primary_file_id_for_run_session as store_primary_file_id_for_run_session,
+    resolve_file_ids_for_run_session as store_resolve_file_ids_for_run_session,
+    save_file_reviews as store_save_file_reviews,
+    storage_file_id_for_run_session as store_storage_file_id_for_run_session,
+    save_reviews_for_run as store_save_reviews_for_run,
+    update_review_in_run_storage as store_update_review_in_run_storage,
+)
 from document_review_projection_service import (
     anchor_for_selection as projection_anchor_for_selection,
     apply_md_metadata_to_anchor as projection_apply_md_metadata_to_anchor,
@@ -138,13 +158,12 @@ from document_assessment_context_service import (
     reviews_for_sections as assess_reviews_for_sections,
     section_id_for_change_anchor as assess_section_id_for_change_anchor,
 )
-from document_bootstrap_service import (
-    create_seed_document_from_pdf as bootstrap_create_seed_document_from_pdf,
-    ensure_default_file_manager_documents as bootstrap_ensure_default_file_manager_documents,
-)
 from document_snapshot_service import (
+    backfill_snapshot_change_counts as snapshot_backfill_snapshot_change_counts,
     create_run_snapshot as snapshot_create_run_snapshot,
+    delete_document_snapshot as snapshot_delete_document_snapshot,
     prune_document_snapshots as snapshot_prune_document_snapshots,
+    rename_document_snapshot as snapshot_rename_document_snapshot,
     snapshot_artifacts as snapshot_snapshot_artifacts,
     snapshot_counts as snapshot_snapshot_counts,
     snapshot_side_file as snapshot_snapshot_side_file,
@@ -168,8 +187,11 @@ from storage_utils import (
     document_snapshot_dir as _document_snapshot_dir,
     document_snapshots_dir as _document_snapshots_dir,
     migrate_legacy_workspaces as _migrate_legacy_workspaces,
+    iter_workspace_dirs,
     read_json as _read_json,
     utc_now as _utc_now,
+    workspace_file_dir as _workspace_file_dir,
+    workspace_stored_pdf_path as _workspace_stored_pdf_path,
     write_json as _write_json,
 )
 from text_utils import keep_token, norm_token, normalize_document_title, trim_for_prompt
@@ -178,13 +200,14 @@ BASE_DIR = Path(__file__).resolve().parent
 if importlib.util.find_spec("dotenv"):
     importlib.import_module("dotenv").load_dotenv(BASE_DIR / ".env")
 DOCUMENTS_DIR = BASE_DIR / "documents"
-INPUT_DIR = BASE_DIR / "input"
-DEFAULT_FILE_MANAGER_INPUTS = ("Report_v1.pdf", "Report_v2.pdf")
 DOCUMENTS_DIR.mkdir(exist_ok=True)
 _migrate_legacy_workspaces(DOCUMENTS_DIR)
 
+# Fixed test workspace: the app always boots into this workspace. Its file_manager
+# files, per-file reviews, and snapshots persist across sessions; analysis runs do not.
+DEFAULT_WORKSPACE_ID = os.environ.get("DEFAULT_WORKSPACE_ID", "57199b22be39")
+
 app = Flask(__name__)
-DEFAULT_FILE_MANAGER_SEEDED = False
 
 
 # =========================================================
@@ -411,15 +434,30 @@ def document_snapshot_dir(doc_id, snapshot_id):
     return _document_snapshot_dir(DOCUMENTS_DIR, doc_id, snapshot_id)
 
 
+def workspace_file_dir(doc_id, file_id):
+    return _workspace_file_dir(DOCUMENTS_DIR, doc_id, file_id)
+
+
+def workspace_file_pdf_path(doc_id, file_id, filename=None):
+    return _workspace_stored_pdf_path(DOCUMENTS_DIR, doc_id, file_id, filename)
+
+
+def resolve_workspace_file_pdf(doc_id, file_id, entry=None):
+    return repo_resolve_workspace_file_pdf(DOCUMENTS_DIR, doc_id, file_id, entry=entry)
+
+
 def document_meta_path(doc_id):
     return _document_meta_path(DOCUMENTS_DIR, doc_id)
 
 
 def load_document_meta(doc_id):
+    workspace_dir = document_dir(doc_id)
+    from storage_utils import ensure_canonical_meta_path
+
+    ensure_canonical_meta_path(workspace_dir)
     meta = read_json(document_meta_path(doc_id))
     if meta:
-        canonical_id = str(meta.get("workspace_id") or doc_id)
-        meta["workspace_id"] = canonical_id
+        meta["workspace_id"] = str(meta.get("workspace_id") or doc_id)
     return meta
 
 
@@ -432,63 +470,79 @@ def save_document_meta(meta):
     write_json(document_meta_path(canonical_id), meta)
 
 
-def create_seed_document_from_pdf(pdf_path: Path, *, seed_key: str):
-    return bootstrap_create_seed_document_from_pdf(
-        pdf_path,
-        seed_key=seed_key,
-        document_run_dir_fn=document_run_dir,
-        utc_now_fn=utc_now,
-        save_document_meta_fn=save_document_meta,
-    )
+def migrate_all_workspace_storage():
+    from storage_utils import ensure_canonical_meta_path, prune_stale_temp_dirs
 
-
-def upsert_seed_document_from_pdf(pdf_path: Path, *, seed_key: str, existing_doc_id: str = None):
-    if existing_doc_id:
-        meta = load_document_meta(existing_doc_id)
-        if meta:
-            run_id = uuid.uuid4().hex[:12]
-            run_dir = document_run_dir(existing_doc_id, run_id)
-            run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
-            shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
-            created_at = utc_now()
-            meta["workspace_id"] = existing_doc_id
-            meta["title"] = meta.get("title") or pdf_path.stem
-            meta["seed_key"] = seed_key
-            meta["is_saved"] = True
-            meta.setdefault("runs", []).append(
-                {
-                    "run_id": run_id,
-                    "kind": "seed",
-                    "status": "ready",
-                    "created_at": created_at,
-                    "filename": pdf_path.name,
-                    "has_diff": False,
-                    "has_ai_assessment": False,
-                }
-            )
+    prune_stale_temp_dirs(DOCUMENTS_DIR)
+    repo_prune_ephemeral_workspaces(DOCUMENTS_DIR, read_json_fn=read_json)
+    if not DOCUMENTS_DIR.exists():
+        return
+    for candidate in iter_workspace_dirs(DOCUMENTS_DIR):
+        ensure_canonical_meta_path(candidate)
+        doc_id = candidate.name
+        meta = read_json(document_meta_path(doc_id), None)
+        if not meta:
+            continue
+        if meta.get("storage_layout_v2"):
+            continue
+        canonical_id = str(meta.get("workspace_id") or doc_id)
+        meta["workspace_id"] = canonical_id
+        if repo_migrate_workspace_files(meta, DOCUMENTS_DIR, canonical_id):
+            meta["storage_layout_v2"] = True
             save_document_meta(meta)
-            return
-    create_seed_document_from_pdf(pdf_path, seed_key=seed_key)
+        elif not any(r.get("kind") == "file" for r in (meta.get("runs") or [])):
+            meta["storage_layout_v2"] = True
+            save_document_meta(meta)
 
 
-def ensure_default_file_manager_documents():
-    global DEFAULT_FILE_MANAGER_SEEDED
-    DEFAULT_FILE_MANAGER_SEEDED = bootstrap_ensure_default_file_manager_documents(
-        already_seeded=DEFAULT_FILE_MANAGER_SEEDED,
-        input_dir=INPUT_DIR,
-        documents_dir=DOCUMENTS_DIR,
-        default_file_manager_inputs=DEFAULT_FILE_MANAGER_INPUTS,
-        read_json_fn=read_json,
-        upsert_seed_document_from_pdf_fn=upsert_seed_document_from_pdf,
-    )
+def purge_ephemeral_analysis_runs():
+    """Analysis is session-scoped.
+
+    File Manager files, their per-file reviews, and snapshots are durable and survive
+    restarts. Analysis runs (``runs/``) are not: unless a run was frozen into a snapshot,
+    it is dropped on each startup so a fresh session begins with no live analysis.
+    """
+    if not DOCUMENTS_DIR.exists():
+        return
+    for candidate in iter_workspace_dirs(DOCUMENTS_DIR):
+        runs_dir = candidate / "runs"
+        if runs_dir.exists():
+            shutil.rmtree(runs_dir, ignore_errors=True)
+        doc_id = candidate.name
+        meta = read_json(document_meta_path(doc_id), None)
+        if not meta or not meta.get("runs"):
+            continue
+        meta["workspace_id"] = str(meta.get("workspace_id") or doc_id)
+        meta["runs"] = []
+        save_document_meta(meta)
 
 
-def public_report_filename(meta, run_meta):
-    return repo_public_report_filename(
-        meta,
-        run_meta,
-        normalize_document_title_fn=normalize_document_title,
-    )
+def prune_dangling_file_entries():
+    """Drop File Manager file entries whose backing directory no longer exists.
+
+    A file entry must always have a directory holding its PDF (and reviews.json). A phantom
+    entry -- meta record with no backing dir -- can still WIN run->file resolution by an exact
+    filename match and then surface zero reviews, making a re-uploaded report look empty even
+    though the real file's reviews sit safely on disk under a different (stem-matched) entry.
+    Removing these dangling entries keeps resolution pointed at files that actually hold data.
+    """
+    if not DOCUMENTS_DIR.exists():
+        return
+    for candidate in iter_workspace_dirs(DOCUMENTS_DIR):
+        doc_id = candidate.name
+        meta = read_json(document_meta_path(doc_id), None)
+        if not meta:
+            continue
+        files = meta.get("files") or []
+        kept = [f for f in files if f.get("file_id") and workspace_file_dir(doc_id, f["file_id"]).exists()]
+        if len(kept) != len(files):
+            meta["files"] = kept
+            save_document_meta(meta)
+
+
+migrate_all_workspace_storage()
+purge_ephemeral_analysis_runs()
+prune_dangling_file_entries()
 
 
 def list_documents_for_manager():
@@ -498,13 +552,34 @@ def list_documents_for_manager():
         normalize_document_title_fn=normalize_document_title,
     )
 
-def find_workspace_id_by_title(title: str, *, exclude_workspace_id: str = None):
-    return repo_find_workspace_id_by_title(
+
+def ensure_default_workspace():
+    return repo_ensure_default_workspace(
+        DOCUMENTS_DIR,
+        read_json_fn=read_json,
+        write_json_fn=write_json,
+        normalize_document_title_fn=normalize_document_title,
+        utc_now_fn=utc_now,
+        preferred_workspace_id=DEFAULT_WORKSPACE_ID,
+    )
+
+
+def list_workspace_files(doc_id):
+    return repo_list_workspace_files(
+        doc_id,
+        DOCUMENTS_DIR,
+        read_json_fn=read_json,
+        normalize_document_title_fn=normalize_document_title,
+    )
+
+
+def workspace_file_title_exists(doc_id, title):
+    return repo_workspace_file_title_exists(
+        doc_id,
         title,
         DOCUMENTS_DIR,
         read_json_fn=read_json,
         normalize_document_title_fn=normalize_document_title,
-        exclude_workspace_id=exclude_workspace_id,
     )
 
 
@@ -559,57 +634,111 @@ def canonical_review_from_anchor(doc_id, run_id, anchor, *, status="open", comme
     )
 
 
-def reviews_for_single_file_side(source_workspace_id, source_run_id, side, target_workspace_id, file_run_id):
-    return service_reviews_for_single_file_side(
-        source_workspace_id,
-        source_run_id,
-        side,
-        target_workspace_id,
-        file_run_id,
-        document_run_dir_fn=document_run_dir,
-        document_reviews_for_run_fn=document_reviews_for_run,
-        anchor_for_selection_fn=anchor_for_selection,
-        canonical_review_from_anchor_fn=canonical_review_from_anchor,
-    )
-
-
-def write_single_file_document(workspace_id, pdf_path: Path, filename: str, title: str, *, source_workspace_id=None, source_run_id=None, source_side="new", replace=False):
-    return service_write_single_file_document(
-        workspace_id,
-        pdf_path,
-        filename,
-        title,
-        document_dir_fn=document_dir,
-        document_run_dir_fn=document_run_dir,
-        reviews_for_single_file_side_fn=reviews_for_single_file_side,
-        utc_now_fn=utc_now,
-        normalize_document_title_fn=normalize_document_title,
-        save_document_meta_fn=save_document_meta,
-        save_document_reviews_fn=save_document_reviews,
-        source_workspace_id=source_workspace_id,
-        source_run_id=source_run_id,
-        source_side=source_side,
-        replace=replace,
-    )
-
-
-def save_run_side_file(workspace_id, run_id, side, *, target_workspace_id=None, title=None, overwrite_existing=False):
-    return service_save_run_side_file(
+def save_run_side_file(workspace_id, run_id, side, *, title=None, overwrite_existing=False):
+    # A plain Save (no explicit new name) updates the File Manager file this run is already bound
+    # to -- the same file its reviews live on -- instead of forking a duplicate entry. Without
+    # this, an upload that resolves to an existing file (e.g. re-uploading v1) saves to a brand
+    # new same-named file with no reviews, which then shadows the real file on the next upload.
+    # Save As (explicit title) still creates a new file.
+    target_file_id = None
+    if not (title and str(title).strip()):
+        meta = load_document_meta(workspace_id)
+        if meta:
+            target_file_id = store_primary_file_id_for_run_session(
+                meta, run_id, find_file_by_id_fn=find_file_by_id
+            )
+    payload, status = service_save_run_side_file(
         workspace_id,
         run_id,
         side,
         document_run_dir_fn=document_run_dir,
         run_side_pdf_info_fn=run_side_pdf_info,
-        find_workspace_id_by_title_fn=find_workspace_id_by_title,
         load_document_meta_fn=load_document_meta,
-        public_report_filename_fn=public_report_filename,
-        write_single_file_document_fn=write_single_file_document,
+        find_file_in_workspace_fn=find_file_in_workspace,
         normalize_document_title_fn=normalize_document_title,
-        document_title_exists_fn=workspace_title_exists,
-        target_workspace_id=target_workspace_id,
+        workspace_file_title_exists_fn=workspace_file_title_exists,
+        save_document_meta_fn=save_document_meta,
+        workspace_stored_pdf_fn=workspace_file_pdf_path,
+        utc_now_fn=utc_now,
         title=title,
         overwrite_existing=overwrite_existing,
+        target_file_id=target_file_id,
     )
+    # Save / Save As persists only the PDF + meta entry. Carry the current run's reviews onto
+    # the saved file so they survive the startup purge of ephemeral runs (reviews are stored
+    # per report). Best-effort: a review-copy failure must not fail the file save itself.
+    if status in (200, 201) and payload.get("file_id"):
+        try:
+            store_attach_run_reviews_to_file(
+                workspace_id,
+                run_id,
+                payload["file_id"],
+                side,
+                documents_dir=DOCUMENTS_DIR,
+                load_document_meta_fn=load_document_meta,
+                find_file_by_id_fn=find_file_by_id,
+                read_json_fn=read_json,
+                write_json_fn=write_json,
+                migrate_legacy_fn=migrate_workspace_reviews,
+            )
+        except Exception:
+            pass
+    return payload, status
+
+
+def delete_workspace_file(workspace_id, file_id):
+    return service_delete_workspace_file(
+        workspace_id,
+        file_id,
+        load_document_meta_fn=load_document_meta,
+        workspace_file_dir_fn=workspace_file_dir,
+        save_document_meta_fn=save_document_meta,
+        find_file_by_id_fn=find_file_by_id,
+        utc_now_fn=utc_now,
+    )
+
+
+def rename_workspace_file(workspace_id, file_id, title):
+    return service_rename_workspace_file(
+        workspace_id,
+        file_id,
+        title,
+        load_document_meta_fn=load_document_meta,
+        save_document_meta_fn=save_document_meta,
+        find_file_by_id_fn=find_file_by_id,
+        normalize_document_title_fn=normalize_document_title,
+        workspace_file_title_exists_fn=workspace_file_title_exists,
+        workspace_stored_pdf_fn=workspace_file_pdf_path,
+        utc_now_fn=utc_now,
+    )
+
+
+def open_workspace_saved_file(workspace_id, file_id):
+    return service_open_workspace_saved_file(
+        workspace_id,
+        file_id,
+        document_run_dir_fn=document_run_dir,
+        load_document_meta_fn=load_document_meta,
+        find_file_by_id_fn=find_file_by_id,
+        resolve_workspace_file_pdf_fn=resolve_workspace_file_pdf,
+        process_single_document_run_fn=process_single_document_run,
+        read_json_fn=read_json,
+        document_reviews_for_run_fn=document_reviews_for_run,
+        semantic_save_reviews_fn=semantic.save_reviews,
+    )
+
+
+def find_file_in_workspace(meta, title):
+    return repo_find_file_in_meta(
+        meta,
+        title,
+        normalize_document_title_fn=normalize_document_title,
+    )
+
+
+def find_file_by_id(meta, file_id):
+    return repo_find_file_by_id(meta, file_id)
+
 
 
 def get_uploaded_pdf(field_names=("pdf", "report_pdf", "file")):
@@ -685,16 +814,106 @@ def document_semantic_map(doc_id, run_id):
     return (read_json(p, {}) or {}).get("semantic_map", {})
 
 
-def document_reviews_path(doc_id):
-    return _document_reviews_path(DOCUMENTS_DIR, doc_id)
+def _review_store_kwargs():
+    return {
+        "documents_dir": DOCUMENTS_DIR,
+        "load_document_meta_fn": load_document_meta,
+        "find_file_by_id_fn": find_file_by_id,
+        "read_json_fn": read_json,
+        "write_json_fn": write_json,
+    }
+
+
+def migrate_workspace_reviews(doc_id):
+    return store_migrate_legacy_workspace_reviews(doc_id, **_review_store_kwargs())
+
+
+def load_reviews_for_run(doc_id, run_id):
+    return store_load_reviews_for_run(
+        doc_id,
+        run_id,
+        migrate_legacy_fn=migrate_workspace_reviews,
+        **_review_store_kwargs(),
+    )
 
 
 def load_document_reviews(doc_id):
-    return read_json(document_reviews_path(doc_id), []) or []
+    # load_all_workspace_reviews accepts only a subset of the shared store kwargs
+    # (no find_file_by_id_fn / write_json_fn), so pass them explicitly.
+    return store_load_all_workspace_reviews(
+        doc_id,
+        documents_dir=DOCUMENTS_DIR,
+        load_document_meta_fn=load_document_meta,
+        read_json_fn=read_json,
+        migrate_legacy_fn=migrate_workspace_reviews,
+    )
 
 
-def save_document_reviews(doc_id, reviews):
-    write_json(document_reviews_path(doc_id), reviews)
+def save_reviews_for_run(doc_id, run_id, reviews):
+    store_save_reviews_for_run(doc_id, run_id, reviews, **_review_store_kwargs())
+
+
+def save_document_reviews(doc_id, run_id, reviews):
+    save_reviews_for_run(doc_id, run_id, reviews)
+
+
+def mutate_document_review(doc_id, review_id, mutator):
+    migrate_workspace_reviews(doc_id)
+    meta = load_document_meta(doc_id) or {}
+    for entry in meta.get("files") or []:
+        file_id = entry.get("file_id")
+        if not file_id:
+            continue
+        reviews = store_load_file_reviews(DOCUMENTS_DIR, doc_id, file_id, read_json_fn=read_json)
+        updated = None
+        for review in reviews:
+            if review.get("review_id") == review_id:
+                mutator(review)
+                updated = review
+                break
+        if updated:
+            store_save_file_reviews(DOCUMENTS_DIR, doc_id, file_id, reviews, write_json_fn=write_json)
+            return updated
+    return None
+
+
+def update_review_in_run(doc_id, run_id, review_id, mutator):
+    migrate_workspace_reviews(doc_id)
+    return store_update_review_in_run_storage(
+        doc_id,
+        run_id,
+        review_id,
+        mutator,
+        migrate_legacy_fn=migrate_workspace_reviews,
+        **_review_store_kwargs(),
+    )
+
+
+def delete_review_in_run(doc_id, run_id, review_id):
+    migrate_workspace_reviews(doc_id)
+    return store_delete_review_in_run_storage(
+        doc_id,
+        run_id,
+        review_id,
+        migrate_legacy_fn=migrate_workspace_reviews,
+        **_review_store_kwargs(),
+    )
+
+
+def delete_document_review(doc_id, review_id):
+    migrate_workspace_reviews(doc_id)
+    meta = load_document_meta(doc_id) or {}
+    deleted = False
+    for entry in meta.get("files") or []:
+        file_id = entry.get("file_id")
+        if not file_id:
+            continue
+        reviews = store_load_file_reviews(DOCUMENTS_DIR, doc_id, file_id, read_json_fn=read_json)
+        kept = [r for r in reviews if r.get("review_id") != review_id]
+        if len(kept) != len(reviews):
+            store_save_file_reviews(DOCUMENTS_DIR, doc_id, file_id, kept, write_json_fn=write_json)
+            deleted = True
+    return deleted
 
 
 def words_bbox(words, word_ids):
@@ -784,7 +1003,13 @@ def document_reviews_for_run(doc_id, run_id):
         doc_id,
         run_id,
         load_document_meta_fn=load_document_meta,
-        load_document_reviews_fn=load_document_reviews,
+        load_reviews_for_run_fn=load_reviews_for_run,
+        resolve_file_ids_for_run_session_fn=lambda meta, rid: store_resolve_file_ids_for_run_session(
+            meta, rid, find_file_by_id_fn=find_file_by_id
+        ),
+        load_file_reviews_fn=lambda doc, fid: store_load_file_reviews(
+            DOCUMENTS_DIR, doc, fid, read_json_fn=read_json
+        ),
     )
 
 
@@ -792,6 +1017,9 @@ def create_document_level_review(doc_id, run_id, run_dir: Path, data):
     anchor = anchor_for_selection(run_dir, run_id, data.get("side", "new"), data.get("word_ids", []), data.get("rect"))
     if not anchor:
         return {"error": "no_word_selected"}
+    meta = load_document_meta(doc_id) or {}
+    side = data.get("side", "new")
+    storage_id = store_storage_file_id_for_run_session(meta, run_id, side, find_file_by_id_fn=find_file_by_id) or run_id
     now = utc_now()
     comment_text = data.get("comment", "")
     review = {
@@ -799,18 +1027,19 @@ def create_document_level_review(doc_id, run_id, run_dir: Path, data):
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
         "workspace_id": doc_id,
         "status": data.get("status", "open"),
-        "created_run_id": run_id,
+        "created_run_id": storage_id,
         "is_floating": False,
         "text": anchor.get("text", ""),
         "comments": ([{"comment_id": "c-" + uuid.uuid4().hex[:8], "author": data.get("author", "user"), "text": comment_text, "created_at": now}] if comment_text else []),
-        "anchors": {run_id: anchor},
+        "anchors": {storage_id: anchor},
         "created_at": now,
         "updated_at": now,
     }
-    reviews = load_document_reviews(doc_id)
-    reviews.append(review)
-    save_document_reviews(doc_id, reviews)
-    return review_projection_for_anchor(review, run_id)
+    store_append_review_for_run(doc_id, run_id, review, side=side, **_review_store_kwargs())
+    # The anchor is keyed by storage_id (the bound File Manager file_id for a plain upload, or the
+    # run_id when ephemeral). Project by that same key so the lookup finds the anchor; using run_id
+    # here returns None when the run is bound to a file (storage_id != run_id) and 500s the request.
+    return review_projection_for_anchor(review, storage_id)
 
 
 def find_word_sequence_by_text(words, text):
@@ -856,7 +1085,8 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
         load_document_meta_fn=load_document_meta,
         update_run_meta_fn=update_run_meta,
         document_run_dir_fn=document_run_dir,
-        load_document_reviews_fn=load_document_reviews,
+        load_document_reviews_fn=load_reviews_for_run,
+        load_reviews_for_run_fn=load_reviews_for_run,
         read_json_fn=read_json,
         document_semantic_map_fn=document_semantic_map,
         map_anchor_to_current_md_anchor_fn=map_anchor_to_current_md_anchor,
@@ -873,7 +1103,7 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
     )
 
 
-SNAPSHOT_LIMIT = 10
+SNAPSHOT_LIMIT = 30
 
 
 def snapshot_artifacts(run_dir):
@@ -914,6 +1144,39 @@ def create_run_snapshot(doc_id, run_id, label=""):
     )
 
 
+def delete_document_snapshot(doc_id, snapshot_id):
+    return snapshot_delete_document_snapshot(
+        doc_id,
+        snapshot_id,
+        load_document_meta_fn=load_document_meta,
+        document_snapshot_dir_fn=document_snapshot_dir,
+        save_document_meta_fn=save_document_meta,
+    )
+
+
+def rename_document_snapshot(doc_id, snapshot_id, label=""):
+    return snapshot_rename_document_snapshot(
+        doc_id,
+        snapshot_id,
+        label,
+        load_document_meta_fn=load_document_meta,
+        document_snapshot_dir_fn=document_snapshot_dir,
+        read_json_fn=read_json,
+        write_json_fn=write_json,
+        save_document_meta_fn=save_document_meta,
+    )
+
+
+def backfill_snapshot_change_counts(doc_id, meta):
+    return snapshot_backfill_snapshot_change_counts(
+        doc_id,
+        meta,
+        document_snapshot_dir_fn=document_snapshot_dir,
+        read_json_fn=read_json,
+        save_document_meta_fn=save_document_meta,
+    )
+
+
 def snapshot_side_file(side, kind):
     return snapshot_snapshot_side_file(side, kind)
 
@@ -926,14 +1189,18 @@ def update_run_meta(meta, run_id, **patch):
     return None
 
 
-AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL") or "claude-3-5-sonnet-latest"
+AI_ASSESSMENT_MODEL = resolve_ai_model("AI_ASSESSMENT_MODEL")
+CHANGE_AI_ASSESSMENT_MODEL = resolve_ai_model("CHANGE_AI_ASSESSMENT_MODEL", fallback=AI_ASSESSMENT_MODEL)
 AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "ai_assessment_system.md"
 CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "change_ai_assessment_system.md"
 CHARS_MAX_WORDS = max(1, int(os.environ.get("CHARS_MAX_WORDS") or "50000"))
 CHARS_MAX_ESTIMATED_COUNT = max(1, int(os.environ.get("CHARS_MAX_ESTIMATED_COUNT") or "250000"))
 AI_ASSESSMENT_PROMPT_FALLBACK = (
     "You are an expert financial report review assistant. "
-    "Use the available markdown tools before calling submit_verdict."
+    "Judge whether each prior review requirement is fully resolved (cleared), "
+    "partly resolved (partial), unresolved (not_cleared), or impossible to judge "
+    "because the review itself is too vague (unclear). "
+    "Use markdown tools when needed, then call submit_verdict."
 )
 CHANGE_AI_ASSESSMENT_PROMPT_FALLBACK = (
     "You are an expert financial report risk reviewer focused on change bundles. "
@@ -982,9 +1249,15 @@ def assessment_reviews_for_run(doc_id, run_id, review_id=None):
         run_id,
         load_document_meta_fn=load_document_meta,
         run_meta_for_fn=run_meta_for,
-        load_document_reviews_fn=load_document_reviews,
+        load_document_reviews_fn=load_reviews_for_run,
         assessment_anchor_for_previous_side_fn=assessment_anchor_for_previous_side,
         review_id=review_id,
+        resolve_file_ids_for_run_session_fn=lambda meta, rid: store_resolve_file_ids_for_run_session(
+            meta, rid, find_file_by_id_fn=find_file_by_id
+        ),
+        load_file_reviews_fn=lambda doc, fid: store_load_file_reviews(
+            DOCUMENTS_DIR, doc, fid, read_json_fn=read_json
+        ),
     )
 
 
@@ -1096,7 +1369,7 @@ def call_ai_change_assessment(prompt, tool_context):
     return callers_call_ai_change_assessment(
         prompt,
         tool_context,
-        model=AI_ASSESSMENT_MODEL,
+        model=CHANGE_AI_ASSESSMENT_MODEL,
         prompt_path=CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH,
         prompt_fallback=CHANGE_AI_ASSESSMENT_PROMPT_FALLBACK,
         load_system_prompt_fn=load_system_prompt,
@@ -1108,7 +1381,7 @@ def call_ai_change_assessment_batch(context_packs, available_sections, tool_cont
         context_packs,
         available_sections,
         tool_context,
-        model=AI_ASSESSMENT_MODEL,
+        model=CHANGE_AI_ASSESSMENT_MODEL,
         prompt_path=CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH,
         prompt_fallback=CHANGE_AI_ASSESSMENT_PROMPT_FALLBACK,
         load_system_prompt_fn=load_system_prompt,
@@ -1178,7 +1451,7 @@ def run_change_ai_assessment(doc_id, run_id, change_id=None, change_ids=None):
         run_id,
         change_id=change_id,
         change_ids=change_ids,
-        model_name=AI_ASSESSMENT_MODEL,
+        model_name=CHANGE_AI_ASSESSMENT_MODEL,
         load_document_meta_fn=load_document_meta,
         run_meta_for_fn=run_meta_for,
         document_run_dir_fn=document_run_dir,
@@ -1191,7 +1464,6 @@ def run_change_ai_assessment(doc_id, run_id, change_id=None, change_ids=None):
         build_change_assessment_context_pack_fn=build_change_assessment_context_pack,
         call_ai_change_assessment_fn=call_ai_change_assessment,
         build_change_assessment_prompt_fn=build_change_assessment_prompt,
-        enforce_change_verdict_policy_fn=enforce_change_verdict_policy,
         build_change_groups_for_run_fn=build_change_groups_for_run,
         call_ai_change_assessment_batch_fn=call_ai_change_assessment_batch,
         harmonize_change_items_fn=harmonize_change_items,
@@ -1216,7 +1488,7 @@ def forward_change_assessment_to_review(doc_id, run_id, change_id):
         new_word_ids_for_change_fn=new_word_ids_for_change,
         anchor_for_selection_fn=anchor_for_selection,
         utc_now_fn=utc_now,
-        load_document_reviews_fn=load_document_reviews,
+        load_document_reviews_fn=load_reviews_for_run,
         save_document_reviews_fn=save_document_reviews,
         semantic_save_reviews_fn=semantic.save_reviews,
         review_projection_for_anchor_fn=review_projection_for_anchor,
@@ -1255,7 +1527,12 @@ def document_blueprint_deps():
         "update_run_meta_fn": update_run_meta,
         "load_document_meta_fn": load_document_meta,
         "load_document_reviews_fn": load_document_reviews,
+        "load_reviews_for_run_fn": load_reviews_for_run,
         "save_document_reviews_fn": save_document_reviews,
+        "mutate_document_review_fn": mutate_document_review,
+        "delete_document_review_fn": delete_document_review,
+        "update_review_in_run_fn": update_review_in_run,
+        "delete_review_in_run_fn": delete_review_in_run,
         "copy_if_exists_fn": copy_if_exists,
         "read_json_fn": read_json,
         "build_chars_from_words_fn": build_chars_from_words,
@@ -1275,6 +1552,12 @@ def document_blueprint_deps():
         "normalize_document_title_fn": normalize_document_title,
         "document_title_exists_fn": workspace_title_exists,
         "save_run_side_file_fn": save_run_side_file,
+        "delete_workspace_file_fn": delete_workspace_file,
+        "rename_workspace_file_fn": rename_workspace_file,
+        "list_workspace_files_fn": list_workspace_files,
+        "resolve_workspace_file_pdf_fn": resolve_workspace_file_pdf,
+        "find_file_by_id_fn": find_file_by_id,
+        "open_workspace_saved_file_fn": open_workspace_saved_file,
         "document_dir_fn": document_dir,
         "write_json_fn": write_json,
     }
@@ -1298,13 +1581,14 @@ def assessment_blueprint_deps():
 
 def file_manager_blueprint_deps():
     return {
-        "ensure_default_file_manager_documents_fn": ensure_default_file_manager_documents,
         "list_documents_for_manager_fn": list_documents_for_manager,
+        "ensure_default_workspace_fn": ensure_default_workspace,
         "load_document_meta_fn": load_document_meta,
         "normalize_document_title_fn": normalize_document_title,
         "document_title_exists_fn": workspace_title_exists,
         "save_document_meta_fn": save_document_meta,
         "document_dir_fn": document_dir,
+        "utc_now_fn": utc_now,
     }
 
 
@@ -1313,6 +1597,9 @@ def snapshot_blueprint_deps():
         "load_document_meta_fn": load_document_meta,
         "snapshot_limit": SNAPSHOT_LIMIT,
         "create_run_snapshot_fn": create_run_snapshot,
+        "delete_document_snapshot_fn": delete_document_snapshot,
+        "rename_document_snapshot_fn": rename_document_snapshot,
+        "backfill_snapshot_change_counts_fn": backfill_snapshot_change_counts,
         "document_snapshot_dir_fn": document_snapshot_dir,
         "read_json_fn": read_json,
         "build_chars_from_words_fn": build_chars_from_words,
@@ -1350,4 +1637,6 @@ def suppress_flask_console_noise():
 if __name__ == "__main__":
     suppress_flask_console_noise()
     print("PDF Diff Viewer running: http://127.0.0.1:8000", flush=True)
+    print(f"Review AI model: {AI_ASSESSMENT_MODEL}", flush=True)
+    print(f"Change AI model: {CHANGE_AI_ASSESSMENT_MODEL}", flush=True)
     app.run(host="127.0.0.1", port=8000, debug=True, use_reloader=False)

@@ -1,61 +1,24 @@
-import re
 import time
 
 from flask import Blueprint, Response, current_app, jsonify, request, send_file
 
 import run_layout
-
-_HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
-_SNAPSHOT_ID_RE = re.compile(r'^snap-[0-9a-f]{10}$')
-
-
-def _is_valid_hex_id(value: str) -> bool:
-    return bool(_HEX12_RE.match(value))
-
-
-def _is_valid_snapshot_id(value: str) -> bool:
-    return bool(_SNAPSHOT_ID_RE.match(value))
-
-
-def _ids_payload(workspace_id: str):
-    value = str(workspace_id or "")
-    return {"workspace_id": value}
-
-
-def _parse_optional_positive_int(name: str):
-    raw = request.args.get(name)
-    if raw is None or raw == "":
-        return None, None
-    try:
-        parsed = int(raw)
-    except ValueError:
-        return None, f"{name} must be an integer"
-    if parsed < 1:
-        return None, f"{name} must be >= 1"
-    return parsed, None
-
-
-def _chars_page_filters_from_query():
-    page, page_err = _parse_optional_positive_int("page")
-    if page_err:
-        return None, page_err
-    page_start, start_err = _parse_optional_positive_int("page_start")
-    if start_err:
-        return None, start_err
-    page_end, end_err = _parse_optional_positive_int("page_end")
-    if end_err:
-        return None, end_err
-    if page is not None and (page_start is not None or page_end is not None):
-        return None, "page cannot be combined with page_start/page_end"
-    if page_start is not None and page_end is not None and page_start > page_end:
-        return None, "page_start must be <= page_end"
-    return {"page": page, "page_start": page_start, "page_end": page_end}, None
+from routes.common import (
+    chars_page_filters_from_query,
+    has_invalid_hex_id,
+    ids_payload,
+    is_valid_hex_id,
+    is_valid_snapshot_id,
+)
 
 
 def create_snapshot_blueprint(*, deps):
     load_document_meta_fn = deps["load_document_meta_fn"]
     snapshot_limit = deps["snapshot_limit"]
     create_run_snapshot_fn = deps["create_run_snapshot_fn"]
+    delete_document_snapshot_fn = deps["delete_document_snapshot_fn"]
+    rename_document_snapshot_fn = deps["rename_document_snapshot_fn"]
+    backfill_snapshot_change_counts_fn = deps["backfill_snapshot_change_counts_fn"]
     document_snapshot_dir_fn = deps["document_snapshot_dir_fn"]
     read_json_fn = deps["read_json_fn"]
     build_chars_from_words_fn = deps["build_chars_from_words_fn"]
@@ -70,17 +33,39 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots")
     def list_document_snapshots(doc_id):
-        if not _is_valid_hex_id(doc_id):
+        if not is_valid_hex_id(doc_id):
             return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
+        backfill_snapshot_change_counts_fn(doc_id, meta)
         snapshots = sorted(meta.get("snapshots", []), key=lambda s: s.get("created_at", ""), reverse=True)
-        return jsonify({**_ids_payload(doc_id), "snapshots": snapshots[:snapshot_limit]})
+        return jsonify({**ids_payload(doc_id), "snapshots": snapshots[:snapshot_limit]})
+
+    @bp.route("/api/documents/<doc_id>/snapshots", methods=["POST"])
+    def save_document_snapshot(doc_id):
+        if not is_valid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
+        meta = load_document_meta_fn(doc_id)
+        if not meta:
+            return jsonify({"error": "document not found"}), 404
+        data = request.get_json(silent=True) or {}
+        run_id = str(data.get("run_id") or data.get("source_run_id") or "").strip()
+        if run_id and not is_valid_hex_id(run_id):
+            return jsonify({"error": "invalid run_id"}), 400
+        if not run_id:
+            runs = meta.get("runs") or []
+            if not runs:
+                return jsonify({"error": "no runs in workspace"}), 400
+            run_id = str(runs[-1].get("run_id") or "").strip()
+        if not run_id:
+            return jsonify({"error": "no runs in workspace"}), 400
+        payload, status = create_run_snapshot_fn(doc_id, run_id, label=data.get("label", ""))
+        return jsonify(payload), status
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/snapshots", methods=["POST"])
     def save_document_run_snapshot(doc_id, run_id):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_hex_id(run_id):
             return jsonify({"error": "invalid id"}), 400
         data = request.get_json(silent=True) or {}
         payload, status = create_run_snapshot_fn(doc_id, run_id, label=data.get("label", ""))
@@ -88,7 +73,7 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>")
     def get_document_snapshot(doc_id, snapshot_id):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         snap_dir = document_snapshot_dir_fn(doc_id, snapshot_id)
         if not snap_dir.exists():
@@ -98,9 +83,24 @@ def create_snapshot_blueprint(*, deps):
             return jsonify({"error": "snapshot data not found"}), 404
         return jsonify({"snapshot": read_json_fn(snap_dir / "snapshot.json", {}), "result": viewer_data})
 
+    @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>", methods=["DELETE"])
+    def delete_document_snapshot(doc_id, snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
+            return jsonify({"error": "invalid id"}), 400
+        payload, status = delete_document_snapshot_fn(doc_id, snapshot_id)
+        return jsonify(payload), status
+
+    @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>", methods=["PATCH"])
+    def rename_document_snapshot(doc_id, snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
+            return jsonify({"error": "invalid id"}), 400
+        data = request.get_json(silent=True) or {}
+        payload, status = rename_document_snapshot_fn(doc_id, snapshot_id, data.get("label", ""))
+        return jsonify(payload), status
+
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/page/<side>/<int:page_no>")
     def snapshot_page_image(doc_id, snapshot_id, side, page_no):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         zoom = float(request.args.get("zoom", "1.6"))
         name = snapshot_side_file_fn(side, "pdf")
@@ -113,7 +113,7 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/words/<side>")
     def snapshot_words(doc_id, snapshot_id, side):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         name = snapshot_side_file_fn(side, "words")
         if not name:
@@ -125,7 +125,7 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/chars/<side>")
     def snapshot_chars(doc_id, snapshot_id, side):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         words_name = snapshot_side_file_fn(side, "words")
         if not words_name:
@@ -133,7 +133,7 @@ def create_snapshot_blueprint(*, deps):
         words_path = document_snapshot_dir_fn(doc_id, snapshot_id) / words_name
         if not words_path.exists():
             return jsonify({"error": "not found"}), 404
-        page_filters, filter_error = _chars_page_filters_from_query()
+        page_filters, filter_error = chars_page_filters_from_query()
         if filter_error:
             return jsonify({"error": filter_error}), 400
         words = read_json_fn(words_path, []) or []
@@ -203,19 +203,25 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/reviews")
     def snapshot_reviews(doc_id, snapshot_id):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         return jsonify(read_json_fn(run_layout.run_reviews_path(document_snapshot_dir_fn(doc_id, snapshot_id)), []) or [])
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/assess")
     def snapshot_assessment(doc_id, snapshot_id):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         return jsonify(read_json_fn(run_layout.review_assessment_path(document_snapshot_dir_fn(doc_id, snapshot_id)), {"items": []}) or {"items": []})
 
+    @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/change-assess")
+    def snapshot_change_assessment(doc_id, snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
+            return jsonify({"error": "invalid id"}), 400
+        return jsonify(read_json_fn(run_layout.change_assessment_path(document_snapshot_dir_fn(doc_id, snapshot_id)), {"items": []}) or {"items": []})
+
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/export/<side>")
     def export_snapshot_pdf(doc_id, snapshot_id, side):
-        if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
+        if not is_valid_hex_id(doc_id) or not is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
         compat_side = "new" if side in ("new", "report", "current") else "old"
         snap_dir = document_snapshot_dir_fn(doc_id, snapshot_id)

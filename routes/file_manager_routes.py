@@ -16,19 +16,23 @@ def _ids_payload(workspace_id: str):
 
 
 def create_file_manager_blueprint(*, deps):
-    ensure_default_file_manager_documents_fn = deps["ensure_default_file_manager_documents_fn"]
     list_documents_for_manager_fn = deps["list_documents_for_manager_fn"]
+    ensure_default_workspace_fn = deps["ensure_default_workspace_fn"]
     load_document_meta_fn = deps["load_document_meta_fn"]
     normalize_document_title_fn = deps["normalize_document_title_fn"]
     document_title_exists_fn = deps["document_title_exists_fn"]
     save_document_meta_fn = deps["save_document_meta_fn"]
     document_dir_fn = deps["document_dir_fn"]
+    utc_now_fn = deps.get("utc_now_fn")
     bp = Blueprint("file_manager", __name__)
 
     @bp.route("/api/file-manager")
     def file_manager_index():
-        ensure_default_file_manager_documents_fn()
         return jsonify({"items": list_documents_for_manager_fn()})
+
+    @bp.route("/api/workspace/default", methods=["GET"])
+    def workspace_default():
+        return jsonify(ensure_default_workspace_fn())
 
     @bp.route("/api/file-manager/<doc_id>", methods=["PATCH"])
     def file_manager_rename(doc_id):
@@ -45,6 +49,8 @@ def create_file_manager_blueprint(*, deps):
         if document_title_exists_fn(title, exclude_workspace_id=doc_id):
             return jsonify({"error": "duplicate title"}), 409
         meta["title"] = title
+        if utc_now_fn:
+            meta["updated_at"] = utc_now_fn()
         save_document_meta_fn(meta)
         return jsonify({"renamed": True, **_ids_payload(doc_id), "title": meta.get("title")})
 

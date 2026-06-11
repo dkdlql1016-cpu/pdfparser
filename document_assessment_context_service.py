@@ -3,6 +3,24 @@ import re
 import run_layout
 
 
+def _home_anchor_for_previous_review(review):
+    """Resolve a previous-report review's anchor when no key matches ``prev_run_id``.
+
+    Reviews are stored per File Manager file but anchored by the ephemeral run id (or file id)
+    that authored them. The update run's ``previous_run_id`` rarely equals that key once a run is
+    purged or the base was opened as a file, so the literal-key lookup in
+    ``assessment_anchor_for_previous_side`` misses and the comment becomes "not assessable". The
+    home anchor's word ids reference the previous document, so it is the correct previous-side
+    anchor. Only call this for reviews already known to belong to the previous report.
+    """
+    anchors = review.get("anchors") or {}
+    if not anchors:
+        return None, None
+    created = str(review.get("created_run_id") or "")
+    key = created if created in anchors else next(iter(anchors))
+    return anchors.get(key), key
+
+
 def assessment_reviews_for_run(
     doc_id,
     run_id,
@@ -12,21 +30,53 @@ def assessment_reviews_for_run(
     load_document_reviews_fn,
     assessment_anchor_for_previous_side_fn,
     review_id=None,
+    resolve_file_ids_for_run_session_fn=None,
+    load_file_reviews_fn=None,
 ):
     meta = load_document_meta_fn(doc_id) or {}
     run_meta = run_meta_for_fn(meta, run_id) or {}
     prev_run_id = run_meta.get("previous_run_id")
     if not prev_run_id:
         return []
-    reviews = []
-    for review in load_document_reviews_fn(doc_id):
+
+    def assessable(review):
         if review_id and review.get("review_id") != review_id:
-            continue
+            return None
         if review.get("status", "open") not in ("open", "partial", "unclear"):
-            continue
+            return None
         prev_anchor, anchor_run_id = assessment_anchor_for_previous_side_fn(review, prev_run_id, run_id)
-        if prev_anchor:
-            reviews.append((review, prev_anchor, anchor_run_id))
+        return (review, prev_anchor, anchor_run_id) if prev_anchor else None
+
+    # Report-aware path. A diff session spans the previous report file(s) and the current (update)
+    # report file (file_ids[-1]). The AI Comment assessment only evaluates the PREVIOUS report's
+    # comments, so iterate those files directly. Their anchors are keyed by the authoring run/file
+    # id rather than ``prev_run_id``, so fall back to the review's home anchor when the literal-key
+    # lookup misses -- otherwise every comment on a saved base report reads as "not assessable".
+    file_ids = []
+    if resolve_file_ids_for_run_session_fn and load_file_reviews_fn:
+        file_ids = resolve_file_ids_for_run_session_fn(meta, run_id) or []
+    if len(file_ids) >= 2:
+        reviews = []
+        for fid in file_ids[:-1]:
+            for review in load_file_reviews_fn(doc_id, fid):
+                if review_id and review.get("review_id") != review_id:
+                    continue
+                if review.get("status", "open") not in ("open", "partial", "unclear"):
+                    continue
+                prev_anchor, anchor_run_id = assessment_anchor_for_previous_side_fn(review, prev_run_id, run_id)
+                if not prev_anchor:
+                    prev_anchor, anchor_run_id = _home_anchor_for_previous_review(review)
+                if prev_anchor:
+                    reviews.append((review, prev_anchor, anchor_run_id))
+        return reviews
+
+    # Pure ephemeral run (no File Manager backing): previous reviews are anchored by the literal
+    # previous run id, so the literal-key resolver already finds them.
+    reviews = []
+    for review in load_document_reviews_fn(doc_id, run_id):
+        entry = assessable(review)
+        if entry:
+            reviews.append(entry)
     return reviews
 
 

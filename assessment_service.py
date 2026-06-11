@@ -105,7 +105,7 @@ def run_ai_assessment_service(
             try:
                 entry["item"].update(call_ai_assessment_fn(build_assessment_prompt_fn(entry["review"], entry["prev_anchor"], available_sections, entry["context_pack"]), tool_context))
             except Exception as e:
-                entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": ""})
+                entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e)})
             items.append(entry["item"])
     else:
         for group_index, (group_key, batch) in enumerate(group_assessment_entries_by_report_section_fn(prepared), start=1):
@@ -116,13 +116,13 @@ def run_ai_assessment_service(
                     if rid in verdicts:
                         entry["item"].update(verdicts[rid])
                     else:
-                        entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": "AI did not return a verdict for this review_id", "evidence_old": "", "evidence_new": ""})
+                        entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": "AI did not return a verdict for this review_id"})
                     entry["item"]["batch_index"] = group_index
                     entry["item"]["batch_key"] = group_key
                     items.append(entry["item"])
             except Exception as e:
                 for entry in batch:
-                    entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "evidence_old": "", "evidence_new": "", "batch_index": group_index, "batch_key": group_key})
+                    entry["item"].update({"status": "error", "verdict": "unclear", "confidence": None, "reasoning": str(e), "batch_index": group_index, "batch_key": group_key})
                     items.append(entry["item"])
     assessment = {
         "status": "done",
@@ -157,7 +157,6 @@ def run_change_ai_assessment_service(
     build_change_assessment_context_pack_fn,
     call_ai_change_assessment_fn,
     build_change_assessment_prompt_fn,
-    enforce_change_verdict_policy_fn,
     build_change_groups_for_run_fn,
     call_ai_change_assessment_batch_fn,
     harmonize_change_items_fn,
@@ -225,7 +224,6 @@ def run_change_ai_assessment_service(
                     build_change_assessment_prompt_fn(entry["context_pack"], available_sections),
                     tool_context,
                 ))
-                enforce_change_verdict_policy_fn(entry["item"])
             except Exception as e:
                 entry["item"].update({
                     "status": "error",
@@ -233,8 +231,6 @@ def run_change_ai_assessment_service(
                     "confidence": None,
                     "reasoning": str(e),
                     "recommended_comment": "",
-                    "evidence_old": "",
-                    "evidence_new": "",
                 })
             kept.append(entry["item"])
     else:
@@ -263,7 +259,6 @@ def run_change_ai_assessment_service(
                     cid = entry["item"].get("change_id")
                     if cid in verdicts:
                         entry["item"].update(verdicts[cid])
-                        enforce_change_verdict_policy_fn(entry["item"])
                     else:
                         entry["item"].update({
                             "status": "error",
@@ -271,8 +266,6 @@ def run_change_ai_assessment_service(
                             "confidence": None,
                             "reasoning": "AI did not return a verdict for this change_id",
                             "recommended_comment": "",
-                            "evidence_old": "",
-                            "evidence_new": "",
                         })
                     entry["item"]["batch_key"] = group_key
                     kept.append(entry["item"])
@@ -284,8 +277,6 @@ def run_change_ai_assessment_service(
                         "confidence": None,
                         "reasoning": str(e),
                         "recommended_comment": "",
-                        "evidence_old": "",
-                        "evidence_new": "",
                         "batch_key": group_key,
                     })
                     kept.append(entry["item"])
@@ -371,9 +362,9 @@ def forward_change_assessment_to_review_service(
         "created_at": now,
         "updated_at": now,
     }
-    reviews = load_document_reviews_fn(doc_id)
+    reviews = load_document_reviews_fn(doc_id, run_id)
     reviews.append(review)
-    save_document_reviews_fn(doc_id, reviews)
+    save_document_reviews_fn(doc_id, run_id, reviews)
     semantic_save_reviews_fn(run_dir, document_reviews_for_run_fn(doc_id, run_id))
     item["forwarded_review_id"] = review["review_id"]
     item["forwarded_at"] = now

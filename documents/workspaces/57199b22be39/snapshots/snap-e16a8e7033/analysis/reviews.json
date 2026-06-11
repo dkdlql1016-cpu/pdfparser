@@ -1,0 +1,1336 @@
+[
+  {
+    "review_id": "r-6c46d582",
+    "anchor_id": "a-39ba4061",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      331
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [],
+    "new_lines": [],
+    "section_id": null,
+    "md_anchor": {
+      "source": "section_only",
+      "section_id": null,
+      "old_lines": [],
+      "new_lines": [],
+      "segment_ids": [],
+      "equal_refs": []
+    },
+    "text": "intagible",
+    "selection": {
+      "page": 3,
+      "rect": [
+        305.3958555255704,
+        454.4762513338757,
+        341.19038223305625,
+        461.33052240552195
+      ],
+      "word_ids": [
+        331
+      ]
+    },
+    "comment": "correct the typo",
+    "comments": [
+      {
+        "comment_id": "c-41dc821b",
+        "author": "user",
+        "text": "correct the typo",
+        "created_at": "2026-06-11T10:54:44.850597+00:00"
+      }
+    ],
+    "status": "cleared",
+    "created_at": "2026-06-11T10:54:44.850597+00:00",
+    "updated_at": "2026-06-11T16:16:26.219821+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-60f1f707",
+    "anchor_id": "a-1ebe4cf3",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      336
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [],
+    "new_lines": [],
+    "section_id": null,
+    "md_anchor": {
+      "source": "section_only",
+      "section_id": null,
+      "old_lines": [],
+      "new_lines": [],
+      "segment_ids": [],
+      "equal_refs": []
+    },
+    "text": "recoverablity.",
+    "selection": {
+      "page": 3,
+      "rect": [
+        473.7062896182165,
+        455.2378370085031,
+        527.0172868421315,
+        455.99942268313043
+      ],
+      "word_ids": [
+        336
+      ]
+    },
+    "comment": "correct the typo",
+    "comments": [
+      {
+        "comment_id": "c-b6643871",
+        "author": "user",
+        "text": "correct the typo",
+        "created_at": "2026-06-11T10:55:21.036870+00:00"
+      }
+    ],
+    "status": "cleared",
+    "created_at": "2026-06-11T10:55:21.036870+00:00",
+    "updated_at": "2026-06-11T16:16:24.798321+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-feb23615",
+    "anchor_id": "a-68500ae9",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      322,
+      323,
+      324,
+      325,
+      326,
+      327,
+      328,
+      329,
+      330,
+      331,
+      332,
+      333,
+      334,
+      335,
+      336,
+      337,
+      338,
+      339,
+      340,
+      341,
+      342,
+      343,
+      344,
+      345,
+      346,
+      347
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      37
+    ],
+    "new_lines": [
+      37
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        37
+      ],
+      "new_lines": [
+        37
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 322,
+          "new_word_id": 322,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "We"
+        },
+        {
+          "old_word_id": 323,
+          "new_word_id": 323,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "were"
+        },
+        {
+          "old_word_id": 324,
+          "new_word_id": 324,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "unable"
+        },
+        {
+          "old_word_id": 325,
+          "new_word_id": 325,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "to"
+        },
+        {
+          "old_word_id": 326,
+          "new_word_id": 326,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "obtain"
+        },
+        {
+          "old_word_id": 327,
+          "new_word_id": 330,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "audit"
+        },
+        {
+          "old_word_id": 328,
+          "new_word_id": 331,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "evidence"
+        },
+        {
+          "old_word_id": 329,
+          "new_word_id": 332,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "regarding"
+        },
+        {
+          "old_word_id": 330,
+          "new_word_id": 334,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "the"
+        },
+        {
+          "old_word_id": 332,
+          "new_word_id": 335,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "development"
+        },
+        {
+          "old_word_id": 333,
+          "new_word_id": 336,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "costs"
+        },
+        {
+          "old_word_id": 334,
+          "new_word_id": 359,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "and"
+        },
+        {
+          "old_word_id": 335,
+          "new_word_id": 360,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "their"
+        },
+        {
+          "old_word_id": 337,
+          "new_word_id": 362,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "Consequently,"
+        },
+        {
+          "old_word_id": 338,
+          "new_word_id": 363,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "we"
+        },
+        {
+          "old_word_id": 339,
+          "new_word_id": 364,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "were"
+        },
+        {
+          "old_word_id": 340,
+          "new_word_id": 365,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "unable"
+        },
+        {
+          "old_word_id": 341,
+          "new_word_id": 366,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "to"
+        },
+        {
+          "old_word_id": 342,
+          "new_word_id": 367,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "determine"
+        },
+        {
+          "old_word_id": 343,
+          "new_word_id": 368,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "whether"
+        },
+        {
+          "old_word_id": 344,
+          "new_word_id": 369,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "any"
+        },
+        {
+          "old_word_id": 345,
+          "new_word_id": 370,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "adjustments"
+        },
+        {
+          "old_word_id": 346,
+          "new_word_id": 378,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "were"
+        },
+        {
+          "old_word_id": 347,
+          "new_word_id": 379,
+          "old_line": 37,
+          "new_line": 37,
+          "segment_id": null,
+          "text": "necessary."
+        }
+      ]
+    },
+    "text": "We were unable to obtain audit evidence regarding the intagible development costs and their recoverablity. Consequently, we were unable to determine whether any adjustments were necessary.",
+    "selection": {
+      "page": 3,
+      "rect": [
+        56.35733992242447,
+        453.7146656592484,
+        420.39529239430146,
+        475.0390645488144
+      ],
+      "word_ids": [
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347
+      ]
+    },
+    "comment": "Basis for Qualified Opinion should describe both the recognition/recoverability issue and the cutoff issue for R&D and amortization expense. The cutoff clauses is missing.",
+    "comments": [
+      {
+        "comment_id": "c-a34cc091",
+        "author": "user",
+        "text": "Basis for Qualified Opinion should describe both the recognition/recoverability issue and the cutoff issue for R&D and amortization expense. The cutoff clauses is missing.",
+        "created_at": "2026-06-11T10:56:12.288664+00:00"
+      }
+    ],
+    "status": "open",
+    "created_at": "2026-06-11T10:56:12.288664+00:00",
+    "updated_at": "2026-06-11T11:01:38.043389+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-2c64e073",
+    "anchor_id": "a-66c54205",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      200,
+      201,
+      202,
+      203,
+      204
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      35
+    ],
+    "new_lines": [
+      35
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        35
+      ],
+      "new_lines": [
+        35
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 200,
+          "new_word_id": 200,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "As"
+        },
+        {
+          "old_word_id": 201,
+          "new_word_id": 201,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "described"
+        },
+        {
+          "old_word_id": 202,
+          "new_word_id": 202,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "in"
+        },
+        {
+          "old_word_id": 203,
+          "new_word_id": 203,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "Note"
+        }
+      ]
+    },
+    "text": "As described in Note 5",
+    "selection": {
+      "page": 3,
+      "rect": [
+        57.88051127167919,
+        356.23169930694655,
+        146.22444952845268,
+        358.51645633082865
+      ],
+      "word_ids": [
+        200,
+        201,
+        202,
+        203,
+        204
+      ]
+    },
+    "comment": "Reference to Note 5 appears incorrect. Development costs are disclosed in Note 6. Intangible Assets.",
+    "comments": [
+      {
+        "comment_id": "c-95d8957d",
+        "author": "user",
+        "text": "Reference to Note 5 appears incorrect. Development costs are disclosed in Note 6. Intangible Assets.",
+        "created_at": "2026-06-11T10:57:10.558978+00:00"
+      }
+    ],
+    "status": "cleared",
+    "created_at": "2026-06-11T10:57:10.558978+00:00",
+    "updated_at": "2026-06-11T16:16:30.263952+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-63611c23",
+    "anchor_id": "a-adbcdaa8",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      35
+    ],
+    "new_lines": [
+      35
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        35
+      ],
+      "new_lines": [
+        35
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 229,
+          "new_word_id": 229,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "and"
+        },
+        {
+          "old_word_id": 230,
+          "new_word_id": 230,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "the"
+        },
+        {
+          "old_word_id": 231,
+          "new_word_id": 231,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "Company"
+        },
+        {
+          "old_word_id": 232,
+          "new_word_id": 232,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "reclassified"
+        },
+        {
+          "old_word_id": 234,
+          "new_word_id": 234,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "million"
+        },
+        {
+          "old_word_id": 235,
+          "new_word_id": 235,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "of"
+        },
+        {
+          "old_word_id": 236,
+          "new_word_id": 236,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "the"
+        },
+        {
+          "old_word_id": 237,
+          "new_word_id": 237,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "development"
+        },
+        {
+          "old_word_id": 238,
+          "new_word_id": 238,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "costs"
+        },
+        {
+          "old_word_id": 239,
+          "new_word_id": 239,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "to"
+        },
+        {
+          "old_word_id": 240,
+          "new_word_id": 240,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "research"
+        },
+        {
+          "old_word_id": 241,
+          "new_word_id": 241,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "and"
+        },
+        {
+          "old_word_id": 242,
+          "new_word_id": 242,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "development"
+        },
+        {
+          "old_word_id": 243,
+          "new_word_id": 243,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "expenses"
+        },
+        {
+          "old_word_id": 244,
+          "new_word_id": 244,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "and"
+        },
+        {
+          "old_word_id": 245,
+          "new_word_id": 245,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "W435"
+        },
+        {
+          "old_word_id": 246,
+          "new_word_id": 246,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "million"
+        },
+        {
+          "old_word_id": 247,
+          "new_word_id": 247,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "to"
+        },
+        {
+          "old_word_id": 248,
+          "new_word_id": 248,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "amortization"
+        },
+        {
+          "old_word_id": 249,
+          "new_word_id": 249,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "expenses"
+        },
+        {
+          "old_word_id": 250,
+          "new_word_id": 250,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "for"
+        },
+        {
+          "old_word_id": 251,
+          "new_word_id": 251,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "the"
+        },
+        {
+          "old_word_id": 252,
+          "new_word_id": 252,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "year"
+        },
+        {
+          "old_word_id": 253,
+          "new_word_id": 253,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "ended"
+        },
+        {
+          "old_word_id": 254,
+          "new_word_id": 254,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "December"
+        },
+        {
+          "old_word_id": 255,
+          "new_word_id": 255,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "31,"
+        },
+        {
+          "old_word_id": 256,
+          "new_word_id": 256,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "2024."
+        },
+        {
+          "old_word_id": 257,
+          "new_word_id": 257,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "As"
+        },
+        {
+          "old_word_id": 258,
+          "new_word_id": 258,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "a"
+        },
+        {
+          "old_word_id": 259,
+          "new_word_id": 259,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "result,"
+        },
+        {
+          "old_word_id": 260,
+          "new_word_id": 260,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "W765"
+        },
+        {
+          "old_word_id": 261,
+          "new_word_id": 261,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "million"
+        },
+        {
+          "old_word_id": 262,
+          "new_word_id": 262,
+          "old_line": 35,
+          "new_line": 35,
+          "segment_id": null,
+          "text": "remained"
+        }
+      ]
+    },
+    "text": "and the Company reclassified W1,950 million of the development costs to research and development expenses and W435 million to amortization expenses for the year ended December 31, 2024. As a result, W765 million remained",
+    "selection": {
+      "page": 3,
+      "rect": [
+        287.87938500914123,
+        369.940241450239,
+        336.6208681852921,
+        398.8804970860786
+      ],
+      "word_ids": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262
+      ]
+    },
+    "comment": "Development cost amounts do not agree with Note 6. Reclassification states as \\1,950m (should be \\ 1,905m) and remaining development cost as \\ 765m (should be \\ 810m)",
+    "comments": [
+      {
+        "comment_id": "c-f1b48252",
+        "author": "user",
+        "text": "Development cost amounts do not agree with Note 6. Reclassification states as \\1,950m (should be \\ 1,905m) and remaining development cost as \\ 765m (should be \\ 810m)",
+        "created_at": "2026-06-11T10:59:01.925103+00:00"
+      }
+    ],
+    "status": "open",
+    "created_at": "2026-06-11T10:59:01.925103+00:00",
+    "updated_at": "2026-06-11T11:01:38.177922+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-f2ca25ce",
+    "anchor_id": "a-62901049",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      78,
+      79,
+      80,
+      81,
+      82
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      29
+    ],
+    "new_lines": [
+      29
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        29
+      ],
+      "new_lines": [
+        29
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 78,
+          "new_word_id": 78,
+          "old_line": 29,
+          "new_line": 29,
+          "segment_id": null,
+          "text": "DEMO"
+        },
+        {
+          "old_word_id": 80,
+          "new_word_id": 80,
+          "old_line": 29,
+          "new_line": 29,
+          "segment_id": null,
+          "text": "Inc."
+        },
+        {
+          "old_word_id": 81,
+          "new_word_id": 81,
+          "old_line": 29,
+          "new_line": 29,
+          "segment_id": null,
+          "text": "(the"
+        },
+        {
+          "old_word_id": 82,
+          "new_word_id": 82,
+          "old_line": 29,
+          "new_line": 29,
+          "segment_id": null,
+          "text": "“Company”),"
+        }
+      ]
+    },
+    "text": "DEMO Korea, Inc. (the “Company”),",
+    "selection": {
+      "page": 3,
+      "rect": [
+        245.23058723000918,
+        213.05359247700332,
+        386.8855227106977,
+        216.09993517551277
+      ],
+      "word_ids": [
+        78,
+        79,
+        80,
+        81,
+        82
+      ]
+    },
+    "comment": "Compnay name should be consistent throughout the report. Use 'DEMO International, Inc.\"",
+    "comments": [
+      {
+        "comment_id": "c-44d1487d",
+        "author": "user",
+        "text": "Compnay name should be consistent throughout the report. Use 'DEMO International, Inc.\"",
+        "created_at": "2026-06-11T10:59:49.384312+00:00"
+      }
+    ],
+    "status": "open",
+    "created_at": "2026-06-11T10:59:49.384312+00:00",
+    "updated_at": "2026-06-11T11:01:38.244081+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-2d959c75",
+    "anchor_id": "a-27a39f44",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      94,
+      95,
+      96
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      29
+    ],
+    "new_lines": [
+      29
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        29
+      ],
+      "new_lines": [
+        29
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 95,
+          "new_word_id": 95,
+          "old_line": 29,
+          "new_line": 29,
+          "segment_id": null,
+          "text": "and"
+        }
+      ]
+    },
+    "text": "2023 and 2022,",
+    "selection": {
+      "page": 3,
+      "rect": [
+        208.67447484789602,
+        225.23896327104106,
+        268.83974314345727,
+        229.04689164417783
+      ],
+      "word_ids": [
+        94,
+        95,
+        96
+      ]
+    },
+    "comment": "Reporting periods in the audit opinion are states as December 31, 2023 and 2022. Correct to 2024 and 2023 to agree with the financial statements.",
+    "comments": [
+      {
+        "comment_id": "c-a4e91404",
+        "author": "user",
+        "text": "Reporting periods in the audit opinion are states as December 31, 2023 and 2022. Correct to 2024 and 2023 to agree with the financial statements.",
+        "created_at": "2026-06-11T11:00:35.434302+00:00"
+      }
+    ],
+    "status": "open",
+    "created_at": "2026-06-11T11:00:35.434302+00:00",
+    "updated_at": "2026-06-11T11:01:38.313277+00:00",
+    "floating": false
+  },
+  {
+    "review_id": "r-1f874bee",
+    "anchor_id": "a-365bd7b8",
+    "side": "old",
+    "anchor_run_id": "8ff85536755e",
+    "old_word_ids": [
+      1106,
+      1107,
+      1108,
+      1109,
+      1110,
+      1111,
+      1112,
+      1113,
+      1114,
+      1115,
+      1116,
+      1117,
+      1118,
+      1119,
+      1120,
+      1121,
+      1122,
+      1123,
+      1124,
+      1125,
+      1126,
+      1127,
+      1128,
+      1129,
+      1130,
+      1131,
+      1132,
+      1133,
+      1134
+    ],
+    "new_word_ids": [],
+    "segment_ids": [],
+    "change_ids": [],
+    "old_lines": [
+      68
+    ],
+    "new_lines": [
+      68
+    ],
+    "section_id": null,
+    "md_anchor": {
+      "source": "selection_equal",
+      "section_id": null,
+      "old_lines": [
+        68
+      ],
+      "new_lines": [
+        68
+      ],
+      "segment_ids": [],
+      "equal_refs": [
+        {
+          "old_word_id": 1106,
+          "new_word_id": 1138,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "We"
+        },
+        {
+          "old_word_id": 1108,
+          "new_word_id": 1140,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "with"
+        },
+        {
+          "old_word_id": 1109,
+          "new_word_id": 1141,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "those"
+        },
+        {
+          "old_word_id": 1110,
+          "new_word_id": 1142,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "charged"
+        },
+        {
+          "old_word_id": 1111,
+          "new_word_id": 1143,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "with"
+        },
+        {
+          "old_word_id": 1112,
+          "new_word_id": 1144,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "governance"
+        },
+        {
+          "old_word_id": 1114,
+          "new_word_id": 1155,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "the"
+        },
+        {
+          "old_word_id": 1115,
+          "new_word_id": 1156,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "audit"
+        },
+        {
+          "old_word_id": 1117,
+          "new_word_id": 1157,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "and"
+        },
+        {
+          "old_word_id": 1122,
+          "new_word_id": 1161,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "including"
+        },
+        {
+          "old_word_id": 1123,
+          "new_word_id": 1162,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "any"
+        },
+        {
+          "old_word_id": 1124,
+          "new_word_id": 1163,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "significant"
+        },
+        {
+          "old_word_id": 1125,
+          "new_word_id": 1164,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "deficiencies"
+        },
+        {
+          "old_word_id": 1126,
+          "new_word_id": 1165,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "in"
+        },
+        {
+          "old_word_id": 1127,
+          "new_word_id": 1166,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "internal"
+        },
+        {
+          "old_word_id": 1128,
+          "new_word_id": 1167,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "control"
+        },
+        {
+          "old_word_id": 1129,
+          "new_word_id": 1168,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "that"
+        },
+        {
+          "old_word_id": 1130,
+          "new_word_id": 1169,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "we"
+        },
+        {
+          "old_word_id": 1132,
+          "new_word_id": 1171,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "during"
+        },
+        {
+          "old_word_id": 1133,
+          "new_word_id": 1172,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "our"
+        },
+        {
+          "old_word_id": 1134,
+          "new_word_id": 1173,
+          "old_line": 68,
+          "new_line": 68,
+          "segment_id": null,
+          "text": "audit."
+        }
+      ]
+    },
+    "text": "We talked with those charged with governance about the audit plan and important things we found, including any significant deficiencies in internal control that we identified during our audit.",
+    "selection": {
+      "page": 4,
+      "rect": [
+        47.97989750152354,
+        596.4167814425496,
+        373.93856624203266,
+        612.410080609724
+      ],
+      "word_ids": [
+        1106,
+        1107,
+        1108,
+        1109,
+        1110,
+        1111,
+        1112,
+        1113,
+        1114,
+        1115,
+        1116,
+        1117,
+        1118,
+        1119,
+        1120,
+        1121,
+        1122,
+        1123,
+        1124,
+        1125,
+        1126,
+        1127,
+        1128,
+        1129,
+        1130,
+        1131,
+        1132,
+        1133,
+        1134
+      ]
+    },
+    "comment": "Please revise the informal wording (\"We tlaked with...\") to align with standard audit report language and professional tone.",
+    "comments": [
+      {
+        "comment_id": "c-7aee13a9",
+        "author": "user",
+        "text": "Please revise the informal wording (\"We tlaked with...\") to align with standard audit report language and professional tone.",
+        "created_at": "2026-06-11T11:01:24.382521+00:00"
+      }
+    ],
+    "status": "cleared",
+    "created_at": "2026-06-11T11:01:24.382521+00:00",
+    "updated_at": "2026-06-11T16:16:18.127960+00:00",
+    "floating": false
+  }
+]

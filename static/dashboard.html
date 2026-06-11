@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dashboard — Report Review Workspace</title>
 <style>
-:root{--blue:#2563eb;--ui-font:12px;--ui-font-sm:11px;--add:#059669;--del:#dc2626;--high:#dc2626;--medium:#d97706;--low:#059669}
+:root{--blue:#2563eb;--ui-font:12px;--ui-font-sm:11px;--ai-font:13px;--ai-label-font:11px;--add:#059669;--del:#dc2626;--high:#dc2626;--medium:#d97706;--low:#059669}
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827;font-size:var(--ui-font)}
 .sidebarRail{display:none;position:fixed;left:10px;top:8px;z-index:1600;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center;cursor:pointer}
@@ -37,6 +37,9 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .sessionListRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
 .sessionListRow .meta{color:#6b7280;font-size:11px;margin-bottom:4px}
 .sessionListRow .title{font-weight:700;color:#111827;line-height:1.35}
+.sessionRowActions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.sessionRowActions button{padding:4px 8px;font-size:11px;font-weight:700;background:#eef2ff;color:#3730a3;border-radius:6px}
+.sessionRowActions button.danger{background:#fef2f2;color:#b91c1c}
 #dashboardMain{flex:1;overflow:hidden;background:#f1f5f9;padding:48px 14px 12px;display:flex;flex-direction:column;min-height:0}
 .dashLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;flex:1;min-height:0;height:100%}
 .dashLeft,.dashRight{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
@@ -66,6 +69,8 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .riskCard .num{font-size:16px;font-weight:800;line-height:1.2;margin-top:4px;font-variant-numeric:tabular-nums;color:#111827}
 .changeStream{flex:1;min-height:0;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;flex-direction:column;overflow:hidden}
 .changeStream.show{display:flex}
+.changeStream .streamMain .streamMeta{margin-bottom:18px}
+.changeStream .streamSummary{margin-top:3px}
 .streamBody{flex:1;overflow:auto;min-height:0}
 .streamItem{display:flex;gap:10px;padding:8px 12px;border-bottom:1px solid #e5e7eb;background:#fff;align-items:flex-start;cursor:pointer}
 .streamItem:last-child{border-bottom:0}
@@ -76,8 +81,38 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .streamSummary{font-size:var(--ui-font);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}
 .addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
-.streamAi{flex:0 0 36%;min-width:0;font-size:10px;line-height:1.35;padding:6px 8px;background:#f5f3ff;border-left:3px solid #a78bfa;border-radius:6px;color:#4c1d95;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.streamAi.empty{color:#94a3b8;background:#f8fafc;border-color:#e5e7eb;font-style:italic;-webkit-line-clamp:1}
+.streamAi{flex:0 0 36%;min-width:0;font-size:var(--ai-font);line-height:1.45;padding:8px 10px;background:#f5f3ff;border-left:3px solid #a78bfa;border-radius:6px;color:#4c1d95;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.streamAi.empty{font-size:var(--ui-font-sm);color:#94a3b8;background:#f8fafc;border-color:#e5e7eb;font-style:italic;-webkit-line-clamp:1}
+.changeStream .streamAi{flex:0 0 40%;display:block;overflow:visible;-webkit-line-clamp:unset;max-height:none;white-space:normal;font-size:var(--ai-font)}
+.changeStream .streamAi.empty{-webkit-line-clamp:unset;font-size:var(--ui-font-sm)}
+.changeStream .streamItem{align-items:flex-start}
+.changeStream .streamAi .aiReason{background:transparent;border:0;padding:0;margin:0}
+.changeStream .streamAi .aiField{margin-top:8px}
+.changeStream .streamAi .aiField:first-of-type{margin-top:0}
+.changeStream .streamAi .aiLabel{display:block;font-size:var(--ai-label-font);font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#7c3aed;margin-bottom:3px}
+.changeStream .streamAi .aiValue{font-size:var(--ai-font);line-height:1.45;color:#4c1d95;white-space:normal}
+.changeModalAi{margin-top:10px;padding:10px;background:#f5f3ff;border-left:3px solid #a78bfa;border-radius:6px;color:#4c1d95;font-size:var(--ai-font);line-height:1.5}
+.changeModalAi.empty{font-size:var(--ui-font-sm);color:#94a3b8;background:#f8fafc;border-color:#e5e7eb;font-style:italic}
+.changeModalAi .aiField{margin-top:10px}
+.changeModalAi .aiLabel{display:block;font-size:var(--ai-label-font);font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#7c3aed;margin-bottom:4px}
+.changeModalAi .aiValue{font-size:var(--ai-font);white-space:normal;line-height:1.5}
+.reviewStream .streamAi{display:block;overflow:visible;-webkit-line-clamp:unset;max-height:none;white-space:normal;font-size:var(--ai-font);line-height:1.45;padding:8px 10px}
+.reviewStream .streamAi.empty{font-size:var(--ui-font-sm);-webkit-line-clamp:unset}
+.reviewStream .streamAi .aiReason{background:transparent;border:0;padding:0;margin:0}
+.reviewStream .streamAi .aiField{margin-top:8px}
+.reviewStream .streamAi .aiField:first-of-type{margin-top:0}
+.reviewStream .streamAi .aiLabel{display:block;font-size:var(--ai-label-font);font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#7c3aed;margin-bottom:3px}
+.reviewStream .streamAi .aiValue{font-size:var(--ai-font);line-height:1.45;color:#4c1d95;white-space:normal}
+.reviewModalAi{margin-top:10px;padding:10px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:var(--ai-font);line-height:1.5}
+.reviewModalAi.empty{font-size:var(--ui-font-sm);color:#94a3b8;background:#f8fafc;border-color:#e5e7eb;font-style:italic}
+.reviewModalAi .aiField{margin-top:10px}
+.reviewModalAi .aiLabel{display:block;font-size:var(--ai-label-font);font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#7c3aed;margin-bottom:4px}
+.reviewModalAi .aiValue{white-space:normal;line-height:1.5}
+.riskBadge{display:inline-flex;align-items:center;gap:6px;margin-bottom:4px;font-weight:800}
+.riskDot{width:9px;height:9px;border-radius:999px;display:inline-block}
+.riskDot.high{background:#cf222e}
+.riskDot.medium{background:#f59e0b}
+.riskDot.low{background:#16a34a}
 .reviewPanelBody{display:flex;flex-direction:column;flex:1;min-height:0;gap:10px}
 .reportPicker{position:relative;flex:none}
 .reportPickerBtn{width:100%;text-align:left;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;cursor:pointer;display:block;font:inherit}
@@ -102,9 +137,12 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .originFilter.forward{color:#7c3aed}
 .originFilter.active.forward{color:#6d28d9;border-color:#ddd6fe;background:#f5f3ff}
 .originFilter.active.all{color:var(--blue);border-color:#bfdbfe;background:#eef2ff}
-.rvBadge{font-size:9px;font-weight:800;text-transform:lowercase;padding:2px 8px;border-radius:999px;line-height:1.35;flex:none}
+.rvBadge{font-size:9px;font-weight:800;text-transform:lowercase;padding:2px 8px;border-radius:999px;line-height:1.35;flex:none;display:inline-block}
 .rvBadge.new{color:#be123c;background:#ffe4e6}
 .rvBadge.forward{color:#6d28d9;background:#ede9fe}
+.rvBadge.open{color:#1d4ed8;background:#dbeafe}
+.rvBadge.cleared{color:#64748b;background:#f1f5f9}
+.streamMeta .rvBadge{margin-right:2px}
 .reviewStat{border:1px solid #f1f5f9;border-radius:6px;padding:6px 4px;text-align:center;background:#fafbfc;cursor:pointer;font:inherit}
 .reviewStat:hover{border-color:#cbd5e1;background:#fff}
 .reviewStat.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.1);background:#fff}
@@ -112,6 +150,8 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .reviewStat .l{font-size:10px;font-weight:700;color:#64748b;margin-top:4px}
 .reviewStream{flex:1;min-width:0;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;overflow:hidden}
 .reviewStream.show{display:flex;flex-direction:column}
+.reviewStream .streamMain .streamMeta{margin-bottom:18px}
+.reviewStream .streamSummary{margin-top:3px}
 .reviewStream .streamItem.cleared{opacity:.52;background:#fafbfc}
 .reviewStream .streamItem.cleared .streamMeta{color:#9ca3af}
 .reviewStream .streamItem.cleared .streamSummary{color:#6b7280}
@@ -125,16 +165,21 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 .reviewModalBox{width:min(720px,92vw);max-height:80vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
 .changeModalHead,.reviewModalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .changeModalBody,.reviewModalBody{font-size:var(--ui-font);line-height:1.5;color:#111827}
+.reviewModalBody .streamMeta{margin-bottom:18px}
+.reviewModalBody>p{margin-top:6px}
 .changeModalItem{padding:10px 0;border-bottom:1px solid #e5e7eb}
+.changeModalItem .streamMeta{margin-bottom:18px}
+.changeModalItem .changeModalDiff{margin-top:3px}
 .changeModalItem:last-child{border-bottom:0}
 .changeSection{font-size:10px;font-weight:800;color:#6b7280;margin-bottom:2px;line-height:1.35}
 .changeModalDiff{line-height:1.45}
-.streamMeta .indexLabel{color:#111827;font-weight:700}
-.streamMeta .indexTitle{color:#374151;font-weight:600}
+.streamMeta .changeArea{color:#374151;font-weight:600}
+.streamMeta .changeArea .indexLabel{color:#111827;font-weight:700}
+.streamMeta .changeArea .indexTitle{color:#374151;font-weight:600}
 .empty{padding:20px;color:#6b7280;line-height:1.45}
 .fmBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.36);z-index:3000;display:none;align-items:center;justify-content:center}
 .fmBox{width:min(1040px,92vw);max-height:78vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:12px}
-.fmHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.fmHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}.fmHeadTitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fmHeadTitle strong{font-size:var(--ui-font)}.fmViewTabs{display:flex;gap:6px;flex-wrap:wrap}.fmViewTabs button{padding:4px 8px;font-size:var(--ui-font-sm)}.fmViewTabs button.active{background:#eef2ff;color:#1d4ed8}
 .fmTable{width:100%;border-collapse:collapse;font-size:var(--ui-font)}
 .fmTable th,.fmTable td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}
 .fmTable th{font-size:var(--ui-font-sm);color:#6b7280}
@@ -238,17 +283,19 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     <div class="reviewModalBody" id="reviewModalBody"></div>
   </div>
 </div>
-<div id="fmDialog" class="fmBackdrop"><div class="fmBox"><div class="fmHead"><strong>File Manager</strong><button type="button" class="secondary" id="fmCloseBtn">Close</button></div><div id="fmTableWrap"></div></div></div>
+<div id="fmDialog" class="fmBackdrop"><div class="fmBox"><div class="fmHead"><div id="fmDialogTitle" class="fmHeadTitle"><strong>Files</strong></div><button type="button" class="secondary" id="fmCloseBtn">Close</button></div><div id="fmTableWrap"></div></div></div>
 <div id="toast"></div>
+<script src="/static/shared.js?v=20260612-1"></script>
 <script>
 (function(){
+  const {FileManager, updateFilesBtnLabel, ensureDefaultWorkspace}=PdfShared;
   const $=(s)=>document.querySelector(s);
-  let DOC_ID=null, RUN_ID=null, SNAPSHOT_ID=null, WORKSPACE_TITLE='Workspace';
+  let DOC_ID=null, RUN_ID=null, SNAPSHOT_ID=null, ORIGIN_RUN_ID=null, WORKSPACE_TITLE='Workspace';
   let WORKSPACE_RUNS=[];
   let WORKSPACE_RENAME_INPUT=null, WORKSPACE_RENAME_ORIGINAL=null;
   let SESSIONS=[], DATA=null, REVIEWS=[], AI_ASSESSMENT={items:[]}, CHANGE_AI_ASSESSMENT={items:[]};
   let CHANGE_BUCKETS={high:[],medium:[],low:[],na:[]}, REPORTS={};
-  let activeSessionId=null, activeRisk=null, activeReportSide='new';
+  let activeSessionId=null, activeRisk=null, activeReportSide='old';
   let activeStatusFilter='total', activeOriginNew=false, activeOriginForward=false;
 
   function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)}
@@ -269,16 +316,37 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   function activeSession(){return SESSIONS.find(s=>s.id===activeSessionId)||null}
   function activeRunMeta(){
     const session=activeSession();
-    return session?.run||runMetaById(session?.run_id)||{};
+    if(session?.run?.run_id)return session.run;
+    const runId=session?.run_id||RUN_ID;
+    const fromMeta=runMetaById(runId);
+    if(fromMeta.run_id)return fromMeta;
+    const sourceId=session?.snapshot?.source_run_id||session?.snapshot?.run_id;
+    return runMetaById(sourceId)||{};
   }
-  function reportFilenameForSide(side,runMeta){
-    if(side==='new')return publicReportFilename(runMeta.filename,publicReportFilename(DATA?.new_filename||DATA?.filename,'report.pdf'));
-    const prev=runMeta.previous_run_id?runMetaById(runMeta.previous_run_id):null;
-    return publicReportFilename(prev?.filename,publicReportFilename(DATA?.old_filename,'previous.pdf'));
+  function reportFilenameForSide(side){
+    const session=activeSession();
+    const runMeta=activeRunMeta();
+    const snap=session?.snapshot||{};
+    if(side==='new'){
+      return publicReportFilename(
+        snap.filename,
+        publicReportFilename(runMeta.filename, publicReportFilename(DATA?.new_filename||DATA?.filename,'report.pdf'))
+      );
+    }
+    const prevRun=runMeta.previous_run_id?runMetaById(runMeta.previous_run_id):null;
+    let oldName=prevRun?.filename||'';
+    if(!oldName||INTERNAL_PDF_NAMES.has(String(oldName).toLowerCase())){
+      const label=String(session?.label||'');
+      if(label.includes('→'))oldName=label.split('→')[0].trim();
+    }
+    return publicReportFilename(oldName,'previous.pdf');
   }
   function isDiff(){return DATA?.mode==='diff'}
   function snapshotApiBase(){return `/api/documents/${DOC_ID}/snapshots/${SNAPSHOT_ID}`}
   function viewerLink(extra={}){const q=new URLSearchParams();if(DOC_ID)q.set('doc',DOC_ID);if(RUN_ID)q.set('run',RUN_ID);Object.entries(extra).forEach(([k,v])=>{if(v!=null&&v!=='')q.set(k,String(v))});return '/?'+q.toString()}
+  // When the user arrived from the viewer's active run, return to that exact run so the
+  // dashboard round-trip does not reset it. Falls back to the active session's run.
+  function backToViewerLink(){const q=new URLSearchParams();if(DOC_ID)q.set('doc',DOC_ID);const run=ORIGIN_RUN_ID||RUN_ID;if(run)q.set('run',run);return '/?'+q.toString()}
 
   function normalizeChangeVerdict(v){
     const raw=String(v||'').toLowerCase().trim();
@@ -287,12 +355,56 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     if(raw==='high'||raw==='medium'||raw==='low')return raw;
     return 'low';
   }
-  function isCleared(rv){return rv.status==='cleared'||rv.status==='resolved'||rv.status==='closed'}
+  // Human workflow only — never infer from AI assessment verdict/decision.
+  function isHumanCleared(rv){return rv.status==='cleared'||rv.status==='resolved'}
   function reviewBelongsToSide(rv,side){return side==='old'?((rv.old_word_ids||[]).length>0||rv.side==='old'):((rv.new_word_ids||[]).length>0||rv.side==='new')}
   function reviewComments(rv){return Array.isArray(rv.comments)?rv.comments:[]}
   function reviewText(rv){const cs=reviewComments(rv);return cs.length?cs[cs.length-1].text:(rv.comment||'(No comment)')}
   function changeAiItemForId(id){return (CHANGE_AI_ASSESSMENT.items||[]).find(x=>Number(x.change_id)===Number(id))}
   function aiItemForReview(id){return (AI_ASSESSMENT.items||[]).find(x=>x.review_id===id)}
+
+  function verdictLabel(value){return String(value||'unclear').replace(/_/g,' ').toUpperCase()}
+  // Review verdict -> colored dot class + display text, mirroring the viewer (index.html).
+  function reviewVerdictClass(value){
+    const raw=String(value||'').toLowerCase().trim();
+    if(raw==='cleared')return 'low';      // green
+    if(raw==='not_cleared')return 'high'; // red
+    return 'medium';                       // yellow: partial / unclear / anything else
+  }
+  function reviewVerdictText(value){
+    const raw=String(value||'').toLowerCase().trim();
+    const map={cleared:'Cleared',not_cleared:'Not cleared',partial:'Partial',unclear:'Unclear'};
+    if(map[raw])return map[raw];
+    const s=verdictLabel(value).toLowerCase();
+    return s.charAt(0).toUpperCase()+s.slice(1);
+  }
+
+  function renderChangeAiBlock(aiItem,wrapClass){
+    const empty=`<div class="${wrapClass} empty">No AI</div>`;
+    if(!aiItem||!(aiItem.reasoning||aiItem.verdict||aiItem.recommended_comment))return empty;
+    const assessed=!!(aiItem.status==='done'&&String(aiItem.verdict||'').trim());
+    if(!assessed&&!String(aiItem.reasoning||'').trim()&&!String(aiItem.recommended_comment||'').trim())return empty;
+    const verdict=normalizeChangeVerdict(aiItem.verdict);
+    const reason=String(aiItem.reasoning||'').trim();
+    const rec=verdict==='low'?'':String(aiItem.recommended_comment||'').trim();
+    const parts=[];
+    if(reason)parts.push(`<div class="aiField"><span class="aiLabel">Reasoning</span><div class="aiValue">${esc(reason)}</div></div>`);
+    if(rec)parts.push(`<div class="aiField"><span class="aiLabel">Suggested review</span><div class="aiValue">${esc(rec)}</div></div>`);
+    if(!parts.length)return empty;
+    return `<div class="${wrapClass}"><div class="aiReason">${parts.join('')}</div></div>`;
+  }
+
+  function renderReviewAiBlock(aiItem,wrapClass){
+    const empty=`<div class="${wrapClass} empty">No AI</div>`;
+    if(!aiItem||!(aiItem.reasoning||aiItem.verdict))return empty;
+    const assessed=!!(aiItem.status==='done'&&String(aiItem.verdict||'').trim());
+    if(!assessed&&!String(aiItem.reasoning||'').trim())return empty;
+    const aiVerdict=aiItem.verdict||'unclear';
+    const reason=String(aiItem.reasoning||'').trim();
+    const parts=[`<div class="aiField"><span class="aiLabel">Verdict</span><div class="aiValue"><span class="riskBadge"><span class="riskDot ${esc(reviewVerdictClass(aiVerdict))}"></span>${esc(reviewVerdictText(aiVerdict))}</span></div></div>`];
+    if(reason)parts.push(`<div class="aiField"><span class="aiLabel">Reasoning</span><div class="aiValue">${esc(reason)}</div></div>`);
+    return `<div class="${wrapClass}"><div class="aiReason">${parts.join('')}</div></div>`;
+  }
 
   function updateWorkspaceTitle(){const el=$('#workspaceTitle');if(el)el.textContent=WORKSPACE_TITLE||'Workspace'}
   function syncUrl(){
@@ -309,10 +421,94 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     if(it.type==='note')return 'NOTE';
     return String(it.type||'SECTION').toUpperCase();
   }
+  const SKIP_INDEX_TYPES=new Set(['cover','contents','toc']);
+  function sectionEntriesFromData(){
+    const sm=DATA?.section_map;
+    if(!sm)return [];
+    const raw=sm.sections||sm;
+    if(Array.isArray(raw))return raw;
+    return Object.entries(raw||{}).map(([section_id,meta])=>({section_id,...meta}));
+  }
+  function sectionEntryById(sectionId){
+    if(!sectionId)return null;
+    return sectionEntriesFromData().find(s=>s.section_id===sectionId)||null;
+  }
+  function sectionForReviewByNearbyChange(rv,side){
+    const page=(side==='old'?rv.old_page:rv.new_page)||rv.page||rv.selection?.page;
+    const rect=rv.selection?.rect;
+    if(!page||!rect||!DATA?.changes?.length)return null;
+    const midY=(rect[1]+rect[3])/2;
+    let best=null,bestDist=Infinity;
+    for(const ch of DATA.changes){
+      const chPage=side==='old'?ch.old_page:ch.new_page;
+      if(chPage!==page)continue;
+      const anchor=side==='old'?ch.old_anchor:ch.new_anchor;
+      if(!anchor?.bbox)continue;
+      const anchorMid=(anchor.bbox[1]+anchor.bbox[3])/2;
+      const dist=Math.abs(midY-anchorMid);
+      if(dist<bestDist){bestDist=dist;best=ch}
+    }
+    return best?sectionForChange(best):null;
+  }
+  function sectionForReview(rv,side){
+    const sectionId=rv.section_id||rv.md_anchor?.section_id;
+    const byId=sectionEntryById(sectionId);
+    if(byId)return byId;
+    const lines=side==='old'?(rv.old_lines||rv.md_anchor?.old_lines||[]):(rv.new_lines||rv.md_anchor?.new_lines||[]);
+    const seg=Array.isArray(lines)&&lines.length?lines[0]:null;
+    const page=(side==='old'?rv.old_page:rv.new_page)||rv.page||rv.selection?.page;
+    if(seg!=null){
+      const bySeg=sectionForChange({seg_start:seg,new_page:page,old_page:page});
+      if(bySeg)return bySeg;
+    }
+    const byChange=sectionForReviewByNearbyChange(rv,side);
+    if(byChange)return byChange;
+    return sectionForChange({seg_start:null,new_page:page,old_page:page});
+  }
+  function indexHeadingForReview(rv,side){
+    const section=sectionForReview(rv,side);
+    if(section){
+      const {label,title}=sectionLabelsForMeta(section);
+      return {label,title};
+    }
+    const page=(side==='old'?rv.old_page:rv.new_page)||rv.page||rv.selection?.page;
+    const it=indexItemForPage(DATA?.index_items||[],page,side);
+    if(!it)return {label:'',title:''};
+    const label=it.type==='note'&&it.note_no?`Note ${it.note_no}`:(it.label||it.title||indexTypeLabel(it));
+    const title=it.title||'';
+    return {label,title};
+  }
+  function sectionForChange(c){
+    const seg=c.seg_start??c.seg_end;
+    const page=c.new_page||c.old_page;
+    const sections=sectionEntriesFromData();
+    if(seg!=null&&sections.length){
+      const hit=sections.find(s=>s.start_line!=null&&s.end_line!=null&&seg>=s.start_line&&seg<=s.end_line);
+      if(hit)return hit;
+    }
+    if(page!=null&&sections.length){
+      const hit=sections.find(s=>s.page_start!=null&&s.page_end!=null&&page>=s.page_start&&page<=s.page_end);
+      if(hit)return hit;
+    }
+    return null;
+  }
+  function sectionLabelsForMeta(section){
+    if(!section)return {label:'',title:''};
+    const title=String(section.title||section.label||'').trim();
+    if(section.type==='note'&&section.note_no){
+      return {label:`Note ${section.note_no}`,title};
+    }
+    if(section.type==='fs'){
+      return {label:'FINANCIAL STATEMENT',title:title||'Financial Statement'};
+    }
+    const type=indexTypeLabel(section);
+    return {label:type,title:title||type};
+  }
   function indexItemForPage(indexItems,page,side){
     if(!page||!indexItems?.length)return null;
     let best=null,bestPage=-1;
     for(const it of indexItems){
+      if(SKIP_INDEX_TYPES.has(String(it.type||'').toLowerCase()))continue;
       const p=side==='old'?(it.old_page??it.page):it.page;
       if(p==null)continue;
       if(p<=page&&p>=bestPage){best=it;bestPage=p}
@@ -320,15 +516,25 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     return best;
   }
   function indexHeadingForChange(c){
+    const section=sectionForChange(c);
+    if(section){
+      const {label,title}=sectionLabelsForMeta(section);
+      return {label,title,indexItem:null,section};
+    }
     const page=c.new_page||c.old_page;
     const it=indexItemForPage(DATA?.index_items||[],page,'new');
-    const label=it?(it.label||it.title||indexTypeLabel(it)):('');
-    const title=it?(it.title||it.label||''):('');
+    const label=it?(it.type==='note'&&it.note_no?`Note ${it.note_no}`:(it.label||it.title||indexTypeLabel(it))):('');
+    const title=it?(it.title||''):('');
     return {label,title,indexItem:it};
   }
   function changeSectionFor(c){
     const page=c.new_page||c.old_page||'-';
-    const {label,title,indexItem}=indexHeadingForChange(c);
+    const {label,title,indexItem,section}=indexHeadingForChange(c);
+    if(section){
+      const head=title||label||'Change';
+      const type=section.type==='note'&&section.note_no?`Note ${section.note_no}`:indexTypeLabel(section);
+      return `${type} · p.${page} · ${head}`;
+    }
     const type=indexTypeLabel(indexItem);
     const head=title||label||'Change';
     return `${type} · p.${page} · ${head}`;
@@ -340,10 +546,18 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     return parts.join(' ')||'(empty)';
   }
   function indexHeadingHtml(c){
-    const {label,title}=indexHeadingForChange(c);
-    if(!label)return '';
-    if(!title)return '<span class="indexLabel">'+esc(label)+'</span>';
+    const raw=c.raw||c;
+    const {label,title}=indexHeadingForChange(raw);
+    if(!label&&!title)return '';
+    if(!title||label===title)return '<span class="indexLabel">'+esc(label||title)+'</span>';
     return '<span class="indexLabel">'+esc(label)+'</span> · <span class="indexTitle">'+esc(title)+'</span>';
+  }
+  function changeAreaMetaHtml(c){
+    const head=indexHeadingHtml(c);
+    if(head)return '<span class="changeArea">'+head+'</span>';
+    const section=c.section||(c.raw?changeSectionFor(c.raw):'');
+    if(section)return '<span class="changeArea">'+esc(section)+'</span>';
+    return '';
   }
 
   function buildChangeViewModels(){
@@ -371,16 +585,15 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   function buildReviewViewModels(side){
     return (REVIEWS||[]).filter(rv=>reviewBelongsToSide(rv,side)).map(rv=>{
       const ai=aiItemForReview(rv.review_id);
-      const page=(side==='old'?rv.old_page:rv.new_page)||rv.page||(side==='old'?rv.old_anchor?.page:rv.new_anchor?.page);
-      const it=indexItemForPage(DATA?.index_items||[],page,side);
+      const {label,title}=indexHeadingForReview(rv,side);
       return {
         id:rv.review_id,
         text:reviewText(rv),
-        status:isCleared(rv)?'cleared':'open',
+        status:isHumanCleared(rv)?'cleared':'open',
         origin:rv.copied_from_review_id?'forward':'new',
-        ai:ai&&(ai.reasoning||ai.verdict)?String(ai.reasoning||ai.verdict):null,
-        indexLabel:it?(it.label||it.title||''):'',
-        indexTitle:it?(it.title||it.label||''):'',
+        aiItem:ai||null,
+        indexLabel:label,
+        indexTitle:title,
         raw:rv
       };
     });
@@ -390,10 +603,16 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     return {total:all,open:all.filter(r=>r.status==='open'),cleared:all.filter(r=>r.status==='cleared')};
   }
 
+  function latestSessionId(){
+    if(!SESSIONS.length)return null;
+    const sorted=[...SESSIONS].sort((a,b)=>String(b.snapshot?.created_at||'').localeCompare(String(a.snapshot?.created_at||'')));
+    return sorted[0]?.id||SESSIONS[0].id;
+  }
+
   function buildSessionsFromSnapshots(snapshots,runs){
     const byId=new Map((runs||[]).map(r=>[r.run_id,r]));
     return [...(snapshots||[])].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).map(snap=>{
-      const run=byId.get(snap.run_id)||{};
+      const run=byId.get(snap.run_id)||byId.get(snap.source_run_id)||{};
       const prev=run.previous_run_id?byId.get(run.previous_run_id):null;
       const fn=publicReportFilename(snap.filename,run.filename||'report.pdf');
       const compared=!!(snap.has_diff||snap.mode==='diff');
@@ -421,13 +640,14 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   function rebuildReports(){
     if(!DATA){REPORTS={};return}
     const runMeta=activeRunMeta();
-    const newFile=reportFilenameForSide('new',runMeta);
+    const newFile=reportFilenameForSide('new');
     if(isDiff()){
-      const oldFile=reportFilenameForSide('old',runMeta);
+      const oldFile=reportFilenameForSide('old');
       REPORTS={
         old:{side:'old',tag:'Previous',name:oldFile,file:oldFile,pages:DATA.old_page_count||0,modified:formatDate(runMetaById(runMeta.previous_run_id).created_at||runMeta.created_at)},
         new:{side:'new',tag:'Current',name:newFile,file:newFile,pages:DATA.new_page_count||DATA.page_count||0,modified:formatDate(runMeta.updated_at||runMeta.created_at)}
       };
+      if(!REPORTS[activeReportSide])activeReportSide='old';
     }else{
       REPORTS={
         new:{side:'new',tag:'Current',name:newFile,file:newFile,pages:DATA.new_page_count||DATA.page_count||0,modified:formatDate(runMeta.created_at)}
@@ -460,6 +680,7 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
       session.del=DATA?.summary?.deleted||0;
       buildChangeViewModels();
       rebuildReports();
+      if(isDiff()&&REPORTS.old)activeReportSide='old';
       activeSessionId=snapshotId;
       activeStatusFilter='total';
       activeOriginNew=false;
@@ -471,7 +692,7 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     }
   }
 
-  async function openWorkspace(docId,snapshotId,legacyRunId){
+  async function openWorkspace(docId,snapshotId){
     DOC_ID=docId;
     SNAPSHOT_ID=null;
     RUN_ID=null;
@@ -481,13 +702,9 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     WORKSPACE_TITLE=meta.title||'Workspace';
     WORKSPACE_RUNS=meta.runs||[];
     updateWorkspaceTitle();
+    updateFilesBtnLabel(DOC_ID);
     SESSIONS=buildSessionsFromSnapshots(meta.snapshots||[],WORKSPACE_RUNS);
-    let pick=snapshotId||null;
-    if(!pick&&legacyRunId){
-      const match=SESSIONS.find(s=>s.run_id===legacyRunId);
-      if(match)pick=match.id;
-    }
-    if(!pick&&SESSIONS.length)pick=SESSIONS[0].id;
+    const pick=snapshotId||latestSessionId();
     renderSessionList();
     if(pick)await loadSnapshotData(pick);
     else renderEmptyDashboard();
@@ -526,11 +743,39 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     if(!SESSIONS.length){pane.innerHTML='<div class="empty">'+esc(sessionEmptyMessage())+'</div>';return}
     pane.innerHTML=SESSIONS.map(s=>{
       const active=s.id===activeSessionId?' active':'';
-      return `<div class="sessionListRow${active}" data-session-id="${escAttr(s.id)}"><div class="meta">${esc(s.updated)}</div><div class="title">${esc(s.label)}</div></div>`;
+      return `<div class="sessionListRow${active}" data-session-id="${escAttr(s.id)}"><div class="meta">${esc(s.updated)}</div><div class="title">${esc(s.label)}</div><div class="sessionRowActions"><button type="button" data-act="rename" data-id="${escAttr(s.id)}">Rename</button><button type="button" class="danger" data-act="delete" data-id="${escAttr(s.id)}">Delete</button></div></div>`;
     }).join('');
     pane.querySelectorAll('.sessionListRow').forEach(row=>{
-      row.addEventListener('click',()=>loadSnapshotData(row.dataset.sessionId));
+      row.addEventListener('click',e=>{if(e.target.closest('[data-act]'))return;loadSnapshotData(row.dataset.sessionId)});
     });
+    pane.querySelectorAll('[data-act]').forEach(btn=>{
+      btn.addEventListener('click',e=>{e.stopPropagation();const id=btn.dataset.id;if(btn.dataset.act==='rename')renameSession(id);else deleteSession(id)});
+    });
+  }
+
+  async function renameSession(id){
+    if(!DOC_ID)return;
+    const next=window.prompt('Rename snapshot');
+    if(next===null)return;
+    try{
+      const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:next.trim()})});
+      const data=await res.json();
+      if(!res.ok||data.error){toast(data.error||'Rename failed');return}
+      await openWorkspace(DOC_ID,id);
+      toast('Snapshot renamed');
+    }catch(e){toast('Rename failed')}
+  }
+  async function deleteSession(id){
+    if(!DOC_ID)return;
+    if(!window.confirm('Delete this snapshot?'))return;
+    try{
+      const res=await fetch(`/api/documents/${DOC_ID}/snapshots/${id}`,{method:'DELETE'});
+      const data=await res.json();
+      if(!res.ok||data.error){toast(data.error||'Delete failed');return}
+      const keep=(activeSessionId&&activeSessionId!==id)?activeSessionId:null;
+      await openWorkspace(DOC_ID,keep);
+      toast('Snapshot deleted');
+    }catch(e){toast('Delete failed')}
   }
 
   function selectSessionUi(id){
@@ -566,13 +811,15 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   }
 
   function changeItemHtml(c,compact){
-    const ai=c.ai?`<div class="streamAi">${esc(trim(c.ai,200))}</div>`:`<div class="streamAi empty">No AI</div>`;
+    const ai=compact?renderChangeAiBlock(changeAiItemForId(c.id),'streamAi'):'';
     const summary=`<div class="streamSummary">${changeSummaryHtml(c)}</div>`;
-    const head=indexHeadingHtml(c);
-    return `<div class="streamItem" data-change-id="${c.id}"><div class="streamMain"><div class="streamMeta">#${c.id}${head?' · '+head:''}</div>${summary}</div>${compact?ai:''}</div>`;
+    const area=changeAreaMetaHtml(c);
+    return `<div class="streamItem" data-change-id="${c.id}"><div class="streamMain"><div class="streamMeta">#${c.id}${area?' · '+area:''}</div>${summary}</div>${ai}</div>`;
   }
   function changeModalItemHtml(c){
-    return `<div class="changeModalItem"><div class="changeSection">${esc(c.section||'')}</div><div class="streamMeta">#${c.id}${indexHeadingHtml(c)?' · '+indexHeadingHtml(c):''}</div><div class="changeModalDiff">${changeSummaryHtml(c)}</div><div style="margin-top:8px"><a href="${viewerLink({tab:'diff',change:c.id})}">Open in viewer</a></div></div>`;
+    const aiItem=changeAiItemForId(c.id);
+    const area=changeAreaMetaHtml(c);
+    return `<div class="changeModalItem"><div class="streamMeta">#${c.id}${area?' · '+area:''}</div><div class="changeModalDiff">${changeSummaryHtml(c)}</div>${renderChangeAiBlock(aiItem,'changeModalAi')}<div style="margin-top:8px"><a href="${viewerLink({tab:'diff',change:c.id})}">Open in viewer</a></div></div>`;
   }
 
   function renderChangeStream(){
@@ -631,8 +878,15 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   }
 
   function reviewIndexHeadingHtml(r){
-    if(!r.indexLabel&&!r.indexTitle)return '';
-    if(!r.indexTitle)return '<span class="indexLabel">'+esc(r.indexLabel)+'</span>';
+    if(!r.indexLabel&&!r.indexTitle){
+      const side=activeReportSide;
+      const rv=r.raw||r;
+      const {label,title}=indexHeadingForReview(rv,side);
+      if(!label&&!title)return '';
+      if(!title||label===title)return '<span class="indexLabel">'+esc(label||title)+'</span>';
+      return '<span class="indexLabel">'+esc(label)+'</span> · <span class="indexTitle">'+esc(title)+'</span>';
+    }
+    if(!r.indexTitle||r.indexLabel===r.indexTitle)return '<span class="indexLabel">'+esc(r.indexLabel||r.indexTitle)+'</span>';
     return '<span class="indexLabel">'+esc(r.indexLabel)+'</span> · <span class="indexTitle">'+esc(r.indexTitle)+'</span>';
   }
   function reviewOriginBadge(r){
@@ -640,9 +894,23 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     const label=r.origin==='forward'?'forward':'new';
     return `<span class="rvBadge ${label}">${label}</span>`;
   }
-  function reviewMetaHtml(r){
+  function reviewStatusBadge(r){
+    const label=r.status==='cleared'?'cleared':'open';
+    return `<span class="rvBadge ${label}">${label}</span>`;
+  }
+  function reviewAreaMetaHtml(r){
     const head=reviewIndexHeadingHtml(r);
-    return `<span>${esc(r.status)}</span>${head?'<span class="metaSep">·</span>'+head:''}${reviewOriginBadge(r)}`;
+    if(!head)return '';
+    return '<span class="changeArea">'+head+'</span>';
+  }
+  function reviewMetaHtml(r){
+    const parts=[];
+    const origin=reviewOriginBadge(r);
+    if(origin)parts.push(origin);
+    parts.push(reviewStatusBadge(r));
+    const area=reviewAreaMetaHtml(r);
+    if(area)parts.push('<span class="metaSep">·</span>'+area);
+    return parts.join('');
   }
 
   function filterReviewsByOrigin(items){
@@ -677,7 +945,7 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     const items=filterReviewsByOrigin(baseItems);
     if(!items.length){body.innerHTML='<div style="padding:12px;color:#94a3b8">No comments match.</div>';return}
     body.innerHTML=items.map(r=>{
-      const ai=r.ai?`<div class="streamAi">${esc(trim(r.ai,200))}</div>`:`<div class="streamAi empty">No AI</div>`;
+      const ai=renderReviewAiBlock(r.aiItem||aiItemForReview(r.id),'streamAi');
       const clearedCls=r.status==='cleared'?' cleared':'';
       return `<div class="streamItem${clearedCls}" data-review-id="${escAttr(r.id)}"><div class="streamMain"><div class="streamMeta">${reviewMetaHtml(r)}</div><div class="streamSummary">${esc(trim(r.text))}</div></div>${ai}</div>`;
     }).join('');
@@ -691,9 +959,10 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
 
   function openReviewModal(r){
     $('#reviewModalTitle').textContent='Comment';
+    const aiItem=r.aiItem||aiItemForReview(r.id);
     $('#reviewModalBody').innerHTML=
       `<div class="streamMeta">${reviewMetaHtml(r)}</div><p>${esc(r.text)}</p>`+
-      (r.ai?`<div style="margin-top:8px;padding:8px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px"><strong>AI</strong><br>${esc(r.ai)}</div>`:'')+
+      renderReviewAiBlock(aiItem,'reviewModalAi')+
       `<div style="margin-top:8px"><a href="${viewerLink({tab:'review',review:r.id})}">Open in viewer</a></div>`;
     $('#reviewDetailModal').classList.add('open');
   }
@@ -732,40 +1001,26 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finishWorkspaceRename(true)}else if(e.key==='Escape'){e.preventDefault();finishWorkspaceRename(false)}});
   }
 
-  async function renderFileManager(){
-    const wrap=$('#fmTableWrap');
-    wrap.innerHTML='<div class="empty">Loading files...</div>';
-    try{
-      const res=await fetch('/api/file-manager');
-      const data=await res.json();
-      const items=data.items||[];
-      window.__fmItems=items;
-      if(!items.length){wrap.innerHTML='<div class="empty">No files in manager.</div>';return}
-      wrap.innerHTML=`<table class="fmTable"><thead><tr><th>Name</th><th>Updated</th><th>Runs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${items.map(item=>{
-        const name=esc(item.latest_filename||item.name||'report.pdf');
-        const date=esc(formatDate(item.updated_at||item.created_at));
-        const status=esc(item.latest_status||'-');
-        const ws=escAttr(item.workspace_id||'');const run=escAttr(item.latest_run_id||'');
-        return `<tr><td>${name}</td><td>${date}</td><td>${item.run_count||0}</td><td>${status}</td><td class="fmActions"><button type="button" data-fm-open="${ws}" data-fm-run="${run}">Open</button></td></tr>`;
-      }).join('')}</tbody></table>`;
-      wrap.querySelectorAll('[data-fm-open]').forEach(btn=>{
-        btn.addEventListener('click',async()=>{
-          closeFileManager();
-          try{await openWorkspace(btn.dataset.fmOpen,null)}catch(e){toast('Failed to open workspace')}
-        });
-      });
-    }catch(e){wrap.innerHTML='<div class="empty">Failed to load file manager.</div>'}
-  }
-  function openFileManager(){$('#fmDialog').style.display='flex';renderFileManager()}
-  function closeFileManager(){$('#fmDialog').style.display='none'}
+  FileManager.init({
+    getCtx:()=>({docId:DOC_ID,workspaceTitle:WORKSPACE_TITLE}),
+    onOpenWorkspace:async docId=>{FileManager.close();try{await openWorkspace(docId,null)}catch(e){toast('Failed to open workspace')}},
+    onRenamed:async (docId,title)=>{if(DOC_ID===docId){WORKSPACE_TITLE=title;updateWorkspaceTitle()}},
+    onDeleted:async docId=>{
+      if(DOC_ID!==docId)return;
+      try{
+        const ws=await ensureDefaultWorkspace();
+        await openWorkspace(ws.workspace_id,null);
+      }catch(e){DOC_ID=null;updateFilesBtnLabel(null);updateWorkspaceTitle();renderEmptyDashboard();renderSessionList()}
+    },
+  });
+  updateFilesBtnLabel(null);
 
   $('#sidebarCollapseBtn').addEventListener('click',()=>document.body.classList.add('sidebarCollapsed'));
   $('#sidebarRail').addEventListener('click',()=>document.body.classList.remove('sidebarCollapsed'));
-  $('#workspaceHomeBtn').addEventListener('click',()=>{if(!DOC_ID){toast('Open a workspace first.');return}location.href=viewerLink()});
-  $('#workspaceAnalysisBtn').addEventListener('click',()=>{if(!DOC_ID){toast('Open a workspace first.');return}location.href=viewerLink()});
-  $('#workspaceFilesBtn').addEventListener('click',openFileManager);
+  $('#workspaceHomeBtn').addEventListener('click',()=>{if(!DOC_ID){toast('Open a workspace first.');return}location.href=backToViewerLink()});
+  $('#workspaceAnalysisBtn').addEventListener('click',()=>{if(!DOC_ID){toast('Open a workspace first.');return}location.href=backToViewerLink()});
+  $('#workspaceFilesBtn').addEventListener('click',()=>FileManager.open('manage'));
   $('#workspaceRenameBtn').addEventListener('click',startWorkspaceRename);
-  $('#fmCloseBtn').addEventListener('click',closeFileManager);
   document.addEventListener('mousedown',e=>{if(WORKSPACE_RENAME_INPUT&&!e.target.closest('#workspaceRenameBtn')&&e.target!==WORKSPACE_RENAME_INPUT)finishWorkspaceRename(true)});
   $('#riskGrid').addEventListener('click',e=>{
     const card=e.target.closest('.riskCard');if(!card)return;
@@ -810,16 +1065,19 @@ body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-e
   async function bootstrap(){
     const params=new URLSearchParams(location.search);
     const docId=params.get('doc');
+    ORIGIN_RUN_ID=params.get('run')||null;
+    async function openDefaultWorkspace(){
+      const ws=await ensureDefaultWorkspace();
+      await openWorkspace(ws.workspace_id,null);
+    }
     if(docId){
-      try{await openWorkspace(docId,params.get('snapshot'),params.get('run'))}catch(e){toast('Failed to load workspace')}
+      try{await openWorkspace(docId,params.get('snapshot')||null)}
+      catch(e){
+        try{await openDefaultWorkspace()}catch(_){toast('Failed to load workspace')}
+      }
       return;
     }
-    try{
-      const res=await fetch('/api/file-manager');
-      const data=await res.json();
-      const items=data.items||[];
-      if(items.length)await openWorkspace(items[0].workspace_id,null);
-    }catch(e){}
+    try{await openDefaultWorkspace()}catch(e){}
   }
   bootstrap();
 })();

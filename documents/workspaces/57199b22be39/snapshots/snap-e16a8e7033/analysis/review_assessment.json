@@ -1,0 +1,222 @@
+{
+  "status": "done",
+  "model": "gpt-5.4",
+  "started_at": "2026-06-11T16:15:14.320817+00:00",
+  "completed_at": "2026-06-11T16:15:28.610344+00:00",
+  "skipped_existing_count": 0,
+  "items": [
+    {
+      "review_id": "r-6c46d582",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.393533+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "cleared",
+      "confidence": 0.98,
+      "reasoning": "The reviewer wants the typo \"intagible\" corrected. The diff shows \"intagible\" was removed from the current report, so the requested typo fix is present.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3",
+      "human_decision": "cleared",
+      "human_updated_at": "2026-06-11T16:16:26.210411+00:00"
+    },
+    {
+      "review_id": "r-60f1f707",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.477568+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "cleared",
+      "confidence": 0.88,
+      "reasoning": "The reviewer wants the typo \"recoverablity.\" corrected. That misspelling no longer appears in the current report, indicating the typo was corrected.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3",
+      "human_decision": "cleared",
+      "human_updated_at": "2026-06-11T16:16:24.788669+00:00"
+    },
+    {
+      "review_id": "r-feb23615",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.565263+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "not_cleared",
+      "confidence": 0.95,
+      "reasoning": "The reviewer wants the Basis for Qualified Opinion to describe both the recognition/recoverability issue and the cutoff issue for R&D and amortization expense. The current text still only addresses inability to obtain evidence on development costs and does not add a cutoff clause; add explicit language covering the cutoff issue for R&D and amortization expense.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3"
+    },
+    {
+      "review_id": "r-2c64e073",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.656983+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "cleared",
+      "confidence": 0.97,
+      "reasoning": "The reviewer wants the note reference changed from Note 5 to Note 6 for development costs. The diff shows the note number changed from 5 to 6, satisfying the requested reference correction.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3",
+      "human_decision": "cleared",
+      "human_updated_at": "2026-06-11T16:16:30.253075+00:00"
+    },
+    {
+      "review_id": "r-63611c23",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.748834+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "partial",
+      "confidence": 0.96,
+      "reasoning": "The reviewer wants two amount corrections: reclassification from W1,950m to W1,905m and remaining development cost from W765m to W810m. The diff shows W1,950 was corrected to W1,905, but the current text still shows W765 million remained; update the remaining development cost to W810 million to fully clear the review.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3"
+    },
+    {
+      "review_id": "r-f2ca25ce",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.829071+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "not_cleared",
+      "confidence": 0.97,
+      "reasoning": "The reviewer wants the company name used consistently as \"DEMO International, Inc.\" throughout the report. Although \"Korea\" was changed to \"International\" in one place, the matched current text still says \"DEMO Inc.\", so the requested consistent company name is not fully present; replace remaining variants with \"DEMO International, Inc.\".",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3"
+    },
+    {
+      "review_id": "r-2d959c75",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:14.939860+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 8,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "not_cleared",
+      "confidence": 0.94,
+      "reasoning": "The reviewer wants the audit opinion periods corrected from 2023 and 2022 to 2024 and 2023. The diff adds 2024 and removes 2022, but the matched current text still omits the full corrected pair and does not show \"2024 and 2023\" explicitly; revise the opinion sentence to state the reporting periods as December 31, 2024 and 2023.",
+      "tool_trace": [
+        {
+          "tool": "search_markdown",
+          "file": "current",
+          "query": "recoverablity"
+        }
+      ],
+      "batch_index": 1,
+      "batch_key": "previous_page:3"
+    },
+    {
+      "review_id": "r-1f874bee",
+      "anchor_run_id": "8ff85536755e",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T16:15:15.028652+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 5,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "cleared",
+      "confidence": 0.95,
+      "reasoning": "The reviewer wants the informal sentence to be revised into standard, professional audit-report language. The diff shows the informal wording was replaced with formal audit phrasing such as 'communicate regarding, among other matters, the planned scope and timing of' and 'significant audit findings,' which satisfies that request.",
+      "tool_trace": [],
+      "batch_index": 2,
+      "batch_key": "previous_page:4",
+      "human_decision": "cleared",
+      "human_updated_at": "2026-06-11T16:16:18.121984+00:00"
+    }
+  ],
+  "workspace_id": "57199b22be39",
+  "run_id": "8f3f451c3073",
+  "updated_at": "2026-06-11T16:16:30.253098+00:00"
+}

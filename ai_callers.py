@@ -3,6 +3,11 @@ import os
 
 from ai_config_utils import ai_provider_for_model
 
+# Fixed seed so the same review+report inputs return the same verdict run-to-run.
+# temperature=0 alone does not pin the output for these models; the seed reduces the
+# residual drift that made even simple verdicts flip between sessions.
+ASSESSMENT_SEED = 7
+
 
 def _get_api_client(model):
     provider = ai_provider_for_model(model)
@@ -110,6 +115,7 @@ def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, promp
             client,
             model=model,
             temperature=0,
+            seed=ASSESSMENT_SEED,
             tools=openai_tool_definitions(batch=False),
             messages=messages,
         )
@@ -151,6 +157,7 @@ def call_ai_assessment_batch_openai(context_packs, available_sections, tool_cont
             client,
             model=model,
             temperature=0,
+            seed=ASSESSMENT_SEED,
             tools=openai_tool_definitions(batch=True),
             messages=messages,
         )
@@ -277,6 +284,7 @@ def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path
             client,
             model=model,
             temperature=0,
+            seed=ASSESSMENT_SEED,
             tools=openai_change_tool_definitions(batch=False),
             messages=messages,
         )
@@ -318,6 +326,7 @@ def call_ai_change_assessment_batch_openai(context_packs, available_sections, to
             client,
             model=model,
             temperature=0,
+            seed=ASSESSMENT_SEED,
             tools=openai_change_tool_definitions(batch=True),
             messages=messages,
         )

@@ -1,0 +1,90 @@
+{
+  "workspace_id": "57199b22be39",
+  "title": "Demo FY24",
+  "is_saved": true,
+  "created_at": "2026-06-11T11:01:38.386006+00:00",
+  "updated_at": "2026-06-11T17:54:58.942413+00:00",
+  "runs": [
+    {
+      "run_id": "a5d793bf68a6",
+      "kind": "initial",
+      "status": "ready",
+      "created_at": "2026-06-11T17:52:36.117133+00:00",
+      "filename": "Demo_FY24_Report_v1_reviewed.pdf",
+      "has_diff": false,
+      "has_ai_assessment": false
+    },
+    {
+      "run_id": "3b5300e69594",
+      "kind": "update",
+      "status": "ready",
+      "created_at": "2026-06-11T17:52:55.684892+00:00",
+      "filename": "Demo_FY24_Report_v2.pdf",
+      "previous_run_id": "a5d793bf68a6",
+      "has_diff": true,
+      "has_ai_assessment": false,
+      "has_change_ai_assessment": true
+    }
+  ],
+  "snapshots": [
+    {
+      "snapshot_id": "snap-e16a8e7033",
+      "workspace_id": "57199b22be39",
+      "run_id": "8f3f451c3073",
+      "source_run_id": "8f3f451c3073",
+      "created_at": "2026-06-11T16:16:49.080119+00:00",
+      "filename": "Demo_FY24_Report_v2.pdf",
+      "label": "",
+      "mode": "diff",
+      "has_diff": true,
+      "has_ai_assessment": true,
+      "has_change_assessment": true,
+      "review_count": 8,
+      "open_reviews": 4,
+      "closed_reviews": 4,
+      "added": 83,
+      "deleted": 15,
+      "change_groups": 18
+    },
+    {
+      "snapshot_id": "snap-83b872650b",
+      "workspace_id": "57199b22be39",
+      "run_id": "3b5300e69594",
+      "source_run_id": "3b5300e69594",
+      "created_at": "2026-06-11T17:54:58.940993+00:00",
+      "filename": "Demo_FY24_Report_v2.pdf",
+      "label": "",
+      "mode": "diff",
+      "has_diff": true,
+      "has_ai_assessment": true,
+      "has_change_assessment": true,
+      "added": 83,
+      "deleted": 15,
+      "change_groups": 18,
+      "review_count": 12,
+      "open_reviews": 8,
+      "closed_reviews": 4
+    }
+  ],
+  "files": [
+    {
+      "file_id": "8ff85536755e",
+      "title": "Demo_FY24_Report_v1_reviewed",
+      "filename": "Demo_FY24_Report_v1_reviewed.pdf",
+      "status": "ready",
+      "created_at": "2026-06-11T11:01:38.386006+00:00",
+      "updated_at": "2026-06-11T17:44:25.745954+00:00",
+      "saved_at": "2026-06-11T17:44:25.745954+00:00"
+    },
+    {
+      "file_id": "d8f86acb4d68",
+      "title": "Demo_FY24_Report_v2",
+      "filename": "Demo_FY24_Report_v2.pdf",
+      "status": "ready",
+      "created_at": "2026-06-11T11:07:24.461354+00:00",
+      "updated_at": "2026-06-11T16:43:39.253675+00:00",
+      "saved_at": "2026-06-11T16:43:39.253675+00:00"
+    }
+  ],
+  "storage_layout_v2": true
+}

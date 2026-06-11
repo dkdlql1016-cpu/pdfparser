@@ -25,7 +25,8 @@ def review_threads_for_prompt_from_projection(review):
 def build_assessment_prompt(review, prev_anchor, available_sections, context_pack):
     suggested_section_id = (context_pack.get("recognized_report_section") or {}).get("previous_section_id")
     return (
-        "Assess this prior review comment against the current report.\n\n"
+        "Assess whether this prior review requirement is reflected in the current report.\n"
+        "Return cleared, partial, not_cleared, or unclear (only if the review itself is too vague to judge).\n\n"
         "Input package:\n"
         f"{json.dumps(context_pack, ensure_ascii=False, indent=2)[:50000]}\n\n"
         f"Suggested section_id:\n{suggested_section_id or '(unknown)'}\n\n"
@@ -36,9 +37,11 @@ def build_assessment_prompt(review, prev_anchor, available_sections, context_pac
 
 def build_batch_assessment_prompt(context_packs, available_sections):
     return (
-        "Assess this group of prior review bundles against the current report. "
+        "Assess whether each prior review requirement is reflected in the current report. "
         "These reviews are grouped because they belong to the same inferred report section or nearby fallback page.\n"
-        "Return exactly one verdict for every review_id by calling submit_verdicts.\n\n"
+        "Return exactly one verdict per review_id: cleared, partial, not_cleared, "
+        "or unclear only when the review itself is too vague to judge.\n"
+        "Call submit_verdicts with one item per review_id.\n\n"
         "Review bundles:\n"
         f"{json.dumps(context_packs, ensure_ascii=False, indent=2)}\n\n"
         "Available markdown files for exceptional extra lookup only: previous, current.\n"
