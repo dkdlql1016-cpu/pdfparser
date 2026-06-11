@@ -52,7 +52,6 @@ from document_pipeline_service import (
     copy_if_exists as pipeline_copy_if_exists,
     process_document_diff_run as pipeline_process_document_diff_run,
     process_single_document_run as pipeline_process_single_document_run,
-    sync_report_compat_files as pipeline_sync_report_compat_files,
     write_unmarked_md_copy as pipeline_write_unmarked_md_copy,
 )
 from document_io_service import (
@@ -589,10 +588,6 @@ def write_unmarked_md_copy(src: Path, dst: Path):
     )
 
 
-def sync_report_compat_files(run_dir: Path):
-    pipeline_sync_report_compat_files(run_dir, copy_if_exists_fn=copy_if_exists)
-
-
 def build_chars_from_words(words):
     return pipeline_build_chars_from_words(words)
 
@@ -602,12 +597,10 @@ def process_single_document_run(run_dir: Path, pdf_path: Path, *, doc_id=None, r
         run_dir,
         pdf_path,
         extract_pdf_words_fn=extract_pdf_words,
-        build_chars_from_words_fn=build_chars_from_words,
         write_json_fn=write_json,
         run_opendataloader_to_markdown_fn=run_opendataloader_to_markdown,
         build_new_pdf_index_fn=build_new_pdf_index,
         inject_section_markers_fn=inject_section_markers,
-        sync_report_compat_files_fn=sync_report_compat_files,
         doc_id=doc_id,
         run_id=run_id,
         filename=filename,
@@ -628,7 +621,6 @@ def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
         build_new_pdf_index_fn=build_new_pdf_index,
         inject_section_markers_fn=inject_section_markers,
         map_result_segments_to_pdf_indices_fn=map_result_segments_to_pdf_indices,
-        sync_report_compat_files_fn=sync_report_compat_files,
         document_reviews_for_run_fn=document_reviews_for_run,
         semantic_module=semantic,
         doc_id=doc_id,
@@ -1204,8 +1196,8 @@ def document_blueprint_deps():
         "load_document_reviews_fn": load_document_reviews,
         "save_document_reviews_fn": save_document_reviews,
         "copy_if_exists_fn": copy_if_exists,
-        "sync_report_compat_files_fn": sync_report_compat_files,
         "read_json_fn": read_json,
+        "build_chars_from_words_fn": build_chars_from_words,
         "anchor_for_selection_fn": anchor_for_selection,
         "canonical_review_from_anchor_fn": canonical_review_from_anchor,
         "document_reviews_for_run_fn": document_reviews_for_run,
@@ -1258,6 +1250,7 @@ def snapshot_blueprint_deps():
         "create_run_snapshot_fn": create_run_snapshot,
         "document_snapshot_dir_fn": document_snapshot_dir,
         "read_json_fn": read_json,
+        "build_chars_from_words_fn": build_chars_from_words,
         "snapshot_side_file_fn": snapshot_side_file,
         "render_pdf_page_fn": render_pdf_page,
         "export_annotated_pdf_fn": export_annotated_pdf,

@@ -232,8 +232,8 @@ def build_ai_bundle(run_dir, review_id, context_lines=2):
     if review is None:
         return None
     viewer = json.loads((run_dir / "viewer_data.json").read_text(encoding="utf-8"))
-    old_md = _read_md_lines(run_dir / "old.md")
-    new_md = _read_md_lines(run_dir / "new.md")
+    old_md = _read_md_lines(run_dir / "prev_report.md")
+    new_md = _read_md_lines(run_dir / "report.md")
     return {
         "job_id": viewer.get("job_id"),
         "review": {

@@ -37,9 +37,10 @@ def create_file_manager_blueprint(*, deps):
     @bp.route("/api/file-manager/<doc_id>", methods=["DELETE"])
     def file_manager_delete(doc_id):
         path = document_dir_fn(doc_id)
-        if not path.exists():
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
             return jsonify({"error": "document not found"}), 404
-        shutil.rmtree(path, ignore_errors=True)
         return jsonify({"deleted": True, "doc_id": doc_id})
 
     return bp

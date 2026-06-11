@@ -12,21 +12,11 @@ def snapshot_file_names():
         "report.pdf",
         "report.md",
         "words.json",
-        "chars.json",
         "section_map.json",
         "prev_report.pdf",
         "prev_report.md",
         "prev_words.json",
-        "prev_chars.json",
         "prev_section_map.json",
-        "new.pdf",
-        "new.md",
-        "new_words.json",
-        "new_chars.json",
-        "old.pdf",
-        "old.md",
-        "old_words.json",
-        "old_chars.json",
     ]
 
 
@@ -119,5 +109,5 @@ def snapshot_side_file(side, kind):
     if kind == "words":
         return "words.json" if side in ("new", "report", "current") else "prev_words.json"
     if kind == "chars":
-        return "chars.json" if side in ("new", "report", "current") else "prev_chars.json"
+        return "words.json" if side in ("new", "report", "current") else "prev_words.json"
     return None

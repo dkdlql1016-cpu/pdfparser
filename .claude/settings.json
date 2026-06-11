@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Force | Where-Object { $_.Name -notin @\\('.git','.venv'\\) } | Select-Object Mode, Name, Length)",
+      "PowerShell($run = \"documents\\\\aae9586d634d\\\\runs\\\\d7110a28b8c7\"; Get-ChildItem $run -Recurse -File | Select-Object @{N='Path';E={$_.FullName.Replace\\(\\(Get-Location\\).Path + '\\\\' + $run + '\\\\',''\\)}}, Length; Write-Host \"---\"; $a = Get-FileHash \"$run\\\\old.md\" -Algorithm MD5; $b = Get-FileHash \"$run\\\\prev_report.md\" -Algorithm MD5; $c = Get-FileHash \"$run\\\\new.md\" -Algorithm MD5; $d = Get-FileHash \"$run\\\\report.md\" -Algorithm MD5; Write-Host \"old==prev_report: $\\($a.Hash -eq $b.Hash\\)\"; Write-Host \"new==report: $\\($c.Hash -eq $d.Hash\\)\")",
+      "PowerShell(\\(Get-Content app.py | Measure-Object -Line\\).Lines; Write-Host \"---runs total size---\"; \"{0:N1} MB\" -f \\(\\(Get-ChildItem documents -Recurse -File | Measure-Object Length -Sum\\).Sum / 1MB\\); Write-Host \"---per doc---\"; Get-ChildItem documents -Directory | ForEach-Object { $s = \\(Get-ChildItem $_.FullName -Recurse -File | Measure-Object Length -Sum\\).Sum; \"{0}  {1:N1} MB\" -f $_.Name, \\($s/1MB\\) })"
+    ]
+  }
+}

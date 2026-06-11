@@ -16,17 +16,6 @@ def write_unmarked_md_copy(src: Path, dst: Path, *, strip_section_markers_fn, re
     return dst
 
 
-def sync_report_compat_files(run_dir: Path, *, copy_if_exists_fn):
-    copy_if_exists_fn(run_dir / "report.pdf", run_dir / "new.pdf")
-    copy_if_exists_fn(run_dir / "report.md", run_dir / "new.md")
-    copy_if_exists_fn(run_dir / "words.json", run_dir / "new_words.json")
-    copy_if_exists_fn(run_dir / "chars.json", run_dir / "new_chars.json")
-    copy_if_exists_fn(run_dir / "prev_report.pdf", run_dir / "old.pdf")
-    copy_if_exists_fn(run_dir / "prev_report.md", run_dir / "old.md")
-    copy_if_exists_fn(run_dir / "prev_words.json", run_dir / "old_words.json")
-    copy_if_exists_fn(run_dir / "prev_chars.json", run_dir / "old_chars.json")
-
-
 def build_chars_from_words(words):
     chars = []
     for word in words or []:
@@ -57,22 +46,16 @@ def process_single_document_run(
     pdf_path: Path,
     *,
     extract_pdf_words_fn,
-    build_chars_from_words_fn,
     write_json_fn,
     run_opendataloader_to_markdown_fn,
     build_new_pdf_index_fn,
     inject_section_markers_fn,
-    sync_report_compat_files_fn,
     doc_id=None,
     run_id=None,
     filename=None,
 ):
     words, page_sizes = extract_pdf_words_fn(pdf_path)
-    chars = build_chars_from_words_fn(words)
     write_json_fn(run_dir / "words.json", words)
-    write_json_fn(run_dir / "new_words.json", words)
-    write_json_fn(run_dir / "chars.json", chars)
-    write_json_fn(run_dir / "new_chars.json", chars)
 
     md_src = run_opendataloader_to_markdown_fn(pdf_path, run_dir / "opendataloader_report")
     report_md = run_dir / "report.md"
@@ -81,7 +64,6 @@ def process_single_document_run(
     index_items = build_new_pdf_index_fn(report_md, words, len(page_sizes))
     section_map = inject_section_markers_fn(report_md, index_items)
     write_json_fn(run_dir / "section_map.json", section_map)
-    sync_report_compat_files_fn(run_dir)
 
     viewer_data = {
         "doc_id": doc_id,
@@ -127,7 +109,6 @@ def process_document_diff_run(
     build_new_pdf_index_fn,
     inject_section_markers_fn,
     map_result_segments_to_pdf_indices_fn,
-    sync_report_compat_files_fn,
     document_reviews_for_run_fn,
     semantic_module,
     doc_id=None,
@@ -174,7 +155,6 @@ def process_document_diff_run(
     mapped = map_result_segments_to_pdf_indices_fn(diff_doc["segments"], prev_words, report_words)
     semantic_map = semantic_module.build_semantic_map(diff_doc["segments"], mapped, prev_words, report_words)
     semantic_module.attach_index_old_side(index_items, semantic_map, prev_words, report_words)
-    sync_report_compat_files_fn(run_dir)
     projected_reviews = document_reviews_for_run_fn(doc_id, run_id) if doc_id else []
 
     viewer_data = {

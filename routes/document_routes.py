@@ -1,9 +1,16 @@
+import re
 import shutil
 import uuid
 from pathlib import Path
 
 import document_semantic as semantic
 from flask import Blueprint, Response, jsonify, request, send_file
+
+_HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
+
+
+def _is_valid_hex_id(value: str) -> bool:
+    return bool(_HEX12_RE.match(value))
 
 
 def create_document_blueprint(*, deps):
@@ -17,8 +24,8 @@ def create_document_blueprint(*, deps):
     load_document_reviews_fn = deps["load_document_reviews_fn"]
     save_document_reviews_fn = deps["save_document_reviews_fn"]
     copy_if_exists_fn = deps["copy_if_exists_fn"]
-    sync_report_compat_files_fn = deps["sync_report_compat_files_fn"]
     read_json_fn = deps["read_json_fn"]
+    build_chars_from_words_fn = deps["build_chars_from_words_fn"]
     anchor_for_selection_fn = deps["anchor_for_selection_fn"]
     canonical_review_from_anchor_fn = deps["canonical_review_from_anchor_fn"]
     document_reviews_for_run_fn = deps["document_reviews_for_run_fn"]
@@ -169,7 +176,6 @@ def create_document_blueprint(*, deps):
         copy_if_exists_fn(prev_dir / "report.pdf", run_dir / "prev_report.pdf")
         copy_if_exists_fn(prev_dir / "report.md", run_dir / "prev_report.md")
         copy_if_exists_fn(prev_dir / "words.json", run_dir / "prev_words.json")
-        copy_if_exists_fn(prev_dir / "chars.json", run_dir / "prev_chars.json")
         copy_if_exists_fn(prev_dir / "section_map.json", run_dir / "prev_section_map.json")
         copy_if_exists_fn(prev_dir / "reviews.json", run_dir / "prev_reviews.json")
 
@@ -197,7 +203,6 @@ def create_document_blueprint(*, deps):
                 run_id=run_id,
                 filename=uploaded.filename or "report.pdf",
             )
-            sync_report_compat_files_fn(run_dir)
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
             save_document_meta_fn(meta)
@@ -280,6 +285,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/page/<side>/<int:page_no>")
     def document_page_image(doc_id, run_id, side, page_no):
+        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
+            return jsonify({"error": "invalid id"}), 400
         zoom = float(request.args.get("zoom", "1.6"))
         if side in ("new", "report", "current"):
             pdf_name = "report.pdf"
@@ -294,6 +301,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/words/<side>")
     def document_words(doc_id, run_id, side):
+        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
+            return jsonify({"error": "invalid id"}), 400
         if side in ("new", "report", "current"):
             name = "words.json"
         elif side in ("old", "prev", "previous"):
@@ -307,16 +316,19 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/chars/<side>")
     def document_chars(doc_id, run_id, side):
+        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
+            return jsonify({"error": "invalid id"}), 400
         if side in ("new", "report", "current"):
-            name = "chars.json"
+            words_name = "words.json"
         elif side in ("old", "prev", "previous"):
-            name = "prev_chars.json"
+            words_name = "prev_words.json"
         else:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
-        path = document_run_dir_fn(doc_id, run_id) / name
-        if not path.exists():
+        words_path = document_run_dir_fn(doc_id, run_id) / words_name
+        if not words_path.exists():
             return jsonify({"error": "not found"}), 404
-        return send_file(path, mimetype="application/json")
+        words = read_json_fn(words_path, [])
+        return jsonify(build_chars_from_words_fn(words))
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["GET"])
     def list_document_reviews(doc_id, run_id):

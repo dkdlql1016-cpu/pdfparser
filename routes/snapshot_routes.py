@@ -1,4 +1,12 @@
+import re
+
 from flask import Blueprint, Response, jsonify, request, send_file
+
+_HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
+
+
+def _is_valid_hex_id(value: str) -> bool:
+    return bool(_HEX12_RE.match(value))
 
 
 def create_snapshot_blueprint(*, deps):
@@ -7,6 +15,7 @@ def create_snapshot_blueprint(*, deps):
     create_run_snapshot_fn = deps["create_run_snapshot_fn"]
     document_snapshot_dir_fn = deps["document_snapshot_dir_fn"]
     read_json_fn = deps["read_json_fn"]
+    build_chars_from_words_fn = deps["build_chars_from_words_fn"]
     snapshot_side_file_fn = deps["snapshot_side_file_fn"]
     render_pdf_page_fn = deps["render_pdf_page_fn"]
     export_annotated_pdf_fn = deps["export_annotated_pdf_fn"]
@@ -49,6 +58,8 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/words/<side>")
     def snapshot_words(doc_id, snapshot_id, side):
+        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(snapshot_id):
+            return jsonify({"error": "invalid id"}), 400
         name = snapshot_side_file_fn(side, "words")
         if not name:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
@@ -59,13 +70,16 @@ def create_snapshot_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/chars/<side>")
     def snapshot_chars(doc_id, snapshot_id, side):
-        name = snapshot_side_file_fn(side, "chars")
-        if not name:
+        if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(snapshot_id):
+            return jsonify({"error": "invalid id"}), 400
+        words_name = snapshot_side_file_fn(side, "words")
+        if not words_name:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
-        path = document_snapshot_dir_fn(doc_id, snapshot_id) / name
-        if not path.exists():
+        words_path = document_snapshot_dir_fn(doc_id, snapshot_id) / words_name
+        if not words_path.exists():
             return jsonify({"error": "not found"}), 404
-        return send_file(path, mimetype="application/json")
+        words = read_json_fn(words_path, [])
+        return jsonify(build_chars_from_words_fn(words))
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/reviews")
     def snapshot_reviews(doc_id, snapshot_id):

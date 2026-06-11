@@ -149,6 +149,14 @@ def suppress_layout_moves(segments, window=220):
         n = move_norm_token(segs[ai].get("text", ""))
         if n:
             adds_by_norm.setdefault(n, []).append(ai)
+    _ctx_cache = {}
+
+    def _ctx(idx, radius):
+        key = (idx, radius)
+        if key not in _ctx_cache:
+            _ctx_cache[key] = context_signature(segs, idx, radius)
+        return _ctx_cache[key]
+
     candidate_pairs = []
     for di in deletes:
         dn = move_norm_token(segs[di].get("text", ""))
@@ -157,12 +165,12 @@ def suppress_layout_moves(segments, window=220):
         candidates = [ai for ai in adds_by_norm.get(dn, []) if abs(ai - di) <= window]
         if not candidates:
             continue
-        dctx = context_signature(segs, di, 50)
+        dctx = _ctx(di, 50)
         scored = []
         for ai in candidates:
-            ctx_score = weighted_jaccard(dctx, context_signature(segs, ai, 50))
+            ctx_score = weighted_jaccard(dctx, _ctx(ai, 50))
             anchor_score = near_equal_anchor_score(segs, di, ai, 14)
-            section_score = weighted_jaccard(context_signature(segs, di, 180), context_signature(segs, ai, 180))
+            section_score = weighted_jaccard(_ctx(di, 180), _ctx(ai, 180))
             dist = abs(ai - di)
             dist_score = 1.0 if dist <= 40 else 0.75 if dist <= 100 else 0.45
             token_strength = min(1.0, max(len(dn) / 8.0, 0.35))

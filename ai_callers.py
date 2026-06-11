@@ -2,6 +2,28 @@ import json
 import os
 
 from ai_config_utils import ai_provider_for_model
+
+
+def _get_api_client(model):
+    provider = ai_provider_for_model(model)
+    if provider == "openai":
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+        try:
+            from openai import OpenAI
+        except Exception as e:
+            raise RuntimeError("openai package is not installed") from e
+        return "openai", OpenAI(api_key=api_key)
+    else:
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise RuntimeError("ANTHROPIC_API_KEY is not set")
+        try:
+            from anthropic import Anthropic
+        except Exception as e:
+            raise RuntimeError("anthropic package is not installed") from e
+        return "anthropic", Anthropic(api_key=api_key)
 from ai_runtime_utils import (
     assessment_tool_definitions,
     change_assessment_tool_definitions,
@@ -21,14 +43,7 @@ from section_context_utils import keyword_search_markdown, search_markdown_conte
 
 
 def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
-    try:
-        from openai import OpenAI
-    except Exception as e:
-        raise RuntimeError("openai package is not installed") from e
-    client = OpenAI(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
         {"role": "user", "content": prompt},
@@ -97,14 +112,7 @@ def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, promp
 
 
 def call_ai_assessment_batch_openai(context_packs, available_sections, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
-    try:
-        from openai import OpenAI
-    except Exception as e:
-        raise RuntimeError("openai package is not installed") from e
-    client = OpenAI(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
         {"role": "user", "content": build_batch_assessment_prompt(context_packs, available_sections)},
@@ -183,14 +191,7 @@ def call_ai_assessment(prompt, tool_context, *, model, prompt_path, prompt_fallb
             prompt_fallback=prompt_fallback,
             load_system_prompt_fn=load_system_prompt_fn,
         )
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-    try:
-        from anthropic import Anthropic
-    except Exception as e:
-        raise RuntimeError("anthropic package is not installed") from e
-    client = Anthropic(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [{"role": "user", "content": prompt}]
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
@@ -261,14 +262,7 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context, *,
             prompt_fallback=prompt_fallback,
             load_system_prompt_fn=load_system_prompt_fn,
         )
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-    try:
-        from anthropic import Anthropic
-    except Exception as e:
-        raise RuntimeError("anthropic package is not installed") from e
-    client = Anthropic(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [{"role": "user", "content": build_batch_assessment_prompt(context_packs, available_sections)}]
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
@@ -330,14 +324,7 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context, *,
 
 
 def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
-    try:
-        from openai import OpenAI
-    except Exception as e:
-        raise RuntimeError("openai package is not installed") from e
-    client = OpenAI(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
         {"role": "user", "content": prompt},
@@ -406,14 +393,7 @@ def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path
 
 
 def call_ai_change_assessment_batch_openai(context_packs, available_sections, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
-    try:
-        from openai import OpenAI
-    except Exception as e:
-        raise RuntimeError("openai package is not installed") from e
-    client = OpenAI(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
         {"role": "user", "content": build_change_batch_assessment_prompt(context_packs, available_sections)},
@@ -492,14 +472,7 @@ def call_ai_change_assessment(prompt, tool_context, *, model, prompt_path, promp
             prompt_fallback=prompt_fallback,
             load_system_prompt_fn=load_system_prompt_fn,
         )
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-    try:
-        from anthropic import Anthropic
-    except Exception as e:
-        raise RuntimeError("anthropic package is not installed") from e
-    client = Anthropic(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [{"role": "user", "content": prompt}]
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
@@ -570,14 +543,7 @@ def call_ai_change_assessment_batch(context_packs, available_sections, tool_cont
             prompt_fallback=prompt_fallback,
             load_system_prompt_fn=load_system_prompt_fn,
         )
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not set")
-    try:
-        from anthropic import Anthropic
-    except Exception as e:
-        raise RuntimeError("anthropic package is not installed") from e
-    client = Anthropic(api_key=api_key)
+    _, client = _get_api_client(model)
     messages = [{"role": "user", "content": build_change_batch_assessment_prompt(context_packs, available_sections)}]
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
