@@ -48,31 +48,31 @@ def ensure_default_file_manager_documents(
     documents_dir,
     default_file_manager_inputs,
     read_json_fn,
-    create_seed_document_from_pdf_fn,
+    upsert_seed_document_from_pdf_fn,
 ):
     if already_seeded:
         return True
     if not input_dir.exists():
         return True
-    existing_seed_keys = set()
-    existing_filenames = set()
+    selected_seed = None
+    for filename in default_file_manager_inputs:
+        src = input_dir / filename
+        if src.exists():
+            selected_seed = (filename, src)
+            break
+    if not selected_seed:
+        return True
+    seed_key, seed_src = selected_seed
+    existing_doc_id = None
     for candidate in documents_dir.iterdir():
         if not candidate.is_dir():
             continue
         meta = read_json_fn(candidate / "meta.json", None) or {}
+        if not meta:
+            continue
         key = str(meta.get("seed_key") or "").strip()
-        if key:
-            existing_seed_keys.add(key)
-        runs = meta.get("runs", []) or []
-        if runs:
-            filename = str((runs[-1] or {}).get("filename") or "").strip()
-            if filename:
-                existing_filenames.add(filename)
-    for filename in default_file_manager_inputs:
-        if filename in existing_seed_keys or filename in existing_filenames:
-            continue
-        src = input_dir / filename
-        if not src.exists():
-            continue
-        create_seed_document_from_pdf_fn(src, seed_key=filename)
+        if key == seed_key:
+            existing_doc_id = str(meta.get("doc_id") or candidate.name)
+            break
+    upsert_seed_document_from_pdf_fn(seed_src, seed_key=seed_key, existing_doc_id=existing_doc_id)
     return True

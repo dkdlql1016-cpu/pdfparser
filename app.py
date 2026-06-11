@@ -2,6 +2,7 @@ import importlib
 import importlib.util
 import logging
 import os
+import shutil
 import uuid
 from pathlib import Path
 
@@ -430,6 +431,35 @@ def create_seed_document_from_pdf(pdf_path: Path, *, seed_key: str):
     )
 
 
+def upsert_seed_document_from_pdf(pdf_path: Path, *, seed_key: str, existing_doc_id: str = None):
+    if existing_doc_id:
+        meta = load_document_meta(existing_doc_id)
+        if meta:
+            run_id = uuid.uuid4().hex[:12]
+            run_dir = document_run_dir(existing_doc_id, run_id)
+            run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+            shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
+            created_at = utc_now()
+            meta["doc_id"] = existing_doc_id
+            meta["title"] = meta.get("title") or pdf_path.stem
+            meta["seed_key"] = seed_key
+            meta["is_saved"] = True
+            meta.setdefault("runs", []).append(
+                {
+                    "run_id": run_id,
+                    "kind": "seed",
+                    "status": "ready",
+                    "created_at": created_at,
+                    "filename": pdf_path.name,
+                    "has_diff": False,
+                    "has_ai_assessment": False,
+                }
+            )
+            save_document_meta(meta)
+            return
+    create_seed_document_from_pdf(pdf_path, seed_key=seed_key)
+
+
 def ensure_default_file_manager_documents():
     global DEFAULT_FILE_MANAGER_SEEDED
     DEFAULT_FILE_MANAGER_SEEDED = bootstrap_ensure_default_file_manager_documents(
@@ -438,7 +468,7 @@ def ensure_default_file_manager_documents():
         documents_dir=DOCUMENTS_DIR,
         default_file_manager_inputs=DEFAULT_FILE_MANAGER_INPUTS,
         read_json_fn=read_json,
-        create_seed_document_from_pdf_fn=create_seed_document_from_pdf,
+        upsert_seed_document_from_pdf_fn=upsert_seed_document_from_pdf,
     )
 
 

@@ -18,6 +18,8 @@ http://127.0.0.1:8000
 
 For maintainers/handoff, see `ARCHITECTURE.md`, `RUN_LAYOUT.md`, and `CHARS_API_CONTRACT.md`.
 
+On file-manager bootstrap, the app uses only one default seed source (`DEFAULT_FILE_MANAGER_INPUTS` first existing file). If a matching seed document already exists, it appends a new run to that same seed document instead of creating another document folder.
+
 ## Project Structure
 
 - `app.py`: Flask entrypoint and composition root (wires blueprints and services).
