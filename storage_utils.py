@@ -1,8 +1,12 @@
 import json
+import logging
 import os
+import shutil
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def utc_now():
@@ -39,40 +43,13 @@ def workspaces_root(documents_dir: Path):
     return documents_dir / "workspaces"
 
 
-def legacy_document_dir(documents_dir: Path, doc_id):
-    return documents_dir / doc_id
-
-
-def resolve_document_dir(documents_dir: Path, doc_id):
-    preferred = workspaces_root(documents_dir) / doc_id
-    legacy = legacy_document_dir(documents_dir, doc_id)
-    if preferred.exists():
-        return preferred
-    if legacy.exists():
-        return legacy
-    return preferred
-
-
 def iter_workspace_dirs(documents_dir: Path):
-    """
-    Yield workspace directories from the new layout first, then legacy roots.
-    """
-    seen = set()
+    """Yield workspace directories in the canonical layout."""
     root = workspaces_root(documents_dir)
-    if root.exists():
-        for candidate in root.iterdir():
-            if not candidate.is_dir():
-                continue
-            seen.add(candidate.name)
-            yield candidate
-    if documents_dir.exists():
-        for candidate in documents_dir.iterdir():
-            if not candidate.is_dir():
-                continue
-            if candidate.name == "workspaces":
-                continue
-            if candidate.name in seen:
-                continue
+    if not root.exists():
+        return
+    for candidate in root.iterdir():
+        if candidate.is_dir():
             yield candidate
 
 
@@ -102,11 +79,31 @@ def migrate_legacy_workspaces(documents_dir: Path):
         target = root / candidate.name
         if target.exists():
             continue
-        candidate.rename(target)
+        try:
+            candidate.rename(target)
+        except PermissionError:
+            # Windows can hold file handles from editors/indexers and block directory rename.
+            # Fall back to copy so startup is resilient; source cleanup can be manual later.
+            try:
+                shutil.copytree(candidate, target, dirs_exist_ok=False)
+            except Exception as copy_error:
+                logger.warning(
+                    "Failed to migrate legacy workspace '%s' to '%s': %s",
+                    candidate,
+                    target,
+                    copy_error,
+                )
+        except OSError as move_error:
+            logger.warning(
+                "Failed to migrate legacy workspace '%s' to '%s': %s",
+                candidate,
+                target,
+                move_error,
+            )
 
 
 def document_dir(documents_dir: Path, doc_id):
-    return resolve_document_dir(documents_dir, doc_id)
+    return workspaces_root(documents_dir) / doc_id
 
 
 def document_run_dir(documents_dir: Path, doc_id, run_id):

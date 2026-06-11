@@ -36,10 +36,10 @@ from assessment_normalizers import (
     run_meta_for,
 )
 from file_manager_repo import (
-    document_title_exists as repo_document_title_exists,
-    find_document_id_by_title as repo_find_document_id_by_title,
+    find_workspace_id_by_title as repo_find_workspace_id_by_title,
     list_documents_for_manager as repo_list_documents_for_manager,
     public_report_filename as repo_public_report_filename,
+    workspace_title_exists as repo_workspace_title_exists,
 )
 from file_manager_service import (
     canonical_review_from_anchor as service_canonical_review_from_anchor,
@@ -418,18 +418,16 @@ def document_meta_path(doc_id):
 def load_document_meta(doc_id):
     meta = read_json(document_meta_path(doc_id))
     if meta:
-        canonical_id = str(meta.get("workspace_id") or meta.get("doc_id") or doc_id)
+        canonical_id = str(meta.get("workspace_id") or doc_id)
         meta["workspace_id"] = canonical_id
-        meta["doc_id"] = canonical_id
     return meta
 
 
 def save_document_meta(meta):
-    canonical_id = str(meta.get("workspace_id") or meta.get("doc_id") or "")
+    canonical_id = str(meta.get("workspace_id") or "")
     if not canonical_id:
         raise ValueError("workspace_id is required")
     meta["workspace_id"] = canonical_id
-    meta["doc_id"] = canonical_id
     meta["updated_at"] = utc_now()
     write_json(document_meta_path(canonical_id), meta)
 
@@ -453,7 +451,7 @@ def upsert_seed_document_from_pdf(pdf_path: Path, *, seed_key: str, existing_doc
             run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
             shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
             created_at = utc_now()
-            meta["doc_id"] = existing_doc_id
+            meta["workspace_id"] = existing_doc_id
             meta["title"] = meta.get("title") or pdf_path.stem
             meta["seed_key"] = seed_key
             meta["is_saved"] = True
@@ -500,31 +498,31 @@ def list_documents_for_manager():
         normalize_document_title_fn=normalize_document_title,
     )
 
-def find_document_id_by_title(title: str, *, exclude_doc_id: str = None):
-    return repo_find_document_id_by_title(
+def find_workspace_id_by_title(title: str, *, exclude_workspace_id: str = None):
+    return repo_find_workspace_id_by_title(
         title,
         DOCUMENTS_DIR,
         read_json_fn=read_json,
         normalize_document_title_fn=normalize_document_title,
-        exclude_doc_id=exclude_doc_id,
+        exclude_workspace_id=exclude_workspace_id,
     )
 
 
-def document_title_exists(title: str, *, exclude_doc_id: str = None):
-    return repo_document_title_exists(
+def workspace_title_exists(title: str, *, exclude_workspace_id: str = None):
+    return repo_workspace_title_exists(
         title,
         DOCUMENTS_DIR,
         read_json_fn=read_json,
         normalize_document_title_fn=normalize_document_title,
-        exclude_doc_id=exclude_doc_id,
+        exclude_workspace_id=exclude_workspace_id,
     )
 
 
-def overwrite_saved_document(source_doc_id, source_run_id, target_doc_id):
+def overwrite_saved_document(source_workspace_id, source_run_id, target_workspace_id):
     return service_overwrite_saved_document(
-        source_doc_id,
+        source_workspace_id,
         source_run_id,
-        target_doc_id,
+        target_workspace_id,
         documents_dir=DOCUMENTS_DIR,
         document_dir_fn=document_dir,
         load_document_meta_fn=load_document_meta,
@@ -561,12 +559,12 @@ def canonical_review_from_anchor(doc_id, run_id, anchor, *, status="open", comme
     )
 
 
-def reviews_for_single_file_side(source_doc_id, source_run_id, side, target_doc_id, file_run_id):
+def reviews_for_single_file_side(source_workspace_id, source_run_id, side, target_workspace_id, file_run_id):
     return service_reviews_for_single_file_side(
-        source_doc_id,
+        source_workspace_id,
         source_run_id,
         side,
-        target_doc_id,
+        target_workspace_id,
         file_run_id,
         document_run_dir_fn=document_run_dir,
         document_reviews_for_run_fn=document_reviews_for_run,
@@ -575,9 +573,9 @@ def reviews_for_single_file_side(source_doc_id, source_run_id, side, target_doc_
     )
 
 
-def write_single_file_document(doc_id, pdf_path: Path, filename: str, title: str, *, source_doc_id=None, source_run_id=None, source_side="new", replace=False):
+def write_single_file_document(workspace_id, pdf_path: Path, filename: str, title: str, *, source_workspace_id=None, source_run_id=None, source_side="new", replace=False):
     return service_write_single_file_document(
-        doc_id,
+        workspace_id,
         pdf_path,
         filename,
         title,
@@ -588,27 +586,27 @@ def write_single_file_document(doc_id, pdf_path: Path, filename: str, title: str
         normalize_document_title_fn=normalize_document_title,
         save_document_meta_fn=save_document_meta,
         save_document_reviews_fn=save_document_reviews,
-        source_doc_id=source_doc_id,
+        source_workspace_id=source_workspace_id,
         source_run_id=source_run_id,
         source_side=source_side,
         replace=replace,
     )
 
 
-def save_run_side_file(doc_id, run_id, side, *, target_doc_id=None, title=None, overwrite_existing=False):
+def save_run_side_file(workspace_id, run_id, side, *, target_workspace_id=None, title=None, overwrite_existing=False):
     return service_save_run_side_file(
-        doc_id,
+        workspace_id,
         run_id,
         side,
         document_run_dir_fn=document_run_dir,
         run_side_pdf_info_fn=run_side_pdf_info,
-        find_document_id_by_title_fn=find_document_id_by_title,
+        find_workspace_id_by_title_fn=find_workspace_id_by_title,
         load_document_meta_fn=load_document_meta,
         public_report_filename_fn=public_report_filename,
         write_single_file_document_fn=write_single_file_document,
         normalize_document_title_fn=normalize_document_title,
-        document_title_exists_fn=document_title_exists,
-        target_doc_id=target_doc_id,
+        document_title_exists_fn=workspace_title_exists,
+        target_workspace_id=target_workspace_id,
         title=title,
         overwrite_existing=overwrite_existing,
     )
@@ -800,7 +798,6 @@ def create_document_level_review(doc_id, run_id, run_dir: Path, data):
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
         "workspace_id": doc_id,
-        "doc_id": doc_id,
         "status": data.get("status", "open"),
         "created_run_id": run_id,
         "is_floating": False,
@@ -953,20 +950,19 @@ def change_ai_assessment_path(doc_id, run_id):
 
 
 def load_ai_assessment(doc_id, run_id):
-    default_value = {"workspace_id": doc_id, "doc_id": doc_id, "run_id": run_id, "items": []}
+    default_value = {"workspace_id": doc_id, "run_id": run_id, "items": []}
     return read_json(ai_assessment_path(doc_id, run_id), default_value) or default_value
 
 
 def save_ai_assessment(doc_id, run_id, assessment):
     assessment["workspace_id"] = doc_id
-    assessment["doc_id"] = doc_id
     assessment["run_id"] = run_id
     assessment["updated_at"] = utc_now()
     write_json(ai_assessment_path(doc_id, run_id), assessment)
 
 
 def load_change_ai_assessment(doc_id, run_id):
-    default_value = {"workspace_id": doc_id, "doc_id": doc_id, "run_id": run_id, "items": []}
+    default_value = {"workspace_id": doc_id, "run_id": run_id, "items": []}
     return read_json(
         change_ai_assessment_path(doc_id, run_id),
         default_value,
@@ -975,7 +971,6 @@ def load_change_ai_assessment(doc_id, run_id):
 
 def save_change_ai_assessment(doc_id, run_id, assessment):
     assessment["workspace_id"] = doc_id
-    assessment["doc_id"] = doc_id
     assessment["run_id"] = run_id
     assessment["updated_at"] = utc_now()
     write_json(change_ai_assessment_path(doc_id, run_id), assessment)
@@ -1270,7 +1265,7 @@ def document_blueprint_deps():
         "run_meta_for_fn": run_meta_for,
         "overwrite_saved_document_fn": overwrite_saved_document,
         "normalize_document_title_fn": normalize_document_title,
-        "document_title_exists_fn": document_title_exists,
+        "document_title_exists_fn": workspace_title_exists,
         "save_run_side_file_fn": save_run_side_file,
         "document_dir_fn": document_dir,
         "write_json_fn": write_json,
@@ -1299,7 +1294,7 @@ def file_manager_blueprint_deps():
         "list_documents_for_manager_fn": list_documents_for_manager,
         "load_document_meta_fn": load_document_meta,
         "normalize_document_title_fn": normalize_document_title,
-        "document_title_exists_fn": document_title_exists,
+        "document_title_exists_fn": workspace_title_exists,
         "save_document_meta_fn": save_document_meta,
         "document_dir_fn": document_dir,
     }

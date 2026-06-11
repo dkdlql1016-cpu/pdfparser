@@ -21,7 +21,7 @@ def _has_invalid_hex_id(*values: str) -> bool:
 
 def _ids_payload(workspace_id: str):
     value = str(workspace_id or "")
-    return {"workspace_id": value, "doc_id": value}
+    return {"workspace_id": value}
 
 
 def _parse_optional_positive_int(name: str):
@@ -105,7 +105,6 @@ def create_document_blueprint(*, deps):
         created_at = utc_now_fn()
         meta = {
             "workspace_id": doc_id,
-            "doc_id": doc_id,
             "title": title,
             "is_saved": False,
             "created_at": created_at,
@@ -282,10 +281,10 @@ def create_document_blueprint(*, deps):
         if not run_dir.exists():
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
-        source_doc_id = str(data.get("source_workspace_id") or data.get("source_doc_id") or "").strip()
-        if source_doc_id and _has_invalid_hex_id(source_doc_id):
+        source_workspace_id = str(data.get("source_workspace_id") or "").strip()
+        if source_workspace_id and _has_invalid_hex_id(source_workspace_id):
             return jsonify({"error": "invalid source_workspace_id"}), 400
-        source_meta = load_document_meta_fn(source_doc_id) if source_doc_id else None
+        source_meta = load_document_meta_fn(source_workspace_id) if source_workspace_id else None
         if not source_meta:
             return jsonify({"error": "source document not found"}), 404
         source_runs = source_meta.get("runs", []) or []
@@ -293,7 +292,7 @@ def create_document_blueprint(*, deps):
         existing = load_document_reviews_fn(doc_id)
         existing_source_ids = {r.get("source_review_id") for r in existing if r.get("source_review_id")}
         imported = []
-        for review in load_document_reviews_fn(source_doc_id):
+        for review in load_document_reviews_fn(source_workspace_id):
             anchors = review.get("anchors") or {}
             src_anchor = anchors.get(latest_source_run_id) or next(iter(anchors.values()), None)
             word_ids = list((src_anchor or {}).get("word_ids") or review.get("new_word_ids") or [])
@@ -630,14 +629,14 @@ def create_document_blueprint(*, deps):
         if not run_meta:
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
-        target_doc_id = str(data.get("target_workspace_id") or data.get("target_doc_id") or "").strip()
-        if target_doc_id and _has_invalid_hex_id(target_doc_id):
+        target_workspace_id = str(data.get("target_workspace_id") or "").strip()
+        if target_workspace_id and _has_invalid_hex_id(target_workspace_id):
             return jsonify({"error": "invalid target_workspace_id"}), 400
-        if target_doc_id and target_doc_id != doc_id:
-            payload, status = overwrite_saved_document_fn(doc_id, run_id, target_doc_id)
+        if target_workspace_id and target_workspace_id != doc_id:
+            payload, status = overwrite_saved_document_fn(doc_id, run_id, target_workspace_id)
             return jsonify(payload), status
         current_title = normalize_document_title_fn(meta.get("title") or "Workspace")
-        if not bool(meta.get("is_saved")) and document_title_exists_fn(current_title, exclude_doc_id=doc_id):
+        if not bool(meta.get("is_saved")) and document_title_exists_fn(current_title, exclude_workspace_id=doc_id):
             return jsonify({"error": "duplicate title; use Save As with a different name"}), 409
         meta["is_saved"] = True
         meta["title"] = current_title
@@ -652,14 +651,14 @@ def create_document_blueprint(*, deps):
         if not load_document_meta_fn(doc_id):
             return jsonify({"error": "document not found"}), 404
         data = request.get_json(silent=True) or {}
-        target_doc_id = str(data.get("target_workspace_id") or data.get("target_doc_id") or "").strip() or None
-        if target_doc_id and _has_invalid_hex_id(target_doc_id):
+        target_workspace_id = str(data.get("target_workspace_id") or "").strip() or None
+        if target_workspace_id and _has_invalid_hex_id(target_workspace_id):
             return jsonify({"error": "invalid target_workspace_id"}), 400
         payload, status = save_run_side_file_fn(
             doc_id,
             run_id,
             side,
-            target_doc_id=target_doc_id,
+            target_workspace_id=target_workspace_id,
             title=data.get("title"),
             overwrite_existing=bool(data.get("overwrite_existing")),
         )
@@ -687,7 +686,6 @@ def create_document_blueprint(*, deps):
             meta_path = dst_dir / "meta.json"
         meta = read_json_fn(meta_path, {}) or {}
         meta["workspace_id"] = new_doc_id
-        meta["doc_id"] = new_doc_id
         meta["is_saved"] = True
         meta["title"] = new_title[:120]
         meta["created_at"] = utc_now_fn()
@@ -698,7 +696,6 @@ def create_document_blueprint(*, deps):
         reviews = read_json_fn(reviews_path, []) or []
         for review in reviews:
             review["workspace_id"] = new_doc_id
-            review["doc_id"] = new_doc_id
         write_json_fn(dst_dir / "file_manager" / "reviews.json", reviews)
         latest_run_id = (meta.get("runs") or [{}])[-1].get("run_id")
         return jsonify({"saved_as": True, **_ids_payload(new_doc_id), "run_id": latest_run_id, "title": meta.get("title")}), 201

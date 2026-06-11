@@ -22,7 +22,6 @@ def create_seed_document_from_pdf(
     created_at = utc_now_fn()
     meta = {
         "workspace_id": doc_id,
-        "doc_id": doc_id,
         "title": pdf_path.stem,
         "seed_key": seed_key,
         "is_saved": True,
@@ -75,7 +74,7 @@ def ensure_default_file_manager_documents(
             continue
         key = str(meta.get("seed_key") or "").strip()
         if key == seed_key:
-            existing_doc_id = str(meta.get("doc_id") or candidate.name)
+            existing_doc_id = str(meta.get("workspace_id") or candidate.name)
             break
     upsert_seed_document_from_pdf_fn(seed_src, seed_key=seed_key, existing_doc_id=existing_doc_id)
     return True

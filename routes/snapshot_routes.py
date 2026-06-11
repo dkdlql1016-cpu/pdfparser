@@ -19,7 +19,7 @@ def _is_valid_snapshot_id(value: str) -> bool:
 
 def _ids_payload(workspace_id: str):
     value = str(workspace_id or "")
-    return {"workspace_id": value, "doc_id": value}
+    return {"workspace_id": value}
 
 
 def _parse_optional_positive_int(name: str):

@@ -20,9 +20,9 @@ def _workspace_reviews_path(workspace_dir: Path) -> Path:
 
 
 def overwrite_saved_document(
-    source_doc_id,
+    source_workspace_id,
     source_run_id,
-    target_doc_id,
+    target_workspace_id,
     *,
     documents_dir: Path,
     document_dir_fn,
@@ -31,20 +31,19 @@ def overwrite_saved_document(
     utc_now_fn,
     write_json_fn,
 ):
-    source_dir = document_dir_fn(source_doc_id)
-    target_dir = document_dir_fn(target_doc_id)
+    source_dir = document_dir_fn(source_workspace_id)
+    target_dir = document_dir_fn(target_workspace_id)
     if not source_dir.exists():
         return {"error": "source document not found"}, 404
-    target_meta = load_document_meta_fn(target_doc_id)
+    target_meta = load_document_meta_fn(target_workspace_id)
     if not target_meta:
         return {"error": "target document not found"}, 404
-    tmp_dir = documents_dir / f".tmp_overwrite_{target_doc_id}_{uuid.uuid4().hex[:8]}"
+    tmp_dir = documents_dir / f".tmp_overwrite_{target_workspace_id}_{uuid.uuid4().hex[:8]}"
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir, ignore_errors=True)
     shutil.copytree(source_dir, tmp_dir)
     copied_meta = read_json_fn(_workspace_meta_path(tmp_dir), {}) or {}
-    copied_meta["workspace_id"] = target_doc_id
-    copied_meta["doc_id"] = target_doc_id
+    copied_meta["workspace_id"] = target_workspace_id
     copied_meta["is_saved"] = True
     copied_meta["title"] = target_meta.get("title") or copied_meta.get("title") or "Workspace"
     runs = copied_meta.get("runs", []) or []
@@ -58,8 +57,7 @@ def overwrite_saved_document(
     write_json_fn(tmp_dir / "file_manager" / "meta.json", copied_meta)
     reviews = read_json_fn(_workspace_reviews_path(tmp_dir), []) or []
     for review in reviews:
-        review["workspace_id"] = target_doc_id
-        review["doc_id"] = target_doc_id
+        review["workspace_id"] = target_workspace_id
     write_json_fn(tmp_dir / "file_manager" / "reviews.json", reviews)
     if target_dir.exists():
         shutil.rmtree(target_dir, ignore_errors=True)
@@ -68,8 +66,7 @@ def overwrite_saved_document(
     return {
         "saved": True,
         "overwritten": True,
-        "workspace_id": target_doc_id,
-        "doc_id": target_doc_id,
+        "workspace_id": target_workspace_id,
         "run_id": source_run_id or latest_run_id,
         "title": copied_meta.get("title"),
     }, 200
@@ -102,7 +99,7 @@ def run_side_pdf_info(
 
 
 def canonical_review_from_anchor(
-    doc_id,
+    workspace_id,
     run_id,
     anchor,
     *,
@@ -119,8 +116,7 @@ def canonical_review_from_anchor(
     return {
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
-        "workspace_id": doc_id,
-        "doc_id": doc_id,
+        "workspace_id": workspace_id,
         "status": status or "open",
         "created_run_id": run_id,
         "is_floating": False,
@@ -135,10 +131,10 @@ def canonical_review_from_anchor(
 
 
 def reviews_for_single_file_side(
-    source_doc_id,
+    source_workspace_id,
     source_run_id,
     side,
-    target_doc_id,
+    target_workspace_id,
     file_run_id,
     *,
     document_run_dir_fn,
@@ -148,10 +144,10 @@ def reviews_for_single_file_side(
 ):
     """Copy the reviews shown on one side of a run into a saved single-file document."""
     side_norm = "old" if side in ("old", "prev", "previous") else "new"
-    source_run_dir = document_run_dir_fn(source_doc_id, source_run_id)
+    source_run_dir = document_run_dir_fn(source_workspace_id, source_run_id)
     out = []
     seen_source_ids = set()
-    for proj in document_reviews_for_run_fn(source_doc_id, source_run_id):
+    for proj in document_reviews_for_run_fn(source_workspace_id, source_run_id):
         ids = list((proj.get("old_word_ids") if side_norm == "old" else proj.get("new_word_ids")) or [])
         if not ids:
             continue
@@ -167,7 +163,7 @@ def reviews_for_single_file_side(
         anchor["new_word_ids"] = list(anchor.get("word_ids") or ids)
         out.append(
             canonical_review_from_anchor_fn(
-                target_doc_id,
+                target_workspace_id,
                 file_run_id,
                 anchor,
                 status=proj.get("status", "open"),
@@ -182,7 +178,7 @@ def reviews_for_single_file_side(
 
 
 def write_single_file_document(
-    doc_id,
+    workspace_id,
     pdf_path: Path,
     filename: str,
     title: str,
@@ -194,32 +190,31 @@ def write_single_file_document(
     normalize_document_title_fn,
     save_document_meta_fn,
     save_document_reviews_fn,
-    source_doc_id=None,
+    source_workspace_id=None,
     source_run_id=None,
     source_side="new",
     replace=False,
 ):
-    doc_path = document_dir_fn(doc_id)
+    doc_path = document_dir_fn(workspace_id)
     run_id = uuid.uuid4().hex[:12]
     reviews = (
-        reviews_for_single_file_side_fn(source_doc_id, source_run_id, source_side, doc_id, run_id)
-        if source_doc_id and source_run_id
+        reviews_for_single_file_side_fn(source_workspace_id, source_run_id, source_side, workspace_id, run_id)
+        if source_workspace_id and source_run_id
         else []
     )
     if replace and doc_path.exists():
         shutil.rmtree(doc_path, ignore_errors=True)
-    run_dir = document_run_dir_fn(doc_id, run_id)
+    run_dir = document_run_dir_fn(workspace_id, run_id)
     run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
     shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
     now = utc_now_fn()
     meta = {
-        "workspace_id": doc_id,
-        "doc_id": doc_id,
+        "workspace_id": workspace_id,
         "title": normalize_document_title_fn(title)[:120] or Path(filename).stem or "Workspace",
         "is_saved": True,
         "created_at": now,
         "updated_at": now,
-        "source_doc_id": source_doc_id,
+        "source_workspace_id": source_workspace_id,
         "source_run_id": source_run_id,
         "runs": [
             {
@@ -235,38 +230,38 @@ def write_single_file_document(
     }
     save_document_meta_fn(meta)
     if reviews:
-        save_document_reviews_fn(doc_id, reviews)
+        save_document_reviews_fn(workspace_id, reviews)
     return meta, run_id
 
 
 def save_run_side_file(
-    doc_id,
+    workspace_id,
     run_id,
     side,
     *,
     document_run_dir_fn,
     run_side_pdf_info_fn,
-    find_document_id_by_title_fn,
+    find_workspace_id_by_title_fn,
     load_document_meta_fn,
     public_report_filename_fn,
     write_single_file_document_fn,
     normalize_document_title_fn,
     document_title_exists_fn,
-    target_doc_id=None,
+    target_workspace_id=None,
     title=None,
     overwrite_existing=False,
 ):
-    run_dir = document_run_dir_fn(doc_id, run_id)
-    pdf_path, filename = run_side_pdf_info_fn(doc_id, run_id, run_dir, side)
+    run_dir = document_run_dir_fn(workspace_id, run_id)
+    pdf_path, filename = run_side_pdf_info_fn(workspace_id, run_id, run_dir, side)
     if not pdf_path or not pdf_path.exists():
         return {"error": "report file not found for side"}, 404
 
     # Save (without an explicit target) onto an existing name overwrites that document.
-    if not target_doc_id and overwrite_existing and title:
-        target_doc_id = find_document_id_by_title_fn(title)
+    if not target_workspace_id and overwrite_existing and title:
+        target_workspace_id = find_workspace_id_by_title_fn(title)
 
-    if target_doc_id:
-        target_meta = load_document_meta_fn(target_doc_id)
+    if target_workspace_id:
+        target_meta = load_document_meta_fn(target_workspace_id)
         if not target_meta:
             return {"error": "target document not found"}, 404
         target_runs = target_meta.get("runs", []) or []
@@ -274,11 +269,11 @@ def save_run_side_file(
         save_title = target_meta.get("title") or title or Path(filename).stem
         save_filename = public_report_filename_fn(target_meta, target_latest) or filename
         meta, new_run_id = write_single_file_document_fn(
-            target_doc_id,
+            target_workspace_id,
             pdf_path,
             save_filename,
             save_title,
-            source_doc_id=doc_id,
+            source_workspace_id=workspace_id,
             source_run_id=run_id,
             source_side=side,
             replace=True,
@@ -286,8 +281,7 @@ def save_run_side_file(
         return {
             "saved": True,
             "overwritten": True,
-            "workspace_id": target_doc_id,
-            "doc_id": target_doc_id,
+            "workspace_id": target_workspace_id,
             "run_id": new_run_id,
             "title": meta.get("title"),
         }, 200
@@ -296,21 +290,20 @@ def save_run_side_file(
     if document_title_exists_fn(save_title):
         return {"error": "duplicate title"}, 409
     save_filename = save_title if save_title.lower().endswith(".pdf") else f"{save_title}.pdf"
-    new_doc_id = uuid.uuid4().hex[:12]
+    new_workspace_id = uuid.uuid4().hex[:12]
     meta, new_run_id = write_single_file_document_fn(
-        new_doc_id,
+        new_workspace_id,
         pdf_path,
         save_filename,
         save_title,
-        source_doc_id=doc_id,
+        source_workspace_id=workspace_id,
         source_run_id=run_id,
         source_side=side,
     )
     return {
         "saved": True,
         "created": True,
-        "workspace_id": new_doc_id,
-        "doc_id": new_doc_id,
+        "workspace_id": new_workspace_id,
         "run_id": new_run_id,
         "title": meta.get("title"),
     }, 201

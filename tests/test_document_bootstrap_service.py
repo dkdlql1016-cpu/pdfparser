@@ -44,7 +44,7 @@ class DocumentBootstrapServiceTests(unittest.TestCase):
             write_json(
                 existing / "file_manager" / "meta.json",
                 {
-                    "doc_id": "abcdef123456",
+                    "workspace_id": "abcdef123456",
                     "title": "Uploaded",
                     "runs": [{"filename": "Uploaded.pdf"}],
                 },
@@ -78,7 +78,7 @@ class DocumentBootstrapServiceTests(unittest.TestCase):
             write_json(
                 existing_seed / "file_manager" / "meta.json",
                 {
-                    "doc_id": "seedonly12345",
+                    "workspace_id": "seedonly12345",
                     "seed_key": "Report_v1.pdf",
                     "runs": [{"filename": "Report_v1.pdf"}],
                 },

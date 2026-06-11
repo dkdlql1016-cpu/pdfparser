@@ -12,7 +12,7 @@ def _is_valid_hex_id(value: str) -> bool:
 
 def _ids_payload(workspace_id: str):
     value = str(workspace_id or "")
-    return {"workspace_id": value, "doc_id": value}
+    return {"workspace_id": value}
 
 
 def create_file_manager_blueprint(*, deps):
@@ -42,7 +42,7 @@ def create_file_manager_blueprint(*, deps):
         if not title:
             return jsonify({"error": "title is required"}), 400
         title = normalize_document_title_fn(title[:120])
-        if document_title_exists_fn(title, exclude_doc_id=doc_id):
+        if document_title_exists_fn(title, exclude_workspace_id=doc_id):
             return jsonify({"error": "duplicate title"}), 409
         meta["title"] = title
         save_document_meta_fn(meta)

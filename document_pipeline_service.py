@@ -95,7 +95,6 @@ def process_single_document_run(
 
     viewer_data = {
         "workspace_id": doc_id,
-        "doc_id": doc_id,
         "run_id": run_id,
         "mode": "single",
         "app_version": "documents-phase2-v1",
@@ -189,7 +188,6 @@ def process_document_diff_run(
 
     viewer_data = {
         "workspace_id": doc_id,
-        "doc_id": doc_id,
         "run_id": run_id,
         "mode": "diff",
         "app_version": "documents-phase2-v1",

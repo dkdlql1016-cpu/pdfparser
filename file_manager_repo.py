@@ -42,8 +42,7 @@ def list_documents_for_manager(documents_dir: Path, *, read_json_fn, normalize_d
             normalize_document_title_fn=normalize_document_title_fn,
         )
         raw_items.append({
-            "workspace_id": meta.get("workspace_id") or meta.get("doc_id") or candidate.name,
-            "doc_id": meta.get("doc_id") or candidate.name,
+            "workspace_id": meta.get("workspace_id") or candidate.name,
             "title": meta.get("title") or (latest.get("filename") or "Workspace"),
             "name": public_filename,
             "created_at": meta.get("created_at"),
@@ -96,7 +95,7 @@ def is_saved_or_seed_meta(meta):
     return is_saved or bool(meta.get("seed_key"))
 
 
-def find_document_id_by_title(title: str, documents_dir: Path, *, read_json_fn, normalize_document_title_fn, exclude_doc_id: str = None):
+def find_workspace_id_by_title(title: str, documents_dir: Path, *, read_json_fn, normalize_document_title_fn, exclude_workspace_id: str = None):
     wanted = normalize_document_title_fn(title).casefold()
     if not wanted or not documents_dir.exists():
         return None
@@ -104,20 +103,20 @@ def find_document_id_by_title(title: str, documents_dir: Path, *, read_json_fn, 
         meta = read_json_fn(_meta_path(candidate), None)
         if not is_saved_or_seed_meta(meta):
             continue
-        doc_id = str(meta.get("doc_id") or candidate.name)
-        if exclude_doc_id and doc_id == exclude_doc_id:
+        workspace_id = str(meta.get("workspace_id") or candidate.name)
+        if exclude_workspace_id and workspace_id == exclude_workspace_id:
             continue
         current_title = normalize_document_title_fn(meta.get("title") or "").casefold()
         if current_title and current_title == wanted:
-            return doc_id
+            return workspace_id
     return None
 
 
-def document_title_exists(title: str, documents_dir: Path, *, read_json_fn, normalize_document_title_fn, exclude_doc_id: str = None):
-    return find_document_id_by_title(
+def workspace_title_exists(title: str, documents_dir: Path, *, read_json_fn, normalize_document_title_fn, exclude_workspace_id: str = None):
+    return find_workspace_id_by_title(
         title,
         documents_dir,
         read_json_fn=read_json_fn,
         normalize_document_title_fn=normalize_document_title_fn,
-        exclude_doc_id=exclude_doc_id,
+        exclude_workspace_id=exclude_workspace_id,
     ) is not None

@@ -405,7 +405,7 @@ function closeFileManager(){const dlg=$('#fmDialog');if(dlg)dlg.style.display='n
 window.closeFileManager=closeFileManager;
 
 async function fetchManagerReportFile(item){
-  const workspaceId=item?.workspace_id||item?.doc_id;
+  const workspaceId=item?.workspace_id;
   if(!workspaceId||!item?.latest_run_id)throw new Error('No available file');
   const fileRes=await fetch(`/api/documents/${workspaceId}/runs/${item.latest_run_id}/file/report`);
   if(!fileRes.ok)throw new Error('Failed to fetch file from manager');
@@ -432,7 +432,7 @@ async function runCreateWithBlob(blob,fileName){
     const res=await fetch('/api/documents',{method:'POST',body:fd});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||res.status);
-    DOC_ID=data.workspace_id||data.doc_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
+    DOC_ID=data.workspace_id; RUN_ID=data.run_id; LIVE_RUN_ID=data.run_id; SNAPSHOT_ID=null; READ_ONLY=false; setDirty(false); DATA=data.result;
     if(sourceWorkspaceId){
       await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/import-reviews`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_workspace_id:sourceWorkspaceId})});
     }
@@ -451,7 +451,7 @@ async function compareWithManagerFile(item){
   try{
     const file=await fetchManagerReportFile(item);
     PENDING_UPDATE_FILE=file;
-    UPDATE_SAVE_TARGET_WORKSPACE_ID=item.workspace_id||item.doc_id||null;
+    UPDATE_SAVE_TARGET_WORKSPACE_ID=item.workspace_id||null;
     UPDATE_UPLOAD_NAME=file.name||UPDATE_UPLOAD_NAME;
     updateUploadFileNames();
     closeFileManager();
@@ -463,8 +463,8 @@ async function useManagerFileAsBase(item){
   try{
     const file=await fetchManagerReportFile(item);
     PENDING_BASE_FILE=file;
-    PENDING_BASE_SOURCE_WORKSPACE_ID=item.workspace_id||item.doc_id||null;
-    SAVE_TARGET_WORKSPACE_ID=item.workspace_id||item.doc_id||null;
+    PENDING_BASE_SOURCE_WORKSPACE_ID=item.workspace_id||null;
+    SAVE_TARGET_WORKSPACE_ID=item.workspace_id||null;
     BASE_UPLOAD_NAME=file.name||BASE_UPLOAD_NAME;
     updateUploadFileNames();
     closeFileManager();
@@ -473,7 +473,7 @@ async function useManagerFileAsBase(item){
 }
 
 async function renameFileManagerItem(docId){
-  const item=(window.__fmItems||[]).find(x=>(x.workspace_id||x.doc_id)===docId);
+  const item=(window.__fmItems||[]).find(x=>x.workspace_id===docId);
   if(!item)return;
   const title=prompt('Rename workspace', item.title||item.name||'Workspace');
   if(title===null)return;
@@ -510,14 +510,14 @@ async function renderFileManager(mode){
     const data=await res.json();
     const items=data.items||[];
     if(!items.length){wrap.innerHTML='<div class="empty">No files in manager.</div>';return}
-    wrap.innerHTML=`<table class="fmTable"><thead><tr><th>Name</th><th>Imported on</th><th>Runs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${items.map(item=>{const name=escapeHtml(item.latest_filename||item.name||'report.pdf');const date=escapeHtml(formatDate(item.updated_at||item.created_at));const status=escapeHtml(item.latest_status||'-');const runId=escapeHtmlAttr(item.latest_run_id||'');const workspaceId=escapeHtmlAttr(item.workspace_id||item.doc_id||'');const useBtn=`<button type="button" data-fm-action="select" data-doc-id="${workspaceId}" data-run-id="${runId}">Select</button>`;const manageBtns=`<button type="button" data-fm-action="rename" data-doc-id="${workspaceId}">Rename</button><button type="button" data-fm-action="delete" data-doc-id="${workspaceId}">Delete</button><button type="button" data-fm-action="export" data-doc-id="${workspaceId}" data-run-id="${runId}">Export</button>`;return `<tr><td>${name}</td><td>${date}</td><td>${item.run_count||0}</td><td>${status}</td><td class="fmActions">${mode==='upload'?useBtn:manageBtns}</td></tr>`}).join('')}</tbody></table>`;
+    wrap.innerHTML=`<table class="fmTable"><thead><tr><th>Name</th><th>Imported on</th><th>Runs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${items.map(item=>{const name=escapeHtml(item.latest_filename||item.name||'report.pdf');const date=escapeHtml(formatDate(item.updated_at||item.created_at));const status=escapeHtml(item.latest_status||'-');const runId=escapeHtmlAttr(item.latest_run_id||'');const workspaceId=escapeHtmlAttr(item.workspace_id||'');const useBtn=`<button type="button" data-fm-action="select" data-doc-id="${workspaceId}" data-run-id="${runId}">Select</button>`;const manageBtns=`<button type="button" data-fm-action="rename" data-doc-id="${workspaceId}">Rename</button><button type="button" data-fm-action="delete" data-doc-id="${workspaceId}">Delete</button><button type="button" data-fm-action="export" data-doc-id="${workspaceId}" data-run-id="${runId}">Export</button>`;return `<tr><td>${name}</td><td>${date}</td><td>${item.run_count||0}</td><td>${status}</td><td class="fmActions">${mode==='upload'?useBtn:manageBtns}</td></tr>`}).join('')}</tbody></table>`;
     window.__fmItems=items;
   }catch(e){
     wrap.innerHTML='<div class="empty">Failed to load file manager.</div>';
   }
 }
 function useManagerFileById(docId,runId){
-  const item=(window.__fmItems||[]).find(x=>(x.workspace_id||x.doc_id)===docId&&x.latest_run_id===runId);
+  const item=(window.__fmItems||[]).find(x=>x.workspace_id===docId&&x.latest_run_id===runId);
   if(!item)return;
   if(UPLOAD_CONTEXT==='base')useManagerFileAsBase(item);else compareWithManagerFile(item);
 }
@@ -1426,7 +1426,7 @@ window.saveWorkspace=async function(side='new'){
     const res=await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/save-file/${side}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await res.json();
     if(!res.ok||data.error){toast(data.error==='duplicate title'?'Name already exists. Use Save As':(data.error||'Save failed'));return}
-    if(data.workspace_id||data.doc_id)setSaveTargetForSide(side,data.workspace_id||data.doc_id);
+    if(data.workspace_id)setSaveTargetForSide(side,data.workspace_id);
     toast(data.overwritten?'Saved (overwritten)':'Saved to File Manager');
   }catch(e){toast('Save failed')}
 }
@@ -1441,7 +1441,7 @@ window.saveAsWorkspace=async function(side='new'){
     const res=await fetch(`/api/documents/${DOC_ID}/runs/${RUN_ID}/save-file/${side}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title})});
     const data=await res.json();
     if(!res.ok||data.error){toast(data.error==='duplicate title'?'Name already exists':(data.error||'Save As failed'));return}
-    if(data.workspace_id||data.doc_id)setSaveTargetForSide(side,data.workspace_id||data.doc_id);
+    if(data.workspace_id)setSaveTargetForSide(side,data.workspace_id);
     toast('Saved as new workspace');
   }catch(e){toast('Save As failed')}
 }
