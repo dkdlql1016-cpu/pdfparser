@@ -1,7 +1,7 @@
 # Direct runtime dependencies for this project only.
 # Do not put .venv freeze output here unless we intentionally want a fully locked environment.
 
-Flask>=3.1.3
+Flask>=3.1.3,<4.0
 PyMuPDF>=1.27.0
 opendataloader-pdf>=2.4.7
 anthropic>=0.40.0

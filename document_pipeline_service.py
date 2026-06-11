@@ -26,6 +26,7 @@ def build_chars_from_words(words):
         width = max(0.1, x1 - x0)
         step = width / max(1, len(text))
         for i, ch in enumerate(text):
+            char_x1 = x1 if i == len(text) - 1 else x0 + step * (i + 1)
             chars.append({
                 "idx": len(chars),
                 "char": ch,
@@ -35,7 +36,7 @@ def build_chars_from_words(words):
                 "block": word.get("block"),
                 "line": word.get("line"),
                 "word_no": word.get("word_no"),
-                "bbox": [x0 + step * i, y0, x0 + step * (i + 1), y1],
+                "bbox": [x0 + step * i, y0, char_x1, y1],
                 "order": len(chars),
             })
     return chars

@@ -80,7 +80,7 @@ def run_diff_extract(old_md: Path, new_md: Path, result_json: Path, *, base_dir:
         "--diff-algorithm",
         "histogram",
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="backslashreplace")
     if proc.returncode != 0 or not result_json.exists():
         raise RuntimeError(proc.stderr or proc.stdout or "document_diff_extract.py failed")
     return json.loads(result_json.read_text(encoding="utf-8"))

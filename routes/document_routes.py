@@ -13,6 +13,10 @@ def _is_valid_hex_id(value: str) -> bool:
     return bool(_HEX12_RE.match(value))
 
 
+def _has_invalid_hex_id(*values: str) -> bool:
+    return any(not _is_valid_hex_id(str(value or "")) for value in values)
+
+
 def create_document_blueprint(*, deps):
     get_uploaded_pdf_fn = deps["get_uploaded_pdf_fn"]
     document_run_dir_fn = deps["document_run_dir_fn"]
@@ -55,7 +59,8 @@ def create_document_blueprint(*, deps):
         report_pdf = run_dir / "report.pdf"
         uploaded.save(report_pdf)
 
-        title = request.form.get("title") or Path(uploaded.filename or "report.pdf").stem
+        safe_filename = Path(uploaded.filename or "report.pdf").name or "report.pdf"
+        title = request.form.get("title") or Path(safe_filename).stem
         created_at = utc_now_fn()
         meta = {
             "doc_id": doc_id,
@@ -68,7 +73,7 @@ def create_document_blueprint(*, deps):
                 "kind": "initial",
                 "status": "processing",
                 "created_at": created_at,
-                "filename": uploaded.filename or "report.pdf",
+                "filename": safe_filename,
                 "has_diff": False,
                 "has_ai_assessment": False,
             }],
@@ -81,7 +86,7 @@ def create_document_blueprint(*, deps):
                 report_pdf,
                 doc_id=doc_id,
                 run_id=run_id,
-                filename=uploaded.filename or "report.pdf",
+                filename=safe_filename,
             )
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
@@ -94,6 +99,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>")
     def get_document(doc_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -101,12 +108,16 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/reviews", methods=["GET"])
     def list_document_level_reviews(doc_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         if not load_document_meta_fn(doc_id):
             return jsonify({"error": "document not found"}), 404
         return jsonify(load_document_reviews_fn(doc_id))
 
     @bp.route("/api/documents/<doc_id>/reviews/<review_id>", methods=["PATCH"])
     def patch_document_level_review(doc_id, review_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         patch = request.get_json(force=True) or {}
         reviews = load_document_reviews_fn(doc_id)
         updated = None
@@ -125,6 +136,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/reviews/<review_id>", methods=["DELETE"])
     def delete_document_level_review(doc_id, review_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         reviews = load_document_reviews_fn(doc_id)
         kept = [r for r in reviews if r.get("review_id") != review_id]
         if len(kept) == len(reviews):
@@ -134,6 +147,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/reviews/<review_id>/comments", methods=["POST"])
     def add_document_level_comment(doc_id, review_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         data = request.get_json(force=True) or {}
         reviews = load_document_reviews_fn(doc_id)
         updated = None
@@ -155,6 +170,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs", methods=["POST"])
     def create_document_run(doc_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -181,13 +198,14 @@ def create_document_blueprint(*, deps):
 
         report_pdf = run_dir / "report.pdf"
         uploaded.save(report_pdf)
+        safe_filename = Path(uploaded.filename or "report.pdf").name or "report.pdf"
         created_at = utc_now_fn()
         run_meta = {
             "run_id": run_id,
             "kind": "update",
             "status": "processing",
             "created_at": created_at,
-            "filename": uploaded.filename or "report.pdf",
+            "filename": safe_filename,
             "previous_run_id": prev_run_id,
             "has_diff": False,
             "has_ai_assessment": False,
@@ -201,7 +219,7 @@ def create_document_blueprint(*, deps):
                 report_pdf,
                 doc_id=doc_id,
                 run_id=run_id,
-                filename=uploaded.filename or "report.pdf",
+                filename=safe_filename,
             )
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
@@ -214,6 +232,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/import-reviews", methods=["POST"])
     def import_document_reviews(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         if not load_document_meta_fn(doc_id):
             return jsonify({"error": "document not found"}), 404
         run_dir = document_run_dir_fn(doc_id, run_id)
@@ -221,6 +241,8 @@ def create_document_blueprint(*, deps):
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
         source_doc_id = str(data.get("source_doc_id") or "").strip()
+        if source_doc_id and _has_invalid_hex_id(source_doc_id):
+            return jsonify({"error": "invalid source_doc_id"}), 400
         source_meta = load_document_meta_fn(source_doc_id) if source_doc_id else None
         if not source_meta:
             return jsonify({"error": "source document not found"}), 404
@@ -259,6 +281,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/diff", methods=["POST"])
     def diff_document_run(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -277,6 +301,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>")
     def get_document_run(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         run_dir = document_run_dir_fn(doc_id, run_id)
         viewer_path = run_dir / "viewer_data.json"
         if not viewer_path.exists():
@@ -332,12 +358,16 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["GET"])
     def list_document_reviews(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         reviews = document_reviews_for_run_fn(doc_id, run_id)
         semantic.save_reviews(document_run_dir_fn(doc_id, run_id), reviews)
         return jsonify(reviews)
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["POST"])
     def create_document_review(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         run_dir = document_run_dir_fn(doc_id, run_id)
         if not run_dir.exists():
             return jsonify({"error": "run not found"}), 404
@@ -348,6 +378,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["PATCH"])
     def patch_document_review(doc_id, run_id, review_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         patch = request.get_json(force=True) or {}
         reviews = load_document_reviews_fn(doc_id)
         updated = None
@@ -367,6 +399,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>", methods=["DELETE"])
     def remove_document_review(doc_id, run_id, review_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         reviews = load_document_reviews_fn(doc_id)
         kept = [r for r in reviews if r.get("review_id") != review_id]
         if len(kept) == len(reviews):
@@ -377,6 +411,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>/comments", methods=["POST"])
     def add_document_review_comment(doc_id, run_id, review_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         data = request.get_json(force=True) or {}
         reviews = load_document_reviews_fn(doc_id)
         updated = None
@@ -399,6 +435,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews/<review_id>/comments/<comment_id>", methods=["PATCH"])
     def patch_document_review_comment(doc_id, run_id, review_id, comment_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         data = request.get_json(force=True) or {}
         text = str(data.get("text", "")).strip()
         if not text:
@@ -427,6 +465,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/export/<side>")
     def export_document_pdf(doc_id, run_id, side):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         if side in ("new", "report", "current"):
             compat_side = "new"
         elif side in ("old", "prev", "previous"):
@@ -453,6 +493,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/workspace")
     def document_workspace(doc_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -472,6 +514,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/file/report")
     def document_report_file(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         path = document_run_dir_fn(doc_id, run_id) / "report.pdf"
         if not path.exists():
             return jsonify({"error": "report.pdf not found"}), 404
@@ -479,6 +523,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/save", methods=["POST"])
     def save_document_run(doc_id, run_id):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -487,6 +533,8 @@ def create_document_blueprint(*, deps):
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
         target_doc_id = str(data.get("target_doc_id") or "").strip()
+        if target_doc_id and _has_invalid_hex_id(target_doc_id):
+            return jsonify({"error": "invalid target_doc_id"}), 400
         if target_doc_id and target_doc_id != doc_id:
             payload, status = overwrite_saved_document_fn(doc_id, run_id, target_doc_id)
             return jsonify(payload), status
@@ -501,14 +549,19 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/save-file/<side>", methods=["POST"])
     def save_document_run_file(doc_id, run_id, side):
+        if _has_invalid_hex_id(doc_id, run_id):
+            return jsonify({"error": "invalid id"}), 400
         if not load_document_meta_fn(doc_id):
             return jsonify({"error": "document not found"}), 404
         data = request.get_json(silent=True) or {}
+        target_doc_id = str(data.get("target_doc_id") or "").strip() or None
+        if target_doc_id and _has_invalid_hex_id(target_doc_id):
+            return jsonify({"error": "invalid target_doc_id"}), 400
         payload, status = save_run_side_file_fn(
             doc_id,
             run_id,
             side,
-            target_doc_id=str(data.get("target_doc_id") or "").strip() or None,
+            target_doc_id=target_doc_id,
             title=data.get("title"),
             overwrite_existing=bool(data.get("overwrite_existing")),
         )
@@ -516,6 +569,8 @@ def create_document_blueprint(*, deps):
 
     @bp.route("/api/documents/<doc_id>/save-as", methods=["POST"])
     def save_document_as(doc_id):
+        if _has_invalid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         source_meta = load_document_meta_fn(doc_id)
         if not source_meta:
             return jsonify({"error": "document not found"}), 404

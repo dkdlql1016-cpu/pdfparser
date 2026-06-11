@@ -1,6 +1,13 @@
 import shutil
+import re
 
 from flask import Blueprint, jsonify, request
+
+_HEX12_RE = re.compile(r"^[0-9a-f]{12}$")
+
+
+def _is_valid_hex_id(value: str) -> bool:
+    return bool(_HEX12_RE.match(value or ""))
 
 
 def create_file_manager_blueprint(*, deps):
@@ -20,6 +27,8 @@ def create_file_manager_blueprint(*, deps):
 
     @bp.route("/api/file-manager/<doc_id>", methods=["PATCH"])
     def file_manager_rename(doc_id):
+        if not _is_valid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         meta = load_document_meta_fn(doc_id)
         if not meta:
             return jsonify({"error": "document not found"}), 404
@@ -36,6 +45,8 @@ def create_file_manager_blueprint(*, deps):
 
     @bp.route("/api/file-manager/<doc_id>", methods=["DELETE"])
     def file_manager_delete(doc_id):
+        if not _is_valid_hex_id(doc_id):
+            return jsonify({"error": "invalid id"}), 400
         path = document_dir_fn(doc_id)
         try:
             shutil.rmtree(path)
