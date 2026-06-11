@@ -70,6 +70,7 @@ def create_run_snapshot(
     created_at = utc_now_fn()
     snapshot_meta = {
         "snapshot_id": snapshot_id,
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "run_id": run_id,
         "created_at": created_at,

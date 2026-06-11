@@ -36,7 +36,7 @@ On file-manager bootstrap, the app uses only one default seed source (`DEFAULT_F
 4. Generate word-level diff output through `document_diff_extract.py`.
 5. Align markdown diff segments to PDF word bounding boxes.
 6. Add document-level review comments anchored to selected PDF text.
-7. Store report versions under `documents/<doc_id>/runs/<run_id>`.
+7. Store report versions under `documents/workspaces/<workspace_id>/runs/<run_id>`.
 8. Export PDF annotations from saved reviews.
 
 ## OpenDataLoader Configuration

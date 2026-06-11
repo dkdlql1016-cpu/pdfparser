@@ -163,9 +163,11 @@ from section_context_utils import (
 from storage_utils import (
     document_dir as _document_dir,
     document_meta_path as _document_meta_path,
+    document_reviews_path as _document_reviews_path,
     document_run_dir as _document_run_dir,
     document_snapshot_dir as _document_snapshot_dir,
     document_snapshots_dir as _document_snapshots_dir,
+    migrate_legacy_workspaces as _migrate_legacy_workspaces,
     read_json as _read_json,
     utc_now as _utc_now,
     write_json as _write_json,
@@ -179,6 +181,7 @@ DOCUMENTS_DIR = BASE_DIR / "documents"
 INPUT_DIR = BASE_DIR / "input"
 DEFAULT_FILE_MANAGER_INPUTS = ("Report_v1.pdf", "Report_v2.pdf")
 DOCUMENTS_DIR.mkdir(exist_ok=True)
+_migrate_legacy_workspaces(DOCUMENTS_DIR)
 
 app = Flask(__name__)
 DEFAULT_FILE_MANAGER_SEEDED = False
@@ -413,12 +416,22 @@ def document_meta_path(doc_id):
 
 
 def load_document_meta(doc_id):
-    return read_json(document_meta_path(doc_id))
+    meta = read_json(document_meta_path(doc_id))
+    if meta:
+        canonical_id = str(meta.get("workspace_id") or meta.get("doc_id") or doc_id)
+        meta["workspace_id"] = canonical_id
+        meta["doc_id"] = canonical_id
+    return meta
 
 
 def save_document_meta(meta):
+    canonical_id = str(meta.get("workspace_id") or meta.get("doc_id") or "")
+    if not canonical_id:
+        raise ValueError("workspace_id is required")
+    meta["workspace_id"] = canonical_id
+    meta["doc_id"] = canonical_id
     meta["updated_at"] = utc_now()
-    write_json(document_meta_path(meta["doc_id"]), meta)
+    write_json(document_meta_path(canonical_id), meta)
 
 
 def create_seed_document_from_pdf(pdf_path: Path, *, seed_key: str):
@@ -675,7 +688,7 @@ def document_semantic_map(doc_id, run_id):
 
 
 def document_reviews_path(doc_id):
-    return document_dir(doc_id) / "reviews.json"
+    return _document_reviews_path(DOCUMENTS_DIR, doc_id)
 
 
 def load_document_reviews(doc_id):
@@ -786,6 +799,7 @@ def create_document_level_review(doc_id, run_id, run_dir: Path, data):
     review = {
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "status": data.get("status", "open"),
         "created_run_id": run_id,
@@ -939,10 +953,12 @@ def change_ai_assessment_path(doc_id, run_id):
 
 
 def load_ai_assessment(doc_id, run_id):
-    return read_json(ai_assessment_path(doc_id, run_id), {"doc_id": doc_id, "run_id": run_id, "items": []}) or {"doc_id": doc_id, "run_id": run_id, "items": []}
+    default_value = {"workspace_id": doc_id, "doc_id": doc_id, "run_id": run_id, "items": []}
+    return read_json(ai_assessment_path(doc_id, run_id), default_value) or default_value
 
 
 def save_ai_assessment(doc_id, run_id, assessment):
+    assessment["workspace_id"] = doc_id
     assessment["doc_id"] = doc_id
     assessment["run_id"] = run_id
     assessment["updated_at"] = utc_now()
@@ -950,13 +966,15 @@ def save_ai_assessment(doc_id, run_id, assessment):
 
 
 def load_change_ai_assessment(doc_id, run_id):
+    default_value = {"workspace_id": doc_id, "doc_id": doc_id, "run_id": run_id, "items": []}
     return read_json(
         change_ai_assessment_path(doc_id, run_id),
-        {"doc_id": doc_id, "run_id": run_id, "items": []},
-    ) or {"doc_id": doc_id, "run_id": run_id, "items": []}
+        default_value,
+    ) or default_value
 
 
 def save_change_ai_assessment(doc_id, run_id, assessment):
+    assessment["workspace_id"] = doc_id
     assessment["doc_id"] = doc_id
     assessment["run_id"] = run_id
     assessment["updated_at"] = utc_now()

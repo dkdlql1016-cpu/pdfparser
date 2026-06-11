@@ -1,5 +1,14 @@
 from pathlib import Path
 
+from storage_utils import iter_workspace_dirs
+
+
+def _meta_path(workspace_dir: Path) -> Path:
+    preferred = workspace_dir / "file_manager" / "meta.json"
+    if preferred.exists():
+        return preferred
+    return workspace_dir / "meta.json"
+
 
 def public_report_filename(meta, run_meta, *, normalize_document_title_fn):
     filename = str((run_meta or {}).get("filename") or "").strip()
@@ -15,10 +24,8 @@ def list_documents_for_manager(documents_dir: Path, *, read_json_fn, normalize_d
     raw_items = []
     if not documents_dir.exists():
         return raw_items
-    for candidate in documents_dir.iterdir():
-        if not candidate.is_dir():
-            continue
-        meta = read_json_fn(candidate / "meta.json", None)
+    for candidate in iter_workspace_dirs(documents_dir):
+        meta = read_json_fn(_meta_path(candidate), None)
         if not meta:
             continue
         # Backward compatibility: older documents may not have is_saved.
@@ -35,6 +42,7 @@ def list_documents_for_manager(documents_dir: Path, *, read_json_fn, normalize_d
             normalize_document_title_fn=normalize_document_title_fn,
         )
         raw_items.append({
+            "workspace_id": meta.get("workspace_id") or meta.get("doc_id") or candidate.name,
             "doc_id": meta.get("doc_id") or candidate.name,
             "title": meta.get("title") or (latest.get("filename") or "Workspace"),
             "name": public_filename,
@@ -92,10 +100,8 @@ def find_document_id_by_title(title: str, documents_dir: Path, *, read_json_fn, 
     wanted = normalize_document_title_fn(title).casefold()
     if not wanted or not documents_dir.exists():
         return None
-    for candidate in documents_dir.iterdir():
-        if not candidate.is_dir():
-            continue
-        meta = read_json_fn(candidate / "meta.json", None)
+    for candidate in iter_workspace_dirs(documents_dir):
+        meta = read_json_fn(_meta_path(candidate), None)
         if not is_saved_or_seed_meta(meta):
             continue
         doc_id = str(meta.get("doc_id") or candidate.name)

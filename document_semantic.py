@@ -151,7 +151,9 @@ def load_reviews(run_dir):
 
 
 def save_reviews(run_dir, reviews):
-    _reviews_path(run_dir).write_text(json.dumps(reviews, ensure_ascii=False, indent=2), encoding="utf-8")
+    path = _reviews_path(run_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(reviews, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def add_review(run_dir, semantic_map, data):

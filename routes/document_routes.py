@@ -19,6 +19,11 @@ def _has_invalid_hex_id(*values: str) -> bool:
     return any(not _is_valid_hex_id(str(value or "")) for value in values)
 
 
+def _ids_payload(workspace_id: str):
+    value = str(workspace_id or "")
+    return {"workspace_id": value, "doc_id": value}
+
+
 def _parse_optional_positive_int(name: str):
     raw = request.args.get(name)
     if raw is None or raw == "":
@@ -99,6 +104,7 @@ def create_document_blueprint(*, deps):
         title = request.form.get("title") or Path(safe_filename).stem
         created_at = utc_now_fn()
         meta = {
+            "workspace_id": doc_id,
             "doc_id": doc_id,
             "title": title,
             "is_saved": False,
@@ -127,11 +133,11 @@ def create_document_blueprint(*, deps):
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
             save_document_meta_fn(meta)
-            return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+            return jsonify({"error": str(e), **_ids_payload(doc_id), "run_id": run_id}), 500
 
         update_run_meta_fn(meta, run_id, status="ready")
         save_document_meta_fn(meta)
-        return jsonify({"doc_id": doc_id, "run_id": run_id, "meta": meta, "result": viewer_data}), 201
+        return jsonify({**_ids_payload(doc_id), "run_id": run_id, "meta": meta, "result": viewer_data}), 201
 
     @bp.route("/api/documents/<doc_id>")
     def get_document(doc_id):
@@ -260,11 +266,11 @@ def create_document_blueprint(*, deps):
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
             save_document_meta_fn(meta)
-            return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+            return jsonify({"error": str(e), **_ids_payload(doc_id), "run_id": run_id}), 500
 
         update_run_meta_fn(meta, run_id, status="ready")
         save_document_meta_fn(meta)
-        return jsonify({"doc_id": doc_id, "run_id": run_id, "previous_run_id": prev_run_id, "result": viewer_data}), 201
+        return jsonify({**_ids_payload(doc_id), "run_id": run_id, "previous_run_id": prev_run_id, "result": viewer_data}), 201
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/import-reviews", methods=["POST"])
     def import_document_reviews(doc_id, run_id):
@@ -276,9 +282,9 @@ def create_document_blueprint(*, deps):
         if not run_dir.exists():
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
-        source_doc_id = str(data.get("source_doc_id") or "").strip()
+        source_doc_id = str(data.get("source_workspace_id") or data.get("source_doc_id") or "").strip()
         if source_doc_id and _has_invalid_hex_id(source_doc_id):
-            return jsonify({"error": "invalid source_doc_id"}), 400
+            return jsonify({"error": "invalid source_workspace_id"}), 400
         source_meta = load_document_meta_fn(source_doc_id) if source_doc_id else None
         if not source_meta:
             return jsonify({"error": "source document not found"}), 404
@@ -330,10 +336,10 @@ def create_document_blueprint(*, deps):
         except Exception as e:
             update_run_meta_fn(meta, run_id, status="error", error=str(e))
             save_document_meta_fn(meta)
-            return jsonify({"error": str(e), "doc_id": doc_id, "run_id": run_id}), 500
+            return jsonify({"error": str(e), **_ids_payload(doc_id), "run_id": run_id}), 500
         update_run_meta_fn(meta, run_id, status="ready", has_diff=True)
         save_document_meta_fn(meta)
-        return jsonify({"doc_id": doc_id, "run_id": run_id, "result": viewer_data})
+        return jsonify({**_ids_payload(doc_id), "run_id": run_id, "result": viewer_data})
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>")
     def get_document_run(doc_id, run_id):
@@ -602,7 +608,7 @@ def create_document_blueprint(*, deps):
                 "has_diff": bool(run_layout.diff_segments_path(run_dir).exists()),
                 "has_ai_assessment": bool(run_layout.review_assessment_path(run_dir).exists()),
             })
-        return jsonify({"doc_id": doc_id, "title": meta.get("title"), "runs": runs})
+        return jsonify({**_ids_payload(doc_id), "title": meta.get("title"), "runs": runs})
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/file/report")
     def document_report_file(doc_id, run_id):
@@ -624,9 +630,9 @@ def create_document_blueprint(*, deps):
         if not run_meta:
             return jsonify({"error": "run not found"}), 404
         data = request.get_json(silent=True) or {}
-        target_doc_id = str(data.get("target_doc_id") or "").strip()
+        target_doc_id = str(data.get("target_workspace_id") or data.get("target_doc_id") or "").strip()
         if target_doc_id and _has_invalid_hex_id(target_doc_id):
-            return jsonify({"error": "invalid target_doc_id"}), 400
+            return jsonify({"error": "invalid target_workspace_id"}), 400
         if target_doc_id and target_doc_id != doc_id:
             payload, status = overwrite_saved_document_fn(doc_id, run_id, target_doc_id)
             return jsonify(payload), status
@@ -637,7 +643,7 @@ def create_document_blueprint(*, deps):
         meta["title"] = current_title
         update_run_meta_fn(meta, run_id, saved_at=utc_now_fn(), status=run_meta.get("status") or "ready")
         save_document_meta_fn(meta)
-        return jsonify({"saved": True, "doc_id": doc_id, "run_id": run_id})
+        return jsonify({"saved": True, **_ids_payload(doc_id), "run_id": run_id})
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/save-file/<side>", methods=["POST"])
     def save_document_run_file(doc_id, run_id, side):
@@ -646,9 +652,9 @@ def create_document_blueprint(*, deps):
         if not load_document_meta_fn(doc_id):
             return jsonify({"error": "document not found"}), 404
         data = request.get_json(silent=True) or {}
-        target_doc_id = str(data.get("target_doc_id") or "").strip() or None
+        target_doc_id = str(data.get("target_workspace_id") or data.get("target_doc_id") or "").strip() or None
         if target_doc_id and _has_invalid_hex_id(target_doc_id):
-            return jsonify({"error": "invalid target_doc_id"}), 400
+            return jsonify({"error": "invalid target_workspace_id"}), 400
         payload, status = save_run_side_file_fn(
             doc_id,
             run_id,
@@ -676,17 +682,25 @@ def create_document_blueprint(*, deps):
         src_dir = document_dir_fn(doc_id)
         dst_dir = document_dir_fn(new_doc_id)
         shutil.copytree(src_dir, dst_dir)
-        meta = read_json_fn(dst_dir / "meta.json", {}) or {}
+        meta_path = dst_dir / "file_manager" / "meta.json"
+        if not meta_path.exists():
+            meta_path = dst_dir / "meta.json"
+        meta = read_json_fn(meta_path, {}) or {}
+        meta["workspace_id"] = new_doc_id
         meta["doc_id"] = new_doc_id
         meta["is_saved"] = True
         meta["title"] = new_title[:120]
         meta["created_at"] = utc_now_fn()
         save_document_meta_fn(meta)
-        reviews = read_json_fn(dst_dir / "reviews.json", []) or []
+        reviews_path = dst_dir / "file_manager" / "reviews.json"
+        if not reviews_path.exists():
+            reviews_path = dst_dir / "reviews.json"
+        reviews = read_json_fn(reviews_path, []) or []
         for review in reviews:
+            review["workspace_id"] = new_doc_id
             review["doc_id"] = new_doc_id
-        write_json_fn(dst_dir / "reviews.json", reviews)
+        write_json_fn(dst_dir / "file_manager" / "reviews.json", reviews)
         latest_run_id = (meta.get("runs") or [{}])[-1].get("run_id")
-        return jsonify({"saved_as": True, "doc_id": new_doc_id, "run_id": latest_run_id, "title": meta.get("title")}), 201
+        return jsonify({"saved_as": True, **_ids_payload(new_doc_id), "run_id": latest_run_id, "title": meta.get("title")}), 201
 
     return bp

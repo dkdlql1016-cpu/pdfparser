@@ -14,14 +14,14 @@ class RunLayoutTests(unittest.TestCase):
 
     def test_paths_are_normalized(self):
         root = Path("run")
-        self.assertEqual(run_layout.source_pdf(root, "new"), Path("run/current/source.pdf"))
-        self.assertEqual(run_layout.source_md(root, "old"), Path("run/previous/source.md"))
-        self.assertEqual(run_layout.words_path(root, "current"), Path("run/current/words.json"))
-        self.assertEqual(run_layout.sections_path(root, "previous"), Path("run/previous/sections.json"))
-        self.assertEqual(run_layout.viewer_path(root), Path("run/viewer.json"))
-        self.assertEqual(run_layout.diff_segments_path(root), Path("run/diff/segments.json"))
-        self.assertEqual(run_layout.review_assessment_path(root), Path("run/ai/review_assessment.json"))
-        self.assertEqual(run_layout.change_assessment_path(root), Path("run/ai/change_assessment.json"))
+        self.assertEqual(run_layout.source_pdf(root, "new"), Path("run/compare/current/source.pdf"))
+        self.assertEqual(run_layout.source_md(root, "old"), Path("run/compare/previous/source.md"))
+        self.assertEqual(run_layout.words_path(root, "current"), Path("run/compare/current/words.json"))
+        self.assertEqual(run_layout.sections_path(root, "previous"), Path("run/compare/previous/sections.json"))
+        self.assertEqual(run_layout.viewer_path(root), Path("run/compare/viewer.json"))
+        self.assertEqual(run_layout.diff_segments_path(root), Path("run/compare/diff/segments.json"))
+        self.assertEqual(run_layout.review_assessment_path(root), Path("run/analysis/review_assessment.json"))
+        self.assertEqual(run_layout.change_assessment_path(root), Path("run/analysis/change_assessment.json"))
         self.assertEqual(run_layout.diff_md_path(root, "old"), Path("run/_cache/diff_md/previous.md"))
 
     def test_invalid_side_raises(self):
@@ -31,7 +31,7 @@ class RunLayoutTests(unittest.TestCase):
     def test_durable_artifacts_exclude_cache(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            keep = root / "current" / "words.json"
+            keep = root / "compare" / "current" / "words.json"
             drop = root / "_cache" / "diff_md" / "current.md"
             keep.parent.mkdir(parents=True)
             drop.parent.mkdir(parents=True)

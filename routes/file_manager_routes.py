@@ -10,6 +10,11 @@ def _is_valid_hex_id(value: str) -> bool:
     return bool(_HEX12_RE.match(value or ""))
 
 
+def _ids_payload(workspace_id: str):
+    value = str(workspace_id or "")
+    return {"workspace_id": value, "doc_id": value}
+
+
 def create_file_manager_blueprint(*, deps):
     ensure_default_file_manager_documents_fn = deps["ensure_default_file_manager_documents_fn"]
     list_documents_for_manager_fn = deps["list_documents_for_manager_fn"]
@@ -41,7 +46,7 @@ def create_file_manager_blueprint(*, deps):
             return jsonify({"error": "duplicate title"}), 409
         meta["title"] = title
         save_document_meta_fn(meta)
-        return jsonify({"renamed": True, "doc_id": doc_id, "title": meta.get("title")})
+        return jsonify({"renamed": True, **_ids_payload(doc_id), "title": meta.get("title")})
 
     @bp.route("/api/file-manager/<doc_id>", methods=["DELETE"])
     def file_manager_delete(doc_id):
@@ -55,8 +60,8 @@ def create_file_manager_blueprint(*, deps):
         except PermissionError:
             return jsonify({"error": "document is locked or access is denied"}), 423
         except OSError as e:
-            current_app.logger.exception("file-manager delete failed: doc_id=%s path=%s error=%s", doc_id, path, e)
+            current_app.logger.exception("file-manager delete failed: workspace_id=%s path=%s error=%s", doc_id, path, e)
             return jsonify({"error": "delete failed due to filesystem error"}), 500
-        return jsonify({"deleted": True, "doc_id": doc_id})
+        return jsonify({"deleted": True, **_ids_payload(doc_id)})
 
     return bp

@@ -10,8 +10,8 @@
 
 ## Endpoints
 
-- `GET /api/documents/<doc_id>/runs/<run_id>/chars/<side>`
-- `GET /api/documents/<doc_id>/snapshots/<snapshot_id>/chars/<side>`
+- `GET /api/documents/<workspace_id>/runs/<run_id>/chars/<side>`
+- `GET /api/documents/<workspace_id>/snapshots/<snapshot_id>/chars/<side>`
 
 ## Query Parameters
 

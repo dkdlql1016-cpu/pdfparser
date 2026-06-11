@@ -94,6 +94,7 @@ def process_single_document_run(
     write_json_fn(run_layout.sections_path(run_dir, "current"), section_map)
 
     viewer_data = {
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "run_id": run_id,
         "mode": "single",
@@ -187,6 +188,7 @@ def process_document_diff_run(
     projected_reviews = document_reviews_for_run_fn(doc_id, run_id) if doc_id else []
 
     viewer_data = {
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "run_id": run_id,
         "mode": "diff",

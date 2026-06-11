@@ -383,6 +383,7 @@ def migrate_previous_review_to_current(
     copied_review = {
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "status": source_review.get("status", "open"),
         "created_run_id": run_id,

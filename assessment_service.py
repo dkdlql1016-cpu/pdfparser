@@ -354,6 +354,7 @@ def forward_change_assessment_to_review_service(
     review = {
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "status": "open",
         "created_run_id": run_id,

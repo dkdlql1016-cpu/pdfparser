@@ -17,7 +17,7 @@
 아래는 사용자가 PDF를 올리고, diff/리뷰/AI 평가까지 가는 실제 실행 흐름입니다.
 
 1. **문서 업로드 API 호출**
-   - `routes/document_routes.py`의 `/api/documents`, `/api/documents/<doc_id>/runs`
+  - `routes/document_routes.py`의 `/api/documents`, `/api/documents/<workspace_id>/runs`
    - 조립 진입점은 `app.py` (`register_blueprints`, deps 주입)
 
 2. **PDF -> Markdown 변환 (`opendataloader-pdf` 라이브러리 사용)**
@@ -39,7 +39,7 @@
 5. **semantic map + section index + viewer payload 산출**
    - semantic: `document_semantic.py`
    - 인덱스: `document_index_service.py`
-   - 결과는 `documents/<doc_id>/runs/<run_id>/viewer.json` 등으로 저장
+  - 결과는 `documents/workspaces/<workspace_id>/runs/<run_id>/compare/viewer.json` 등으로 저장
    - `semantic_map`: diff의 `equal` 세그먼트에 속한 old/new 단어 대응 관계(`old_word_id` <-> `new_word_id`)와 line/segment 메타데이터
    - `section index`: section_id, 제목, 시작/끝 범위 메타데이터를 가진 구조화된 섹션 카탈로그(리뷰/AI 컨텍스트에서 활용)
 
@@ -179,27 +179,27 @@
 
 ## 4) 데이터 저장 구조
 
-- `documents/<doc_id>/meta.json`
+- `documents/workspaces/<workspace_id>/file_manager/meta.json`
   - 문서 메타데이터, 제목, 저장 상태, run 목록(`runs[]`)
-- `documents/<doc_id>/reviews.json`
+- `documents/workspaces/<workspace_id>/file_manager/reviews.json`
   - 문서 레벨의 canonical 리뷰 스레드/앵커
-- `documents/<doc_id>/runs/<run_id>/viewer.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/viewer.json`
   - UI용 파생 번들(하이라이트, 변경점, semantic map, section 복사본, alignment report)
-- `documents/<doc_id>/runs/<run_id>/current/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/current/`
   - 현재본 원본 산출물: `source.pdf`, `source.md`, `words.json`, `sections.json`
-- `documents/<doc_id>/runs/<run_id>/previous/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/previous/`
   - diff run의 이전본 원본 산출물: `source.pdf`, `source.md`, `words.json`, `sections.json`
-- `documents/<doc_id>/runs/<run_id>/diff/segments.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/diff/segments.json`
   - PDF 좌표가 없는 raw markdown diff 세그먼트(`equal/delete/add`)
-- `documents/<doc_id>/runs/<run_id>/ai/review_assessment.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/analysis/review_assessment.json`
   - 리뷰 단위 AI 평가 결과/메타
-- `documents/<doc_id>/runs/<run_id>/ai/change_assessment.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/analysis/change_assessment.json`
   - 변경 단위 AI 평가 결과/메타
-- `documents/<doc_id>/runs/<run_id>/_cache/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/_cache/`
   - 버릴 수 있는 중간 산출물(`opendataloader/`, 마커 제거 `diff_md/`)
-- `documents/<doc_id>/snapshots/<snapshot_id>/snapshot.json`
+- `documents/workspaces/<workspace_id>/snapshots/<snapshot_id>/snapshot.json`
   - 스냅샷 메타데이터(카운트/모드/원본 run)
-- `documents/<doc_id>/snapshots/<snapshot_id>/...`
+- `documents/workspaces/<workspace_id>/snapshots/<snapshot_id>/...`
   - `_cache/`를 제외한 durable run 산출물을 같은 구조로 고정 복사
 - `RUN_LAYOUT.md`
   - 산출물 의미, 필수 여부, source of truth 규칙을 설명하는 표준 문서

@@ -5,6 +5,20 @@ from pathlib import Path
 import run_layout
 
 
+def _workspace_meta_path(workspace_dir: Path) -> Path:
+    preferred = workspace_dir / "file_manager" / "meta.json"
+    if preferred.exists():
+        return preferred
+    return workspace_dir / "meta.json"
+
+
+def _workspace_reviews_path(workspace_dir: Path) -> Path:
+    preferred = workspace_dir / "file_manager" / "reviews.json"
+    if preferred.exists():
+        return preferred
+    return workspace_dir / "reviews.json"
+
+
 def overwrite_saved_document(
     source_doc_id,
     source_run_id,
@@ -28,7 +42,8 @@ def overwrite_saved_document(
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir, ignore_errors=True)
     shutil.copytree(source_dir, tmp_dir)
-    copied_meta = read_json_fn(tmp_dir / "meta.json", {}) or {}
+    copied_meta = read_json_fn(_workspace_meta_path(tmp_dir), {}) or {}
+    copied_meta["workspace_id"] = target_doc_id
     copied_meta["doc_id"] = target_doc_id
     copied_meta["is_saved"] = True
     copied_meta["title"] = target_meta.get("title") or copied_meta.get("title") or "Workspace"
@@ -40,11 +55,12 @@ def overwrite_saved_document(
             runs.append(selected)
             copied_meta["runs"] = runs
     copied_meta["updated_at"] = utc_now_fn()
-    write_json_fn(tmp_dir / "meta.json", copied_meta)
-    reviews = read_json_fn(tmp_dir / "reviews.json", []) or []
+    write_json_fn(tmp_dir / "file_manager" / "meta.json", copied_meta)
+    reviews = read_json_fn(_workspace_reviews_path(tmp_dir), []) or []
     for review in reviews:
+        review["workspace_id"] = target_doc_id
         review["doc_id"] = target_doc_id
-    write_json_fn(tmp_dir / "reviews.json", reviews)
+    write_json_fn(tmp_dir / "file_manager" / "reviews.json", reviews)
     if target_dir.exists():
         shutil.rmtree(target_dir, ignore_errors=True)
     tmp_dir.rename(target_dir)
@@ -52,6 +68,7 @@ def overwrite_saved_document(
     return {
         "saved": True,
         "overwritten": True,
+        "workspace_id": target_doc_id,
         "doc_id": target_doc_id,
         "run_id": source_run_id or latest_run_id,
         "title": copied_meta.get("title"),
@@ -102,6 +119,7 @@ def canonical_review_from_anchor(
     return {
         "review_id": "r-" + uuid.uuid4().hex[:8],
         "anchor_id": "a-" + uuid.uuid4().hex[:8],
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "status": status or "open",
         "created_run_id": run_id,
@@ -195,6 +213,7 @@ def write_single_file_document(
     shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
     now = utc_now_fn()
     meta = {
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "title": normalize_document_title_fn(title)[:120] or Path(filename).stem or "Workspace",
         "is_saved": True,
@@ -267,6 +286,7 @@ def save_run_side_file(
         return {
             "saved": True,
             "overwritten": True,
+            "workspace_id": target_doc_id,
             "doc_id": target_doc_id,
             "run_id": new_run_id,
             "title": meta.get("title"),
@@ -289,6 +309,7 @@ def save_run_side_file(
     return {
         "saved": True,
         "created": True,
+        "workspace_id": new_doc_id,
         "doc_id": new_doc_id,
         "run_id": new_run_id,
         "title": meta.get("title"),

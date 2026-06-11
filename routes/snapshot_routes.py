@@ -17,6 +17,11 @@ def _is_valid_snapshot_id(value: str) -> bool:
     return bool(_SNAPSHOT_ID_RE.match(value))
 
 
+def _ids_payload(workspace_id: str):
+    value = str(workspace_id or "")
+    return {"workspace_id": value, "doc_id": value}
+
+
 def _parse_optional_positive_int(name: str):
     raw = request.args.get(name)
     if raw is None or raw == "":
@@ -71,7 +76,7 @@ def create_snapshot_blueprint(*, deps):
         if not meta:
             return jsonify({"error": "document not found"}), 404
         snapshots = sorted(meta.get("snapshots", []), key=lambda s: s.get("created_at", ""), reverse=True)
-        return jsonify({"doc_id": doc_id, "snapshots": snapshots[:snapshot_limit]})
+        return jsonify({**_ids_payload(doc_id), "snapshots": snapshots[:snapshot_limit]})
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/snapshots", methods=["POST"])
     def save_document_run_snapshot(doc_id, run_id):

@@ -39,10 +39,10 @@ class DocumentBootstrapServiceTests(unittest.TestCase):
             documents_dir.mkdir()
             (input_dir / "Report_v1.pdf").write_bytes(b"%PDF-1.4")
 
-            existing = documents_dir / "abcdef123456"
-            existing.mkdir()
+            existing = documents_dir / "workspaces" / "abcdef123456"
+            existing.mkdir(parents=True)
             write_json(
-                existing / "meta.json",
+                existing / "file_manager" / "meta.json",
                 {
                     "doc_id": "abcdef123456",
                     "title": "Uploaded",
@@ -73,10 +73,10 @@ class DocumentBootstrapServiceTests(unittest.TestCase):
             (input_dir / "Report_v1.pdf").write_bytes(b"%PDF-1.4")
             (input_dir / "Report_v2.pdf").write_bytes(b"%PDF-1.4")
 
-            existing_seed = documents_dir / "seedonly12345"
-            existing_seed.mkdir()
+            existing_seed = documents_dir / "workspaces" / "seedonly12345"
+            existing_seed.mkdir(parents=True)
             write_json(
-                existing_seed / "meta.json",
+                existing_seed / "file_manager" / "meta.json",
                 {
                     "doc_id": "seedonly12345",
                     "seed_key": "Report_v1.pdf",

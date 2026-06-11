@@ -17,7 +17,7 @@ Use these terms consistently throughout this document:
 This is the actual execution path from upload to AI assessment.
 
 1. **Document upload API**
-   - `routes/document_routes.py`: `/api/documents`, `/api/documents/<doc_id>/runs`
+   - `routes/document_routes.py`: `/api/documents`, `/api/documents/<workspace_id>/runs`
    - Composition entrypoint: `app.py` (`register_blueprints`, deps wiring)
 
 2. **PDF -> Markdown conversion (OpenDataLoader library)**
@@ -39,7 +39,7 @@ This is the actual execution path from upload to AI assessment.
 5. **Generate semantic map + section index + viewer payload**
    - Semantic: `document_semantic.py`
    - Indexing: `document_index_service.py`
-   - Outputs saved under `documents/<doc_id>/runs/<run_id>/...`
+  - Outputs saved under `documents/workspaces/<workspace_id>/runs/<run_id>/...`
    - `semantic_map` means mapping between old/new words that belong to `equal` diff segments (`old_word_id` <-> `new_word_id`) with line/segment metadata.
    - `section index` means structured section catalog (title, section_id, start/end range metadata) used for section-aware review/AI context.
 
@@ -180,27 +180,27 @@ Cross-domain reusable utility helpers (no domain policy decisions).
 
 ## 4) Data Layout
 
-- `documents/<doc_id>/meta.json`
+- `documents/workspaces/<workspace_id>/file_manager/meta.json`
   - Document metadata, title, saved flag, and run list (`runs[]`).
-- `documents/<doc_id>/reviews.json`
+- `documents/workspaces/<workspace_id>/file_manager/reviews.json`
   - Document-level canonical review threads/anchors.
-- `documents/<doc_id>/runs/<run_id>/viewer.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/viewer.json`
   - UI-facing derived bundle (highlights, changes, semantic map, section copy, alignment report).
-- `documents/<doc_id>/runs/<run_id>/current/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/current/`
   - Current source artifacts: `source.pdf`, `source.md`, `words.json`, `sections.json`.
-- `documents/<doc_id>/runs/<run_id>/previous/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/previous/`
   - Previous-side source artifacts for diff runs: `source.pdf`, `source.md`, `words.json`, `sections.json`.
-- `documents/<doc_id>/runs/<run_id>/diff/segments.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/compare/diff/segments.json`
   - Raw markdown diff segments (`equal/delete/add`), without PDF coordinates.
-- `documents/<doc_id>/runs/<run_id>/ai/review_assessment.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/analysis/review_assessment.json`
   - Review-level AI assessment results and metadata.
-- `documents/<doc_id>/runs/<run_id>/ai/change_assessment.json`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/analysis/change_assessment.json`
   - Change-level AI assessment results and metadata.
-- `documents/<doc_id>/runs/<run_id>/_cache/`
+- `documents/workspaces/<workspace_id>/runs/<run_id>/_cache/`
   - Disposable intermediate outputs (`opendataloader/`, marker-stripped `diff_md/`).
-- `documents/<doc_id>/snapshots/<snapshot_id>/snapshot.json`
+- `documents/workspaces/<workspace_id>/snapshots/<snapshot_id>/snapshot.json`
   - Snapshot metadata (counts, mode, source run).
-- `documents/<doc_id>/snapshots/<snapshot_id>/...`
+- `documents/workspaces/<workspace_id>/snapshots/<snapshot_id>/...`
   - Frozen durable run artifacts, using the same layout as runs and excluding `_cache/`.
 - `RUN_LAYOUT.md`
   - Canonical human-readable contract for artifact meaning, requiredness, and source-of-truth rules.

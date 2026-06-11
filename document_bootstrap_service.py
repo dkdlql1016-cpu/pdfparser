@@ -2,6 +2,7 @@ import shutil
 import uuid
 
 import run_layout
+from storage_utils import iter_workspace_dirs
 
 
 def create_seed_document_from_pdf(
@@ -20,6 +21,7 @@ def create_seed_document_from_pdf(
     shutil.copy2(pdf_path, report_pdf)
     created_at = utc_now_fn()
     meta = {
+        "workspace_id": doc_id,
         "doc_id": doc_id,
         "title": pdf_path.stem,
         "seed_key": seed_key,
@@ -64,10 +66,11 @@ def ensure_default_file_manager_documents(
         return True
     seed_key, seed_src = selected_seed
     existing_doc_id = None
-    for candidate in documents_dir.iterdir():
-        if not candidate.is_dir():
-            continue
-        meta = read_json_fn(candidate / "meta.json", None) or {}
+    for candidate in iter_workspace_dirs(documents_dir):
+        meta_path = candidate / "file_manager" / "meta.json"
+        if not meta_path.exists():
+            meta_path = candidate / "meta.json"
+        meta = read_json_fn(meta_path, None) or {}
         if not meta:
             continue
         key = str(meta.get("seed_key") or "").strip()

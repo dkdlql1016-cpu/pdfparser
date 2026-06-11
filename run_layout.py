@@ -17,16 +17,24 @@ def is_current_side(side: str) -> bool:
     return side_name(side) == "current"
 
 
+def compare_dir(run_dir: Path) -> Path:
+    return Path(run_dir) / "compare"
+
+
+def analysis_dir(run_dir: Path) -> Path:
+    return Path(run_dir) / "analysis"
+
+
 def side_dir(run_dir: Path, side: str) -> Path:
-    return Path(run_dir) / side_name(side)
+    return compare_dir(run_dir) / side_name(side)
 
 
 def current_dir(run_dir: Path) -> Path:
-    return Path(run_dir) / "current"
+    return compare_dir(run_dir) / "current"
 
 
 def previous_dir(run_dir: Path) -> Path:
-    return Path(run_dir) / "previous"
+    return compare_dir(run_dir) / "previous"
 
 
 def source_pdf(run_dir: Path, side: str = "current") -> Path:
@@ -46,11 +54,11 @@ def sections_path(run_dir: Path, side: str = "current") -> Path:
 
 
 def viewer_path(run_dir: Path) -> Path:
-    return Path(run_dir) / "viewer.json"
+    return compare_dir(run_dir) / "viewer.json"
 
 
 def diff_dir(run_dir: Path) -> Path:
-    return Path(run_dir) / "diff"
+    return compare_dir(run_dir) / "diff"
 
 
 def diff_segments_path(run_dir: Path) -> Path:
@@ -58,7 +66,7 @@ def diff_segments_path(run_dir: Path) -> Path:
 
 
 def ai_dir(run_dir: Path) -> Path:
-    return Path(run_dir) / "ai"
+    return analysis_dir(run_dir)
 
 
 def review_assessment_path(run_dir: Path) -> Path:
@@ -70,7 +78,7 @@ def change_assessment_path(run_dir: Path) -> Path:
 
 
 def run_reviews_path(run_dir: Path) -> Path:
-    return Path(run_dir) / "reviews.json"
+    return analysis_dir(run_dir) / "reviews.json"
 
 
 def cache_dir(run_dir: Path) -> Path:
