@@ -21,7 +21,7 @@ Thumbs.db
 
 # Project specific
 runs/
-*.pdf
+# input/ PDFs are tracked (seed reports). Runtime PDFs live under documents/ (ignored below).
 _cache/
 .mypy_cache/_cache/
 .mypy_cache/
