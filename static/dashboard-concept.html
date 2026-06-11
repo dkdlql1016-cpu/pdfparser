@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard mock — Report Review Workspace</title>
+<style>
+:root{--red:#cf222e;--green:#2da44e;--blue:#2563eb;--ui-font:12px;--ui-font-sm:11px;--add:#059669;--del:#dc2626;--high:#dc2626;--medium:#d97706;--low:#059669}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f3f4f6;color:#111827;font-size:var(--ui-font)}
+.mockStrip{background:#fef3c7;color:#92400e;padding:4px 12px;font-size:11px;text-align:center;border-bottom:1px solid #fcd34d}
+.topbar{min-height:48px;background:#111827;color:white;display:flex;align-items:center;gap:8px;padding:5px 10px;flex-wrap:wrap;transition:margin-left .18s ease}
+body:not(.sidebarCollapsed) .topbar{margin-left:320px}
+body.sidebarCollapsed .topbar{margin-left:0}
+.sidebarRail{display:none;flex:none;width:30px;height:30px;padding:0;border-radius:8px;background:#111827;color:#fff;border:1px solid #374151;font-size:16px;line-height:30px;text-align:center;cursor:pointer}
+body.sidebarCollapsed .sidebarRail{display:inline-block}
+.uploadForm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}
+.fileLabel{display:flex;align-items:center;gap:6px;background:#1f2937;padding:5px 7px;border-radius:7px}
+.fileBtn{background:#374151;color:#fff;border:1px solid #4b5563;border-radius:6px;padding:4px 8px;font-weight:800;cursor:default}
+.fileName{color:#cbd5e1;font-size:var(--ui-font-sm);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button{background:var(--blue);color:white;border:0;border-radius:8px;padding:7px 11px;font-weight:700;cursor:pointer}
+button.secondary{background:#374151}
+#status{font-size:12px;color:#d1d5db;min-width:90px}
+main{height:calc(100vh - 48px - 25px);display:grid;grid-template-columns:1fr;overflow:hidden;transition:margin-left .18s ease}
+body:not(.sidebarCollapsed) main{margin-left:320px}
+body.sidebarCollapsed main{margin-left:0}
+aside{position:fixed;left:0;top:25px;width:320px;height:calc(100vh - 25px);z-index:1500;background:white;border-right:1px solid #d1d5db;display:flex;flex-direction:column;transition:transform .18s ease}
+body.sidebarCollapsed aside{transform:translateX(-100%);border-right:0;pointer-events:none}
+.sideHeader{display:flex;align-items:center;gap:8px;height:38px;padding:5px 10px;border-bottom:1px solid #e5e7eb;background:#f8fafc}
+.workspaceTitleRow{display:flex;align-items:center;gap:6px;min-width:0;width:100%}
+.sideTitle{font-size:var(--ui-font);font-weight:800;color:#374151;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sideIconBtn{width:24px;height:24px;padding:0;border-radius:6px;background:#e5e7eb;color:#374151;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0;cursor:default}
+.sideCollapse{margin-left:auto;width:24px;height:24px;padding:0;border-radius:6px;background:#111827;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;border:0;cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid #e5e7eb}
+.tabBtn{background:#fff;color:#374151;border:0;border-right:1px solid #e5e7eb;border-radius:0;padding:6px 3px;font-size:10px;line-height:1.2;cursor:pointer}
+.tabBtn.active{color:#111827;background:#f3f4f6;box-shadow:inset 0 -2px 0 var(--blue)}
+.tabBody{display:none;overflow:auto;flex:1;padding:10px;color:#6b7280;font-size:var(--ui-font);line-height:1.45}
+.tabBody.active{display:block}
+#tab-dashboard.tabBody.active{display:flex;flex-direction:column;min-height:0;padding:0}
+.sideListHead{padding:8px 10px;font-size:10px;font-weight:800;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb;background:#f8fafc;flex:none}
+.sessionListPane{overflow:auto;flex:1;padding:8px;min-height:0}
+.sessionListRow{padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;background:#fff;font-size:var(--ui-font)}
+.sessionListRow:hover{background:#f8fbff;border-color:#93c5fd}
+.sessionListRow.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.sessionListRow .meta{color:#6b7280;font-size:11px;margin-bottom:4px}
+.sessionListRow .title{font-weight:700;color:#111827;line-height:1.35}
+#dashboardMain{flex:1;overflow:hidden;background:#f1f5f9;padding:12px 14px;display:none;min-height:0}
+#viewerMock{flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;background:#fff}
+#viewerMock.single{grid-template-columns:1fr}
+#viewerMock.single #oldPaneMock{display:none}
+.paneMock{position:relative;overflow:hidden;border-right:1px solid #9ca3af;background:#fff}
+.paneMock:last-child{border-right:0}
+.paneTitleMock{background:rgba(17,24,39,.95);color:white;padding:4px 8px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.paneBodyMock{height:calc(100% - 28px);background:#f9fafb;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px}
+body.mode-dashboard #dashboardMain{display:flex;flex-direction:column}
+body.mode-dashboard #viewerMock{display:none}
+body.mode-viewer #dashboardMain{display:none}
+body.mode-viewer #viewerMock{display:grid}
+.dashLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;flex:1;min-height:0;height:100%}
+.dashLeft,.dashRight{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);min-height:0}
+.session{flex:none}
+.changesPanel,.reviewsPanel{flex:1;display:flex;flex-direction:column;min-height:0}
+.sessionTitle{font-size:16px;font-weight:800;color:#111827;line-height:1.3}
+.sessionMeta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11px;margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9}
+.sessionMeta .k{color:#94a3b8;font-weight:700}.sessionMeta .v{color:#111827;font-weight:600;font-variant-numeric:tabular-nums}
+.panelHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f1f5f9;flex:none}
+.panelHead h2{margin:0;font-size:15px;font-weight:800}
+.panelHead .sub{font-size:11px;color:#64748b;margin-top:2px}
+.panelHead .total{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;text-align:right}
+.panelHead .totalLabel{font-size:10px;color:#94a3b8;text-align:right}
+.deltaLine{font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:12px;font-variant-numeric:tabular-nums;flex:none}
+.deltaLine .add{color:var(--add)}.deltaLine .del{color:var(--del)}
+.riskHead{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;flex:none}
+.riskGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex:none}
+.riskCard{border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;background:#fafbfc;cursor:pointer;text-align:left;font:inherit}
+.riskCard:hover{background:#fff;border-color:#cbd5e1}
+.riskCard.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.12);background:#fff}
+.riskCard .code{font-size:10px;font-weight:800;margin-bottom:6px}
+.riskCard.high .code{color:var(--high)}.riskCard.medium .code{color:var(--medium)}
+.riskCard.low .code{color:var(--low)}.riskCard.na .code{color:#94a3b8}
+.riskCard .num{font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:#111827}
+.changeStream{flex:1;min-height:0;margin-top:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;overflow:hidden}
+.changeStream.show{display:flex;flex-direction:column}
+.streamHead{padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:10px;font-weight:800;color:#64748b;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+.streamHead button{padding:4px 8px;font-size:10px}
+.streamBody{flex:1;overflow:auto;min-height:0}
+.streamItem{display:flex;gap:10px;padding:8px 12px;border-bottom:1px solid #e5e7eb;background:#fff;align-items:flex-start;cursor:pointer}
+.streamItem:last-child{border-bottom:0}
+.streamItem:hover{background:#f8fbff}
+.streamMain{flex:1;min-width:0}
+.streamMeta{font-size:10px;color:#6b7280;margin-bottom:3px}
+.streamSummary{font-size:var(--ui-font);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.delText{background:#fee2e2;color:#991b1b;padding:1px 3px;border-radius:3px}
+.addText{background:#dcfce7;color:#166534;padding:1px 3px;border-radius:3px}
+.streamAi{flex:0 0 36%;min-width:0;font-size:10px;line-height:1.35;padding:6px 8px;background:#f5f3ff;border-left:3px solid #a78bfa;border-radius:6px;color:#4c1d95;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.streamAi.empty{color:#94a3b8;background:#f8fafc;border-color:#e5e7eb;font-style:italic;-webkit-line-clamp:1}
+.reviewPanelBody{display:flex;flex-direction:column;flex:1;min-height:0;gap:10px}
+.reportPicker{position:relative;flex:none}
+.reportPickerBtn{width:100%;text-align:left;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;cursor:pointer;display:block;font:inherit}
+.reportPickerBtn:hover{border-color:#cbd5e1}
+.reportPickerRow{display:flex;align-items:center;gap:8px}
+.reportPickerTag{font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;flex:none}
+.reportPickerName{font-size:14px;font-weight:800;color:#111827;flex:1;min-width:0;line-height:1.3}
+.reportPickerChev{color:#94a3b8;font-size:12px;flex:none}
+.reportPickerMeta{font-size:11px;color:#64748b;margin-top:6px}
+.reportPickerMenu{
+  position:absolute;left:0;right:0;top:calc(100% + 6px);
+  background:#fff;border:1px solid #e5e7eb;border-radius:10px;
+  box-shadow:0 8px 24px rgba(15,23,42,.1);display:none;z-index:40;overflow:hidden;
+}
+.reportPickerMenu.open{display:block}
+.reportPickerItem{padding:10px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:12px}
+.reportPickerItem:last-child{border-bottom:0}
+.reportPickerItem:hover,.reportPickerItem.active{background:#f8fafc}
+.reportPickerItem .pickTag{font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase}
+.reportPickerItem .pickName{font-weight:700;color:#111827;margin-top:2px}
+.reviewStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:none}
+.reviewOriginBar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #e5e7eb;background:#fff;flex:none}
+.originFilter{font-size:10px;padding:3px 9px;border:1px solid #e5e7eb;border-radius:999px;background:#fff;color:#64748b;font-weight:700;cursor:pointer;font:inherit}
+.originFilter:hover{border-color:#cbd5e1}
+.originFilter.active.new{color:var(--del);border-color:#fecaca;background:#fef2f2}
+.originFilter.active.forward{color:#64748b;border-color:#cbd5e1;background:#f1f5f9}
+.originFilter.active.all{color:var(--blue);border-color:#bfdbfe;background:#eef2ff}
+.rvBadge{font-size:9px;font-weight:800;margin-left:6px;text-transform:lowercase}
+.rvBadge.new{color:var(--del)}
+.rvBadge.forward{color:#64748b}
+.reviewStat{border:1px solid #f1f5f9;border-radius:6px;padding:6px 4px;text-align:center;background:#fafbfc;cursor:pointer;font:inherit}
+.reviewStat:hover{border-color:#cbd5e1;background:#fff}
+.reviewStat.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.1);background:#fff}
+.reviewStat .n{font-size:16px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:#111827}
+.reviewStat .l{font-size:10px;font-weight:700;color:#64748b;margin-top:4px}
+.reviewStream{flex:1;min-width:0;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;display:none;overflow:hidden}
+.reviewStream.show{display:flex;flex-direction:column}
+.changeModalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:3200;display:none;align-items:center;justify-content:center;padding:16px}
+.changeModalBackdrop.open{display:flex}
+.changeModalBox{width:min(880px,95vw);max-height:86vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
+.changeModalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.changeModalBody{font-size:var(--ui-font);line-height:1.5;color:#111827}
+.changeModalItem{padding:10px 0;border-bottom:1px solid #e5e7eb}
+.changeModalItem:last-child{border-bottom:0}
+.changeSection{font-size:10px;font-weight:800;color:#6b7280;margin-bottom:2px;line-height:1.35}
+.changeModalDiff{line-height:1.45}
+.changeStreamActions{display:flex;gap:6px;margin-top:6px}
+.changeStreamActions button{padding:3px 8px;font-size:10px;background:#eef2ff;color:#3730a3;border:0;border-radius:6px;font-weight:700;cursor:pointer}
+.changeStreamActions button:hover{background:#e0e7ff}
+.reviewModalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:3250;display:none;align-items:center;justify-content:center;padding:16px}
+.reviewModalBackdrop.open{display:flex}
+.reviewModalBox{width:min(720px,92vw);max-height:80vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 25px 60px rgba(0,0,0,.3);padding:14px}
+.reviewModalHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.reviewModalBody{font-size:var(--ui-font);line-height:1.5;color:#111827}
+@media(max-width:1100px){.dashLayout{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="mode-dashboard">
+<div class="mockStrip">Design mock only · sample data workspace 4ced612a18ed</div>
+
+<div class="topbar">
+  <button id="sidebarRail" class="sidebarRail" type="button" title="Open panel">☰</button>
+  <form class="uploadForm" style="display:none">
+    <label class="fileLabel">Base Report <button class="fileBtn" type="button">Upload</button><span class="fileName">Report_v1.pdf</span></label>
+    <button type="button">Analysis</button>
+  </form>
+  <form class="uploadForm">
+    <label class="fileLabel">Updated Report <button class="fileBtn" type="button">Upload</button><span class="fileName">Report_v3.pdf</span></label>
+    <button type="button">Compare</button>
+  </form>
+  <span id="status">Comparison complete</span>
+</div>
+
+<main>
+  <aside>
+    <div class="sideHeader">
+      <div class="workspaceTitleRow">
+        <button class="sideIconBtn" type="button">⌂</button>
+        <button class="sideIconBtn" type="button">☷</button>
+        <button class="sideIconBtn" type="button">✎</button>
+        <span class="sideTitle">Report_v1</span>
+      </div>
+      <button id="sidebarCollapseBtn" class="sideCollapse" type="button" title="Collapse panel">‹</button>
+    </div>
+    <div class="tabs" id="sideTabs">
+      <button class="tabBtn active" data-tab="dashboard" type="button">Dashboard</button>
+      <button class="tabBtn" data-tab="index" type="button">Outline</button>
+      <button class="tabBtn" data-tab="diff" type="button">Changes</button>
+      <button class="tabBtn" data-tab="review" type="button">Comments</button>
+      <button class="tabBtn" data-tab="snapshot" type="button">History</button>
+    </div>
+    <div id="tab-dashboard" class="tabBody active">
+      <div class="sideListHead">Sessions</div>
+      <div id="sessionListPane" class="sessionListPane"></div>
+    </div>
+    <div id="tab-index" class="tabBody">Outline list would appear here.</div>
+    <div id="tab-diff" class="tabBody">Changes list would appear here.</div>
+    <div id="tab-review" class="tabBody">Comments list would appear here.</div>
+    <div id="tab-snapshot" class="tabBody">Snapshot history would appear here.</div>
+  </aside>
+
+  <section id="dashboardMain">
+    <div class="dashLayout">
+      <div class="dashLeft">
+        <div class="panel session">
+          <div class="sessionTitle" id="sessionLabel">Report_v1.pdf → Report_v3.pdf</div>
+          <div class="sessionMeta" id="sessionMetaBar"></div>
+        </div>
+
+        <section class="panel changesPanel">
+          <div class="panelHead">
+            <div><h2>Changes</h2></div>
+            <div><div class="total" id="changeTotal">83</div><div class="totalLabel">change groups</div></div>
+          </div>
+          <div class="deltaLine" id="changeDelta"><span class="add">+76</span> · <span class="del">−73</span></div>
+          <div class="riskHead">Risk classification</div>
+          <div class="riskGrid" id="riskGrid">
+            <button type="button" class="riskCard high" data-risk="high"><div class="code">High</div><div class="num">6</div></button>
+            <button type="button" class="riskCard medium" data-risk="medium"><div class="code">Medium</div><div class="num">11</div></button>
+            <button type="button" class="riskCard low" data-risk="low"><div class="code">Low</div><div class="num">28</div></button>
+            <button type="button" class="riskCard na" data-risk="na"><div class="code">N/A</div><div class="num">40</div></button>
+          </div>
+          <div class="changeStream" id="changeStream">
+            <div class="streamHead">
+              <span id="changeStreamTitle"></span>
+              <button type="button" class="secondary" id="changeStreamExpand">Expand</button>
+            </div>
+            <div class="streamBody" id="changeStreamBody"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="dashRight">
+        <section class="panel reviewsPanel">
+          <div class="panelHead">
+            <div><h2>Reviews</h2><p class="sub">Comments on each report</p></div>
+          </div>
+          <div class="reviewPanelBody">
+            <div class="reportPicker">
+              <button type="button" class="reportPickerBtn" id="reportPickerBtn" aria-expanded="false">
+                <div class="reportPickerRow">
+                  <span class="reportPickerTag" id="reportPickerTag">Current</span>
+                  <span class="reportPickerName" id="reportPickerName">Report_v3</span>
+                  <span class="reportPickerChev" id="reportPickerChev">▼</span>
+                </div>
+                <div class="reportPickerMeta" id="reportPickerMeta">Report_v3.pdf · 37 pages</div>
+              </button>
+              <div class="reportPickerMenu" id="reportPickerMenu"></div>
+            </div>
+            <div class="reviewStats" id="reviewStatsRow">
+              <button type="button" class="reviewStat active" data-filter="total"><div class="n">0</div><div class="l">Total</div></button>
+              <button type="button" class="reviewStat" data-filter="cleared"><div class="n">0</div><div class="l">Cleared</div></button>
+              <button type="button" class="reviewStat" data-filter="open"><div class="n">0</div><div class="l">Open</div></button>
+            </div>
+            <div class="reviewStream show" id="reviewStream">
+              <div class="reviewOriginBar" id="reviewOriginBar">
+                <button type="button" class="originFilter new" data-origin="new">new</button>
+                <button type="button" class="originFilter forward" data-origin="forward">forward</button>
+                <button type="button" class="originFilter all active" data-origin="all">all</button>
+              </div>
+              <div class="streamHead">
+                <span id="reviewStreamTitle"></span>
+                <button type="button" class="secondary" id="reviewStreamExpand" style="display:none">Expand</button>
+              </div>
+              <div class="streamBody" id="reviewStreamBody"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewerMock" class="single">
+    <div id="oldPaneMock" class="paneMock">
+      <div class="paneTitleMock"><span>Previous PDF</span><span style="font-size:10px;color:#9ca3af">Report_v1.pdf</span></div>
+      <div class="paneBodyMock">PDF viewer</div>
+    </div>
+    <div class="paneMock">
+      <div class="paneTitleMock"><span>Current PDF</span><span style="font-size:10px;color:#9ca3af">Report_v3.pdf</span></div>
+      <div class="paneBodyMock">PDF viewer</div>
+    </div>
+  </section>
+</main>
+
+<div id="changeListModal" class="changeModalBackdrop">
+  <div class="changeModalBox">
+    <div class="changeModalHead">
+      <strong id="changeModalTitle">Changes</strong>
+      <button type="button" class="secondary" id="changeModalClose">Close</button>
+    </div>
+    <div class="changeModalBody" id="changeModalBody"></div>
+  </div>
+</div>
+
+<div id="reviewListModal" class="reviewModalBackdrop">
+  <div class="reviewModalBox">
+    <div class="reviewModalHead">
+      <strong id="reviewListModalTitle">Comments</strong>
+      <button type="button" class="secondary" id="reviewListModalClose">Close</button>
+    </div>
+    <div class="reviewModalBody" id="reviewListModalBody"></div>
+  </div>
+</div>
+
+<div id="reviewDetailModal" class="reviewModalBackdrop">
+  <div class="reviewModalBox">
+    <div class="reviewModalHead">
+      <strong id="reviewModalTitle">Comment</strong>
+      <button type="button" class="secondary" id="reviewModalClose">Close</button>
+    </div>
+    <div class="reviewModalBody" id="reviewModalBody"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var EXPAND_THRESHOLD = 5;
+
+  var MOCK_REPORTS = {
+    old: { side: 'old', tag: 'Previous', name: 'Report_v1', file: 'Report_v1.pdf', pages: 36 },
+    new: { side: 'new', tag: 'Current', name: 'Report_v3', file: 'Report_v3.pdf', pages: 37 }
+  };
+
+  function mkRev(id, text, status, origin, ai) {
+    return { id: id, text: text, status: status, origin: origin, ai: ai || null };
+  }
+
+  function buildReviewList(prefix, count, openCount, forwardCount) {
+    var all = [];
+    for (var i = 1; i <= count; i++) {
+      var open = i <= openCount;
+      var origin = i <= forwardCount ? 'forward' : 'new';
+      all.push(mkRev(
+        prefix + '_' + i,
+        'Comment #' + i + ': check figures in section ' + ((i % 12) + 1) + ' and footnote cross-refs.',
+        open ? 'open' : 'cleared',
+        origin,
+        i % 3 === 0 ? 'Anchor may have shifted — verify on current report.' : null
+      ));
+    }
+    return all;
+  }
+
+  function reviewBucketForSide(side) {
+    var all = MOCK_REVIEWS[side] || [];
+    return {
+      total: all,
+      open: all.filter(function (r) { return r.status === 'open'; }),
+      cleared: all.filter(function (r) { return r.status === 'cleared'; })
+    };
+  }
+
+  var MOCK_CHANGES = {
+    high: [
+      { id: 42, section: 'FINANCIAL STATEMENT · p.8 · Consolidated Statements of Operations', old: 'Net revenue $12.4M', new: 'Net revenue $11.8M', ai: 'Material downward revision to headline revenue.' },
+      { id: 58, old: 'Operating margin 18.2%', new: 'Operating margin 15.1%', ai: 'Margin compression flagged as high risk.' },
+      { id: 61, old: 'Cash flow from ops $2.1M', new: 'Cash flow from ops $1.6M', ai: 'Significant cash flow decline vs prior period.' },
+      { id: 64, old: 'Debt ratio 42%', new: 'Debt ratio 48%', ai: 'Leverage increase may affect credit narrative.' },
+      { id: 71, old: 'EPS guidance $1.20', new: 'EPS guidance $0.95', ai: 'Guidance cut is material for investor section.' },
+      { id: 79, old: 'Segment A revenue +8%', new: 'Segment A revenue +2%', ai: 'Segment growth story weakened materially.' }
+    ],
+    medium: [
+      { id: 7, old: 'FY2024 outlook stable', new: 'FY2024 outlook cautiously optimistic', ai: 'Tone shift may warrant a comment.' },
+      { id: 9, old: 'R&D spend flat YoY', new: 'R&D spend +4% YoY', ai: 'Moderate narrative change.' },
+      { id: 11, old: 'Customer churn 2.1%', new: 'Customer churn 2.8%', ai: 'Worth a review comment.' },
+      { id: 14, old: 'Headcount 1,240', new: 'Headcount 1,180', ai: 'Workforce reduction noted.' },
+      { id: 18, old: 'Geographic mix US 62%', new: 'Geographic mix US 58%', ai: 'Regional mix shift.' },
+      { id: 22, old: 'Inventory days 45', new: 'Inventory days 52', ai: 'Working capital impact.' },
+      { id: 25, old: 'Dividend $0.40', new: 'Dividend $0.38', ai: 'Minor payout change.' },
+      { id: 31, old: 'Audit opinion unqualified', new: 'Audit opinion unqualified with emphasis', ai: 'Emphasis paragraph added.' }
+    ],
+    low: [
+      { id: 3, old: 'Table 2 headers', new: 'Table 2 revised headers', ai: 'Formatting-only change.' },
+      { id: 5, old: 'Page footer date', new: 'Page footer revised date', ai: 'Cosmetic.' },
+      { id: 8, old: 'Chart axis label Q1', new: 'Chart axis label Q1–Q4', ai: 'Label clarity.' },
+      { id: 12, old: 'Bullet list item 3', new: 'Bullet list item 3 reordered', ai: 'No numeric impact.' },
+      { id: 16, old: 'Section 2.1 title', new: 'Section 2.1 subtitle added', ai: 'Structure only.' },
+      { id: 19, old: 'Logo placement', new: 'Logo resized', ai: 'Visual only.' },
+      { id: 23, old: 'TOC entry Note 5', new: 'TOC entry Note 5 page', ai: 'Navigation fix.' },
+      { id: 27, old: 'Comma in paragraph 4', new: 'Comma removed', ai: 'Punctuation.' },
+      { id: 33, old: 'Figure 3 caption', new: 'Figure 3 caption updated', ai: 'Caption text.' },
+      { id: 36, old: 'Appendix A title', new: 'Appendix A renamed', ai: 'Naming only.' },
+      { id: 38, old: 'URL in footnote', new: 'URL updated', ai: 'Link update.' },
+      { id: 40, old: 'Whitespace in table', new: 'Table padding adjusted', ai: 'Layout.' }
+    ],
+    na: (function () {
+      var list = [];
+      for (var i = 1; i <= 14; i++) {
+        list.push({
+          id: 100 + i,
+          old: 'Paragraph block ' + i + ' opening',
+          new: 'Paragraph block ' + i + ' revised opening',
+          ai: null
+        });
+      }
+      return list;
+    })()
+  };
+
+  var MOCK_REVIEWS = {
+    old: buildReviewList('rv_prev', 14, 8, 6),
+    new: buildReviewList('rv_cur', 9, 4, 5)
+  };
+
+  function changeGroupTotal() {
+    var n = 0;
+    Object.keys(MOCK_CHANGES).forEach(function (k) { n += MOCK_CHANGES[k].length; });
+    return n;
+  }
+
+  var MOCK_SESSIONS = [
+    {
+      id: 's_v1_v3',
+      label: 'Report_v1.pdf → Report_v3.pdf',
+      created: '2026-06-11 05:24:04',
+      updated: '2026-06-11 05:24:30',
+      savedRuns: 0,
+      itemMeta: changeGroupTotal() + ' change groups',
+      changes: changeGroupTotal(),
+      add: 76,
+      del: 73,
+      compared: true
+    },
+    {
+      id: 's_v1_v2',
+      label: 'Report_v1.pdf → Report_v2.pdf',
+      created: '2026-06-10 11:02:04',
+      updated: '2026-06-10 14:02:11',
+      savedRuns: 0,
+      itemMeta: '41 change groups',
+      changes: 41,
+      add: 38,
+      del: 35,
+      compared: true
+    },
+    {
+      id: 's_v1_only',
+      label: 'Report_v1.pdf',
+      created: '2026-06-09 09:15:00',
+      updated: '2026-06-09 09:15:00',
+      savedRuns: 0,
+      itemMeta: 'No comparison',
+      changes: 0,
+      add: 0,
+      del: 0,
+      compared: false
+    }
+  ];
+  var activeSessionId = 's_v1_v3';
+  var activeRisk = null;
+  var activeReportSide = 'new';
+  var activeStatusFilter = 'total';
+  var activeOriginNew = false;
+  var activeOriginForward = false;
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function changeSummary(c) {
+    var parts = [];
+    if (c.old) parts.push('<span class="delText">− ' + esc(c.old) + '</span>');
+    if (c.new) parts.push('<span class="addText">+ ' + esc(c.new) + '</span>');
+    return parts.join(' ') || '(empty)';
+  }
+
+  function changeSectionFor(c) {
+    if (c.section) return c.section;
+    var types = ['FINANCIAL STATEMENT', 'NOTE', 'SECTION'];
+    var labels = [
+      'Consolidated Statements of Operations',
+      'Note 5 — Long-term debt',
+      'Management discussion and analysis'
+    ];
+    var type = types[c.id % 3];
+    var page = 3 + (c.id % 34);
+    return type + ' · p.' + page + ' · ' + labels[c.id % 3];
+  }
+
+  function changeModalItemHtml(c) {
+    return '<div class="changeModalItem"><div class="changeSection">' + esc(changeSectionFor(c)) + '</div>' +
+      '<div class="streamMeta">#' + c.id + '</div>' +
+      '<div class="changeModalDiff">' + changeSummary(c) + '</div></div>';
+  }
+
+  function changeItemHtml(c, compact) {
+    var ai = c.ai
+      ? '<div class="streamAi">' + esc(c.ai) + '</div>'
+      : '<div class="streamAi empty">No AI</div>';
+    var summary = compact
+      ? '<div class="streamSummary">' + changeSummary(c) + '</div>'
+      : '<div>' + changeSummary(c) + '</div>';
+    var reviewBtn = '<div class="changeStreamActions"><button type="button" class="changeReviewBtn">Review</button></div>';
+    return '<div class="streamItem" data-change-id="' + c.id + '"><div class="streamMain"><div class="streamMeta">#' + c.id + '</div>' + summary + reviewBtn + '</div>' + (compact ? ai : '') + '</div>';
+  }
+
+  function openChangeReviewModal(c, title) {
+    document.getElementById('changeModalTitle').textContent = title || ('Change #' + c.id);
+    document.getElementById('changeModalBody').innerHTML = changeModalItemHtml(c);
+    document.getElementById('changeListModal').classList.add('open');
+  }
+
+  function openChangeModal(label, items) {
+    document.getElementById('changeModalTitle').textContent = label + ' · ' + items.length;
+    document.getElementById('changeModalBody').innerHTML = items.map(changeModalItemHtml).join('');
+    document.getElementById('changeListModal').classList.add('open');
+  }
+
+  function openReviewModal(r) {
+    document.getElementById('reviewModalTitle').textContent = 'Comment · ' + r.id;
+    document.getElementById('reviewModalBody').innerHTML =
+      '<div class="streamMeta">' + esc(r.status) + '</div><p>' + esc(r.text) + '</p>' +
+      (r.ai ? '<div style="margin-top:8px;padding:8px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px"><strong>AI</strong><br>' + esc(r.ai) + '</div>' : '');
+    document.getElementById('reviewDetailModal').classList.add('open');
+  }
+
+  function openReviewListModal(title, items) {
+    document.getElementById('reviewListModalTitle').textContent = title + ' · ' + items.length;
+    document.getElementById('reviewListModalBody').innerHTML = items.map(function (r) {
+      return '<div class="changeModalItem"><div class="streamMeta">' + esc(r.status) + ' · ' + esc(r.id) + '</div><p>' + esc(r.text) + '</p>' +
+        (r.ai ? '<div style="margin-top:6px;padding:6px;border-left:3px solid #a78bfa;background:#f5f3ff;color:#4c1d95;font-size:11px">' + esc(r.ai) + '</div>' : '') + '</div>';
+    }).join('');
+    document.getElementById('reviewListModal').classList.add('open');
+  }
+
+  function renderRiskCounts() {
+    document.querySelectorAll('.riskCard').forEach(function (el) {
+      var k = el.dataset.risk;
+      var num = el.querySelector('.num');
+      if (num && MOCK_CHANGES[k]) num.textContent = String(MOCK_CHANGES[k].length);
+    });
+    var total = changeGroupTotal();
+    var totalEl = document.getElementById('changeTotal');
+    if (totalEl) totalEl.textContent = String(total);
+  }
+
+  function renderReportPicker() {
+    var menu = document.getElementById('reportPickerMenu');
+    if (!menu) return;
+    menu.innerHTML = Object.keys(MOCK_REPORTS).map(function (key) {
+      var r = MOCK_REPORTS[key];
+      var active = r.side === activeReportSide ? ' active' : '';
+      return '<div class="reportPickerItem' + active + '" data-side="' + esc(r.side) + '">' +
+        '<div class="pickTag">' + esc(r.tag) + '</div>' +
+        '<div class="pickName">' + esc(r.name) + '</div></div>';
+    }).join('');
+    menu.querySelectorAll('.reportPickerItem').forEach(function (item) {
+      item.addEventListener('click', function () {
+        selectReportSide(item.dataset.side);
+        menu.classList.remove('open');
+        document.getElementById('reportPickerChev').textContent = '▼';
+        document.getElementById('reportPickerBtn').setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  function selectReportSide(side) {
+    if (!MOCK_REPORTS[side]) return;
+    activeReportSide = side;
+    var r = MOCK_REPORTS[side];
+    document.getElementById('reportPickerTag').textContent = r.tag;
+    document.getElementById('reportPickerName').textContent = r.name;
+    document.getElementById('reportPickerMeta').textContent = r.file + ' · ' + r.pages + ' pages';
+    renderReportPicker();
+    updateReviewStats();
+    renderReviewStream();
+  }
+
+  function updateReviewStats() {
+    var bucket = reviewBucketForSide(activeReportSide);
+    var stats = document.querySelectorAll('#reviewStatsRow .reviewStat');
+    if (stats[0]) stats[0].querySelector('.n').textContent = String(bucket.total.length);
+    if (stats[1]) stats[1].querySelector('.n').textContent = String(bucket.cleared.length);
+    if (stats[2]) stats[2].querySelector('.n').textContent = String(bucket.open.length);
+    stats.forEach(function (btn) {
+      btn.classList.toggle('active', btn.dataset.filter === activeStatusFilter);
+    });
+  }
+
+  function reviewOriginBadge(r) {
+    if (!r.origin) return '';
+    var label = r.origin === 'forward' ? 'forward' : 'new';
+    return '<span class="rvBadge ' + label + '">' + label + '</span>';
+  }
+
+  function filterReviewsByOrigin(items) {
+    if (!activeOriginNew && !activeOriginForward) return items;
+    return items.filter(function (r) {
+      if (activeOriginNew && r.origin === 'new') return true;
+      if (activeOriginForward && r.origin === 'forward') return true;
+      return false;
+    });
+  }
+
+  function updateOriginFilterUi() {
+    document.querySelectorAll('#reviewOriginBar .originFilter').forEach(function (btn) {
+      var kind = btn.dataset.origin;
+      btn.classList.remove('active');
+      if (kind === 'all' && !activeOriginNew && !activeOriginForward) btn.classList.add('active');
+      if (kind === 'new' && activeOriginNew) btn.classList.add('active');
+      if (kind === 'forward' && activeOriginForward) btn.classList.add('active');
+    });
+  }
+
+  function renderChangeStream() {
+    var stream = document.getElementById('changeStream');
+    var body = document.getElementById('changeStreamBody');
+    var title = document.getElementById('changeStreamTitle');
+    var expandBtn = document.getElementById('changeStreamExpand');
+    document.querySelectorAll('.riskCard').forEach(function (el) {
+      el.classList.toggle('active', el.dataset.risk === activeRisk);
+    });
+    if (!activeRisk) {
+      stream.classList.remove('show');
+      body.innerHTML = '';
+      return;
+    }
+    var items = MOCK_CHANGES[activeRisk] || [];
+    var label = { high: 'High', medium: 'Medium', low: 'Low', na: 'N/A' }[activeRisk];
+    stream.classList.add('show');
+    title.textContent = label + ' · ' + items.length;
+    expandBtn.style.display = items.length >= EXPAND_THRESHOLD ? '' : 'none';
+    expandBtn.onclick = function () { openChangeModal(label, items); };
+    if (!items.length) {
+      body.innerHTML = '<div style="padding:12px;color:#94a3b8">No items.</div>';
+      return;
+    }
+    body.innerHTML = items.map(function (c) { return changeItemHtml(c, true); }).join('');
+    body.querySelectorAll('.changeReviewBtn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var row = btn.closest('.streamItem');
+        if (!row) return;
+        var id = Number(row.dataset.changeId);
+        var c = items.find(function (x) { return x.id === id; });
+        if (c) openChangeReviewModal(c);
+      });
+    });
+  }
+
+  function renderReviewStream() {
+    var stream = document.getElementById('reviewStream');
+    var body = document.getElementById('reviewStreamBody');
+    var title = document.getElementById('reviewStreamTitle');
+    var expandBtn = document.getElementById('reviewStreamExpand');
+    if (stream) stream.classList.add('show');
+    updateOriginFilterUi();
+    updateReviewStats();
+    var bucket = reviewBucketForSide(activeReportSide);
+    var baseItems = bucket[activeStatusFilter] || bucket.total || [];
+    var items = filterReviewsByOrigin(baseItems);
+    var report = MOCK_REPORTS[activeReportSide];
+    var statusLabel = activeStatusFilter.charAt(0).toUpperCase() + activeStatusFilter.slice(1);
+    title.textContent = report.tag + ' · ' + statusLabel + ' · ' + items.length;
+    if (expandBtn) {
+      expandBtn.style.display = items.length >= EXPAND_THRESHOLD ? '' : 'none';
+      expandBtn.onclick = function () {
+        openReviewListModal(report.tag + ' · ' + statusLabel, items);
+      };
+    }
+    if (!items.length) {
+      body.innerHTML = '<div style="padding:12px;color:#94a3b8">No comments match.</div>';
+      return;
+    }
+    body.innerHTML = items.map(function (r) {
+      var ai = r.ai ? '<div class="streamAi">' + esc(r.ai) + '</div>' : '<div class="streamAi empty">No AI</div>';
+      return '<div class="streamItem" data-review-id="' + esc(r.id) + '"><div class="streamMain"><div class="streamMeta">' +
+        esc(r.status) + ' · ' + esc(r.id) + reviewOriginBadge(r) + '</div><div class="streamSummary">' + esc(r.text) + '</div></div>' + ai + '</div>';
+    }).join('');
+    body.querySelectorAll('.streamItem').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var id = el.dataset.reviewId;
+        var r = items.find(function (x) { return x.id === id; });
+        if (r) openReviewModal(r);
+      });
+    });
+  }
+
+  function getSession(id) {
+    return MOCK_SESSIONS.find(function (s) { return s.id === id; });
+  }
+
+  function renderSessionList() {
+    var pane = document.getElementById('sessionListPane');
+    if (!pane) return;
+    pane.innerHTML = MOCK_SESSIONS.map(function (s) {
+      var active = s.id === activeSessionId ? ' active' : '';
+      return '<div class="sessionListRow' + active + '" data-session-id="' + esc(s.id) + '"><div class="meta">' + esc(s.updated) + '</div><div class="title">' + esc(s.label) + '</div></div>';
+    }).join('');
+    pane.querySelectorAll('.sessionListRow').forEach(function (row) {
+      row.addEventListener('click', function () {
+        selectSession(row.dataset.sessionId);
+      });
+    });
+  }
+
+  function selectSession(id) {
+    var s = getSession(id);
+    if (!s) return;
+    activeSessionId = id;
+    activeRisk = null;
+    activeStatusFilter = 'total';
+    activeOriginNew = false;
+    activeOriginForward = false;
+    document.getElementById('sessionLabel').textContent = s.label;
+    document.getElementById('sessionMetaBar').innerHTML =
+      '<span><span class="k">created_at</span> <span class="v">' + esc(s.created) + '</span></span>' +
+      '<span><span class="k">updated_at</span> <span class="v">' + esc(s.updated) + '</span></span>';
+    document.getElementById('changeTotal').textContent = String(s.changes);
+    var delta = document.getElementById('changeDelta');
+    if (s.compared) {
+      delta.innerHTML = '<span class="add">+' + s.add + '</span> · <span class="del">−' + s.del + '</span>';
+      delta.style.color = '';
+    } else {
+      delta.innerHTML = 'No comparison — upload an updated report.';
+      delta.style.color = '#94a3b8';
+    }
+    document.getElementById('changeStream').classList.remove('show');
+    renderSessionList();
+    renderChangeStream();
+    renderReviewStream();
+  }
+
+  renderRiskCounts();
+  renderReportPicker();
+  selectReportSide(activeReportSide);
+  renderSessionList();
+  selectSession(activeSessionId);
+
+  document.getElementById('sidebarCollapseBtn').addEventListener('click', function () {
+    document.body.classList.add('sidebarCollapsed');
+  });
+  document.getElementById('sidebarRail').addEventListener('click', function () {
+    document.body.classList.remove('sidebarCollapsed');
+  });
+
+  document.querySelectorAll('#sideTabs .tabBtn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = btn.dataset.tab;
+      document.querySelectorAll('#sideTabs .tabBtn').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      document.querySelectorAll('.tabBody').forEach(function (b) { b.classList.toggle('active', b.id === 'tab-' + tab); });
+      document.body.classList.toggle('mode-dashboard', tab === 'dashboard');
+      document.body.classList.toggle('mode-viewer', tab !== 'dashboard');
+      document.getElementById('viewerMock').classList.toggle('single', tab === 'index');
+    });
+  });
+
+  document.getElementById('riskGrid').addEventListener('click', function (e) {
+    var card = e.target.closest('.riskCard');
+    if (!card) return;
+    var risk = card.dataset.risk;
+    activeRisk = activeRisk === risk ? null : risk;
+    renderChangeStream();
+  });
+
+  var reportPickerBtn = document.getElementById('reportPickerBtn');
+  var reportPickerMenu = document.getElementById('reportPickerMenu');
+  var reportPickerChev = document.getElementById('reportPickerChev');
+  if (reportPickerBtn && reportPickerMenu) {
+    reportPickerBtn.addEventListener('click', function () {
+      var open = reportPickerMenu.classList.toggle('open');
+      reportPickerChev.textContent = open ? '▲' : '▼';
+      reportPickerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!reportPickerMenu.classList.contains('open')) return;
+      var picker = reportPickerBtn.parentElement;
+      if (picker && !picker.contains(e.target)) {
+        reportPickerMenu.classList.remove('open');
+        reportPickerChev.textContent = '▼';
+        reportPickerBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  document.getElementById('reviewStatsRow').addEventListener('click', function (e) {
+    var btn = e.target.closest('.reviewStat');
+    if (!btn || !btn.dataset.filter) return;
+    activeStatusFilter = btn.dataset.filter;
+    renderReviewStream();
+  });
+
+  document.querySelectorAll('#reviewOriginBar .originFilter').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.dataset.origin;
+      if (kind === 'all') {
+        activeOriginNew = false;
+        activeOriginForward = false;
+      } else if (kind === 'new') {
+        activeOriginNew = !activeOriginNew;
+      } else if (kind === 'forward') {
+        activeOriginForward = !activeOriginForward;
+      }
+      renderReviewStream();
+    });
+  });
+
+  document.getElementById('changeModalClose').addEventListener('click', function () {
+    document.getElementById('changeListModal').classList.remove('open');
+  });
+  document.getElementById('changeListModal').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+  document.getElementById('reviewListModalClose').addEventListener('click', function () {
+    document.getElementById('reviewListModal').classList.remove('open');
+  });
+  document.getElementById('reviewListModal').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+  document.getElementById('reviewModalClose').addEventListener('click', function () {
+    document.getElementById('reviewDetailModal').classList.remove('open');
+  });
+  document.getElementById('reviewDetailModal').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>
