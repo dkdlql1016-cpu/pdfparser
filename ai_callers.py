@@ -1,10 +1,25 @@
 import json
 import os
 
-from ai_config_utils import ai_provider_for_model
+from ai_config_utils import ai_provider_for_model, is_azure_mode, resolve_azure_settings
 
 
 def _get_api_client(model):
+    # Azure 모드: AZURE_OPENAI_ENDPOINT + AZURE_OPENAI_API_KEY가 설정된 경우
+    # AzureOpenAI는 OpenAI의 서브클래스로 tool calling 인터페이스가 동일함
+    if is_azure_mode():
+        try:
+            from openai import AzureOpenAI
+        except Exception as e:
+            raise RuntimeError("openai package is not installed") from e
+        s = resolve_azure_settings(model)
+        return "openai", AzureOpenAI(
+            api_key=s["api_key"],
+            azure_endpoint=s["endpoint"],
+            azure_deployment=s["deployment"],
+            api_version=s["api_version"],
+        )
+
     provider = ai_provider_for_model(model)
     if provider == "openai":
         api_key = os.environ.get("OPENAI_API_KEY")
