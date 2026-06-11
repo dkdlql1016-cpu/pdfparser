@@ -50,6 +50,8 @@ from file_manager_service import (
 from document_pipeline_service import (
     build_chars_from_words as pipeline_build_chars_from_words,
     copy_if_exists as pipeline_copy_if_exists,
+    estimated_char_count as pipeline_estimated_char_count,
+    filter_words_for_chars as pipeline_filter_words_for_chars,
     process_document_diff_run as pipeline_process_document_diff_run,
     process_single_document_run as pipeline_process_single_document_run,
     write_unmarked_md_copy as pipeline_write_unmarked_md_copy,
@@ -592,6 +594,14 @@ def build_chars_from_words(words):
     return pipeline_build_chars_from_words(words)
 
 
+def filter_words_for_chars(words, *, page=None, page_start=None, page_end=None):
+    return pipeline_filter_words_for_chars(words, page=page, page_start=page_start, page_end=page_end)
+
+
+def estimated_char_count(words):
+    return pipeline_estimated_char_count(words)
+
+
 def process_single_document_run(run_dir: Path, pdf_path: Path, *, doc_id=None, run_id=None, filename=None):
     return pipeline_process_single_document_run(
         run_dir,
@@ -880,6 +890,8 @@ def update_run_meta(meta, run_id, **patch):
 AI_ASSESSMENT_MODEL = os.environ.get("AI_ASSESSMENT_MODEL") or "claude-3-5-sonnet-latest"
 AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "ai_assessment_system.md"
 CHANGE_AI_ASSESSMENT_SYSTEM_PROMPT_PATH = BASE_DIR / "prompts" / "change_ai_assessment_system.md"
+CHARS_MAX_WORDS = max(1, int(os.environ.get("CHARS_MAX_WORDS") or "50000"))
+CHARS_MAX_ESTIMATED_COUNT = max(1, int(os.environ.get("CHARS_MAX_ESTIMATED_COUNT") or "250000"))
 AI_ASSESSMENT_PROMPT_FALLBACK = (
     "You are an expert financial report review assistant. "
     "Use the available markdown tools before calling submit_verdict."
@@ -1198,6 +1210,10 @@ def document_blueprint_deps():
         "copy_if_exists_fn": copy_if_exists,
         "read_json_fn": read_json,
         "build_chars_from_words_fn": build_chars_from_words,
+        "filter_words_for_chars_fn": filter_words_for_chars,
+        "estimated_char_count_fn": estimated_char_count,
+        "chars_max_words": CHARS_MAX_WORDS,
+        "chars_max_estimated_count": CHARS_MAX_ESTIMATED_COUNT,
         "anchor_for_selection_fn": anchor_for_selection,
         "canonical_review_from_anchor_fn": canonical_review_from_anchor,
         "document_reviews_for_run_fn": document_reviews_for_run,
@@ -1251,6 +1267,10 @@ def snapshot_blueprint_deps():
         "document_snapshot_dir_fn": document_snapshot_dir,
         "read_json_fn": read_json,
         "build_chars_from_words_fn": build_chars_from_words,
+        "filter_words_for_chars_fn": filter_words_for_chars,
+        "estimated_char_count_fn": estimated_char_count,
+        "chars_max_words": CHARS_MAX_WORDS,
+        "chars_max_estimated_count": CHARS_MAX_ESTIMATED_COUNT,
         "snapshot_side_file_fn": snapshot_side_file,
         "render_pdf_page_fn": render_pdf_page,
         "export_annotated_pdf_fn": export_annotated_pdf,

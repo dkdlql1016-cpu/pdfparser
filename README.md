@@ -16,7 +16,7 @@ Open in a browser:
 http://127.0.0.1:8000
 ```
 
-For maintainers/handoff, see `ARCHITECTURE.md`.
+For maintainers/handoff, see `ARCHITECTURE.md` and `CHARS_API_CONTRACT.md`.
 
 ## Project Structure
 

@@ -42,6 +42,29 @@ def build_chars_from_words(words):
     return chars
 
 
+def filter_words_for_chars(words, *, page=None, page_start=None, page_end=None):
+    if page is not None:
+        page_start = page
+        page_end = page
+    if page_start is None and page_end is None:
+        return list(words or [])
+    filtered = []
+    for word in words or []:
+        word_page = word.get("page")
+        if not isinstance(word_page, int):
+            continue
+        if page_start is not None and word_page < page_start:
+            continue
+        if page_end is not None and word_page > page_end:
+            continue
+        filtered.append(word)
+    return filtered
+
+
+def estimated_char_count(words):
+    return sum(len(str(word.get("text", ""))) for word in (words or []))
+
+
 def process_single_document_run(
     run_dir: Path,
     pdf_path: Path,

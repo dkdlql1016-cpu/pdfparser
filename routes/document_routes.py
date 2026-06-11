@@ -1,10 +1,11 @@
 import re
 import shutil
+import time
 import uuid
 from pathlib import Path
 
 import document_semantic as semantic
-from flask import Blueprint, Response, jsonify, request, send_file
+from flask import Blueprint, Response, current_app, jsonify, request, send_file
 
 _HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
 
@@ -15,6 +16,36 @@ def _is_valid_hex_id(value: str) -> bool:
 
 def _has_invalid_hex_id(*values: str) -> bool:
     return any(not _is_valid_hex_id(str(value or "")) for value in values)
+
+
+def _parse_optional_positive_int(name: str):
+    raw = request.args.get(name)
+    if raw is None or raw == "":
+        return None, None
+    try:
+        parsed = int(raw)
+    except ValueError:
+        return None, f"{name} must be an integer"
+    if parsed < 1:
+        return None, f"{name} must be >= 1"
+    return parsed, None
+
+
+def _chars_page_filters_from_query():
+    page, page_err = _parse_optional_positive_int("page")
+    if page_err:
+        return None, page_err
+    page_start, start_err = _parse_optional_positive_int("page_start")
+    if start_err:
+        return None, start_err
+    page_end, end_err = _parse_optional_positive_int("page_end")
+    if end_err:
+        return None, end_err
+    if page is not None and (page_start is not None or page_end is not None):
+        return None, "page cannot be combined with page_start/page_end"
+    if page_start is not None and page_end is not None and page_start > page_end:
+        return None, "page_start must be <= page_end"
+    return {"page": page, "page_start": page_start, "page_end": page_end}, None
 
 
 def create_document_blueprint(*, deps):
@@ -30,6 +61,10 @@ def create_document_blueprint(*, deps):
     copy_if_exists_fn = deps["copy_if_exists_fn"]
     read_json_fn = deps["read_json_fn"]
     build_chars_from_words_fn = deps["build_chars_from_words_fn"]
+    filter_words_for_chars_fn = deps.get("filter_words_for_chars_fn", lambda words, **_kwargs: list(words or []))
+    estimated_char_count_fn = deps.get("estimated_char_count_fn", lambda words: sum(len(str(w.get("text", ""))) for w in (words or [])))
+    chars_max_words = int(deps.get("chars_max_words", 50000))
+    chars_max_estimated_count = int(deps.get("chars_max_estimated_count", 250000))
     anchor_for_selection_fn = deps["anchor_for_selection_fn"]
     canonical_review_from_anchor_fn = deps["canonical_review_from_anchor_fn"]
     document_reviews_for_run_fn = deps["document_reviews_for_run_fn"]
@@ -353,8 +388,73 @@ def create_document_blueprint(*, deps):
         words_path = document_run_dir_fn(doc_id, run_id) / words_name
         if not words_path.exists():
             return jsonify({"error": "not found"}), 404
-        words = read_json_fn(words_path, [])
-        return jsonify(build_chars_from_words_fn(words))
+        page_filters, filter_error = _chars_page_filters_from_query()
+        if filter_error:
+            return jsonify({"error": filter_error}), 400
+        words = read_json_fn(words_path, []) or []
+        scoped_words = filter_words_for_chars_fn(
+            words,
+            page=page_filters["page"],
+            page_start=page_filters["page_start"],
+            page_end=page_filters["page_end"],
+        )
+        if len(scoped_words) > chars_max_words:
+            current_app.logger.warning(
+                "chars request rejected (word limit): doc_id=%s run_id=%s side=%s words=%s max_words=%s page=%s page_start=%s page_end=%s",
+                doc_id,
+                run_id,
+                side,
+                len(scoped_words),
+                chars_max_words,
+                page_filters["page"],
+                page_filters["page_start"],
+                page_filters["page_end"],
+            )
+            return jsonify(
+                {
+                    "error": "chars payload too large",
+                    "reason": "word_limit_exceeded",
+                    "max_words": chars_max_words,
+                    "word_count": len(scoped_words),
+                }
+            ), 413
+        estimated_chars = estimated_char_count_fn(scoped_words)
+        if estimated_chars > chars_max_estimated_count:
+            current_app.logger.warning(
+                "chars request rejected (char estimate): doc_id=%s run_id=%s side=%s estimated_chars=%s max_chars=%s page=%s page_start=%s page_end=%s",
+                doc_id,
+                run_id,
+                side,
+                estimated_chars,
+                chars_max_estimated_count,
+                page_filters["page"],
+                page_filters["page_start"],
+                page_filters["page_end"],
+            )
+            return jsonify(
+                {
+                    "error": "chars payload too large",
+                    "reason": "char_limit_exceeded",
+                    "max_estimated_chars": chars_max_estimated_count,
+                    "estimated_chars": estimated_chars,
+                }
+            ), 413
+        started = time.perf_counter()
+        chars = build_chars_from_words_fn(scoped_words)
+        elapsed_ms = int((time.perf_counter() - started) * 1000)
+        current_app.logger.info(
+            "chars built: doc_id=%s run_id=%s side=%s words=%s chars=%s elapsed_ms=%s page=%s page_start=%s page_end=%s",
+            doc_id,
+            run_id,
+            side,
+            len(scoped_words),
+            len(chars),
+            elapsed_ms,
+            page_filters["page"],
+            page_filters["page_start"],
+            page_filters["page_end"],
+        )
+        return jsonify(chars)
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/reviews", methods=["GET"])
     def list_document_reviews(doc_id, run_id):

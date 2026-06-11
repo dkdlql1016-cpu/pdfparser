@@ -190,8 +190,8 @@ Cross-domain reusable utility helpers (no domain policy decisions).
   - Current run markdown generated from PDF.
 - `documents/<doc_id>/runs/<run_id>/words.json`
   - Current run PDF words extracted as JSON (text/page/bbox/index).
-- `documents/<doc_id>/runs/<run_id>/chars.json`
-  - Character-level JSON derived from words.
+- `documents/<doc_id>/runs/<run_id>/chars.json` (removed)
+  - No longer persisted. Character payload is generated on-demand from `words.json` through `/chars/<side>` APIs.
 - `documents/<doc_id>/runs/<run_id>/result.json`
   - Markdown diff result segments (`equal/delete/add`).
 - `documents/<doc_id>/runs/<run_id>/viewer_data.json`
@@ -200,7 +200,7 @@ Cross-domain reusable utility helpers (no domain policy decisions).
   - Review-level AI assessment results and metadata.
 - `documents/<doc_id>/runs/<run_id>/change_ai_assessment.json`
   - Change-level AI assessment results and metadata.
-- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_chars.json`, `prev_section_map.json`
+- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_section_map.json`
   - Previous-run artifacts copied for update/diff context.
 - `documents/<doc_id>/runs/<run_id>/section_map.json`
   - Current run section index metadata.
@@ -210,5 +210,15 @@ Cross-domain reusable utility helpers (no domain policy decisions).
   - Frozen viewer payload for snapshot.
 - `documents/<doc_id>/snapshots/<snapshot_id>/reviews.json`
   - Frozen review set for snapshot.
+
+### Chars API Runtime Contract
+
+- `/chars/<side>` endpoints are page-scoped server APIs (query: `page`, `page_start`, `page_end`).
+- Response is built from `words.json`/snapshot words on demand.
+- Size guards are enforced with:
+  - `CHARS_MAX_WORDS` (default `50000`)
+  - `CHARS_MAX_ESTIMATED_COUNT` (default `250000`)
+- Large requests are rejected with `413`.
+- See `CHARS_API_CONTRACT.md` for full request/response details.
 
 ---

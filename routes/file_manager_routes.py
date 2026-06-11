@@ -1,7 +1,7 @@
-import shutil
 import re
+import shutil
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 _HEX12_RE = re.compile(r"^[0-9a-f]{12}$")
 
@@ -52,6 +52,11 @@ def create_file_manager_blueprint(*, deps):
             shutil.rmtree(path)
         except FileNotFoundError:
             return jsonify({"error": "document not found"}), 404
+        except PermissionError:
+            return jsonify({"error": "document is locked or access is denied"}), 423
+        except OSError as e:
+            current_app.logger.exception("file-manager delete failed: doc_id=%s path=%s error=%s", doc_id, path, e)
+            return jsonify({"error": "delete failed due to filesystem error"}), 500
         return jsonify({"deleted": True, "doc_id": doc_id})
 
     return bp

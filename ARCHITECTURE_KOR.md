@@ -189,8 +189,8 @@
   - PDF에서 변환된 현재 run markdown
 - `documents/<doc_id>/runs/<run_id>/words.json`
   - 현재 run PDF 단어 JSON(텍스트/페이지/bbox/index)
-- `documents/<doc_id>/runs/<run_id>/chars.json`
-  - words 기반 문자 단위 JSON
+- `documents/<doc_id>/runs/<run_id>/chars.json` (저장 제거)
+  - 더 이상 파일로 저장하지 않으며, `/chars/<side>` API에서 `words.json` 기반으로 on-demand 생성
 - `documents/<doc_id>/runs/<run_id>/result.json`
   - markdown diff 세그먼트 결과(`equal/delete/add`)
 - `documents/<doc_id>/runs/<run_id>/viewer_data.json`
@@ -199,7 +199,7 @@
   - 리뷰 단위 AI 평가 결과/메타
 - `documents/<doc_id>/runs/<run_id>/change_ai_assessment.json`
   - 변경 단위 AI 평가 결과/메타
-- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_chars.json`, `prev_section_map.json`
+- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_section_map.json`
   - 업데이트/diff 문맥용 이전 run 산출물 복사본
 - `documents/<doc_id>/runs/<run_id>/section_map.json`
   - 현재 run section index 메타데이터
@@ -209,5 +209,15 @@
   - 스냅샷 시점의 viewer payload 고정본
 - `documents/<doc_id>/snapshots/<snapshot_id>/reviews.json`
   - 스냅샷 시점의 리뷰 고정본
+
+### chars API 런타임 계약
+
+- `/chars/<side>`는 서버가 제공하는 페이지 범위 기반 API입니다. (`page`, `page_start`, `page_end`)
+- 응답은 `words.json`(또는 snapshot words)에서 요청 시점에 생성됩니다.
+- 크기 가드는 다음 환경변수로 제어됩니다.
+  - `CHARS_MAX_WORDS` (기본값 `50000`)
+  - `CHARS_MAX_ESTIMATED_COUNT` (기본값 `250000`)
+- 임계치 초과 시 `413`을 반환합니다.
+- 상세 계약은 `CHARS_API_CONTRACT.md`를 참고하세요.
 
 ---

@@ -42,6 +42,62 @@ from assessment_prompt_builders import build_batch_assessment_prompt, build_chan
 from section_context_utils import keyword_search_markdown, search_markdown_context, section_context_from_markdown
 
 
+def _openai_chat_completion(client, **kwargs):
+    try:
+        return client.chat.completions.create(**kwargs)
+    except Exception as e:
+        raise RuntimeError(f"openai API request failed: {e}") from e
+
+
+def _anthropic_message(client, **kwargs):
+    try:
+        return client.messages.create(**kwargs)
+    except Exception as e:
+        raise RuntimeError(f"anthropic API request failed: {e}") from e
+
+
+def _run_markdown_tool(name, args, tool_context, tool_trace):
+    if name == "read_section":
+        file_key = args.get("file")
+        section_id = args.get("section_id")
+        md_path, section_map = tool_context[file_key]
+        tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
+        return {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
+    if name == "search_markdown":
+        file_key = args.get("file")
+        query = args.get("query", "")
+        md_path, _section_map = tool_context[file_key]
+        tool_trace.append({"tool": name, "file": file_key, "query": query})
+        return {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
+    if name == "keyword_search_markdown":
+        file_key = args.get("file")
+        keyword = args.get("keyword", "")
+        md_path, section_map = tool_context[file_key]
+        result = keyword_search_markdown(
+            md_path,
+            section_map,
+            keyword,
+            case_sensitive=bool(args.get("case_sensitive", False)),
+            whole_word=bool(args.get("whole_word", True)),
+            max_hits=int(args.get("max_hits", 200) or 200),
+        )
+        result["file"] = file_key
+        tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
+        return result
+    return {"error": f"Unknown tool: {name}"}
+
+
+def _attach_tool_trace(payload, tool_trace):
+    payload["tool_trace"] = tool_trace
+    return payload
+
+
+def _attach_tool_trace_batch(payloads, tool_trace):
+    for payload in payloads.values():
+        payload["tool_trace"] = tool_trace
+    return payloads
+
+
 def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
     _, client = _get_api_client(model)
     messages = [
@@ -50,7 +106,8 @@ def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, promp
     ]
     tool_trace = []
     for _ in range(8):
-        response = client.chat.completions.create(
+        response = _openai_chat_completion(
+            client,
             model=model,
             temperature=0,
             tools=openai_tool_definitions(batch=False),
@@ -76,37 +133,8 @@ def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, promp
             name = call.function.name
             args = openai_tool_call_args(call.function.arguments)
             if name == "submit_verdict":
-                payload = normalize_assessment_payload(args)
-                payload["tool_trace"] = tool_trace
-                return payload
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace(normalize_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
     raise ValueError("AI assessment reached the tool-call limit")
 
@@ -119,7 +147,8 @@ def call_ai_assessment_batch_openai(context_packs, available_sections, tool_cont
     ]
     tool_trace = []
     for _ in range(8):
-        response = client.chat.completions.create(
+        response = _openai_chat_completion(
+            client,
             model=model,
             temperature=0,
             tools=openai_tool_definitions(batch=True),
@@ -145,38 +174,8 @@ def call_ai_assessment_batch_openai(context_packs, available_sections, tool_cont
             name = call.function.name
             args = openai_tool_call_args(call.function.arguments)
             if name == "submit_verdicts":
-                payloads = normalize_batch_assessment_payload(args)
-                for payload in payloads.values():
-                    payload["tool_trace"] = tool_trace
-                return payloads
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace_batch(normalize_batch_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
     raise ValueError("AI batch assessment reached the tool-call limit")
 
@@ -196,7 +195,8 @@ def call_ai_assessment(prompt, tool_context, *, model, prompt_path, prompt_fallb
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
     for _ in range(8):
-        msg = client.messages.create(
+        msg = _anthropic_message(
+            client,
             model=model,
             max_tokens=1200,
             temperature=0,
@@ -212,37 +212,8 @@ def call_ai_assessment(prompt, tool_context, *, model, prompt_path, prompt_fallb
             name = getattr(block, "name", "")
             args = getattr(block, "input", {}) or {}
             if name == "submit_verdict":
-                payload = normalize_assessment_payload(args)
-                payload["tool_trace"] = tool_trace
-                return payload
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace(normalize_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
         if not tool_results:
             messages.append({"role": "user", "content": "Use read_section, search_markdown, or keyword_search_markdown, then call submit_verdict."})
@@ -267,7 +238,8 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context, *,
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
     for _ in range(8):
-        msg = client.messages.create(
+        msg = _anthropic_message(
+            client,
             model=model,
             max_tokens=3000,
             temperature=0,
@@ -283,38 +255,8 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context, *,
             name = getattr(block, "name", "")
             args = getattr(block, "input", {}) or {}
             if name == "submit_verdicts":
-                payloads = normalize_batch_assessment_payload(args)
-                for payload in payloads.values():
-                    payload["tool_trace"] = tool_trace
-                return payloads
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace_batch(normalize_batch_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
         if not tool_results:
             messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_verdicts with one item per review_id."})
@@ -331,7 +273,8 @@ def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path
     ]
     tool_trace = []
     for _ in range(8):
-        response = client.chat.completions.create(
+        response = _openai_chat_completion(
+            client,
             model=model,
             temperature=0,
             tools=openai_change_tool_definitions(batch=False),
@@ -357,37 +300,8 @@ def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path
             name = call.function.name
             args = openai_tool_call_args(call.function.arguments)
             if name == "submit_change_review":
-                payload = normalize_change_assessment_payload(args)
-                payload["tool_trace"] = tool_trace
-                return payload
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace(normalize_change_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
     raise ValueError("AI change assessment reached the tool-call limit")
 
@@ -400,7 +314,8 @@ def call_ai_change_assessment_batch_openai(context_packs, available_sections, to
     ]
     tool_trace = []
     for _ in range(8):
-        response = client.chat.completions.create(
+        response = _openai_chat_completion(
+            client,
             model=model,
             temperature=0,
             tools=openai_change_tool_definitions(batch=True),
@@ -426,38 +341,8 @@ def call_ai_change_assessment_batch_openai(context_packs, available_sections, to
             name = call.function.name
             args = openai_tool_call_args(call.function.arguments)
             if name == "submit_change_reviews":
-                payloads = normalize_change_batch_assessment_payload(args)
-                for payload in payloads.values():
-                    payload["tool_trace"] = tool_trace
-                return payloads
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace_batch(normalize_change_batch_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False)})
     raise ValueError("AI change batch assessment reached the tool-call limit")
 
@@ -477,7 +362,8 @@ def call_ai_change_assessment(prompt, tool_context, *, model, prompt_path, promp
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
     for _ in range(8):
-        msg = client.messages.create(
+        msg = _anthropic_message(
+            client,
             model=model,
             max_tokens=1400,
             temperature=0,
@@ -493,37 +379,8 @@ def call_ai_change_assessment(prompt, tool_context, *, model, prompt_path, promp
             name = getattr(block, "name", "")
             args = getattr(block, "input", {}) or {}
             if name == "submit_change_review":
-                payload = normalize_change_assessment_payload(args)
-                payload["tool_trace"] = tool_trace
-                return payload
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace(normalize_change_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
         if not tool_results:
             messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_review."})
@@ -548,7 +405,8 @@ def call_ai_change_assessment_batch(context_packs, available_sections, tool_cont
     system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
     tool_trace = []
     for _ in range(8):
-        msg = client.messages.create(
+        msg = _anthropic_message(
+            client,
             model=model,
             max_tokens=3000,
             temperature=0,
@@ -564,38 +422,8 @@ def call_ai_change_assessment_batch(context_packs, available_sections, tool_cont
             name = getattr(block, "name", "")
             args = getattr(block, "input", {}) or {}
             if name == "submit_change_reviews":
-                payloads = normalize_change_batch_assessment_payload(args)
-                for payload in payloads.values():
-                    payload["tool_trace"] = tool_trace
-                return payloads
-            if name == "read_section":
-                file_key = args.get("file")
-                section_id = args.get("section_id")
-                md_path, section_map = tool_context[file_key]
-                result = {"file": file_key, "section_id": section_id, "text": section_context_from_markdown(md_path, section_map, section_id)}
-                tool_trace.append({"tool": name, "file": file_key, "section_id": section_id})
-            elif name == "search_markdown":
-                file_key = args.get("file")
-                query = args.get("query", "")
-                md_path, _section_map = tool_context[file_key]
-                result = {"file": file_key, "query": query, "hits": search_markdown_context(md_path, query)}
-                tool_trace.append({"tool": name, "file": file_key, "query": query})
-            elif name == "keyword_search_markdown":
-                file_key = args.get("file")
-                keyword = args.get("keyword", "")
-                md_path, section_map = tool_context[file_key]
-                result = keyword_search_markdown(
-                    md_path,
-                    section_map,
-                    keyword,
-                    case_sensitive=bool(args.get("case_sensitive", False)),
-                    whole_word=bool(args.get("whole_word", True)),
-                    max_hits=int(args.get("max_hits", 200) or 200),
-                )
-                result["file"] = file_key
-                tool_trace.append({"tool": name, "file": file_key, "keyword": keyword, "total_count": result.get("total_count", 0)})
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+                return _attach_tool_trace_batch(normalize_change_batch_assessment_payload(args), tool_trace)
+            result = _run_markdown_tool(name, args, tool_context, tool_trace)
             tool_results.append({"type": "tool_result", "tool_use_id": getattr(block, "id"), "content": json.dumps(result, ensure_ascii=False)})
         if not tool_results:
             messages.append({"role": "user", "content": "Use optional tools only if needed, then call submit_change_reviews."})
