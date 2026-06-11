@@ -1,12 +1,41 @@
 import json
 import os
 
-from ai_config_utils import ai_provider_for_model, is_azure_mode, resolve_azure_settings
+from ai_config_utils import (
+    ai_provider_for_model,
+    is_azure_mode,
+    is_proxy_mode,
+    resolve_azure_settings,
+    resolve_proxy_settings,
+)
 
 
 def _get_api_client(model):
-    # Azure 모드: AZURE_OPENAI_ENDPOINT + AZURE_OPENAI_API_KEY가 설정된 경우
-    # AzureOpenAI는 OpenAI의 서브클래스로 tool calling 인터페이스가 동일함
+    # 우선순위: 프록시 모드 > 직접 API key 모드 > 공개 OpenAI/Anthropic
+
+    # 프록시 모드: LLM_PROXY_BASE_URL + LLM_PROXY_SHARED_SECRET이 설정된 경우
+    # AzureOpenAI에 커스텀 httpx.Client를 주입해 X-LLM-Proxy-Secret 헤더를 달아 보냄
+    # tool calling 인터페이스는 변경 없음
+    if is_proxy_mode():
+        try:
+            import httpx
+            from openai import AzureOpenAI
+        except Exception as e:
+            raise RuntimeError("openai / httpx package is not installed") from e
+        s = resolve_proxy_settings(model)
+        headers = {"X-LLM-Proxy-Secret": s["shared_secret"]}
+        if s["host_header"]:
+            headers["Host"] = s["host_header"]
+        http_client = httpx.Client(headers=headers, verify=s["ssl_verify"])
+        return "openai", AzureOpenAI(
+            api_key="x-proxy-auth",  # SDK 필수 파라미터, 프록시가 X-LLM-Proxy-Secret으로 인증
+            azure_endpoint=s["proxy_base_url"],
+            azure_deployment=s["deployment"],
+            api_version=s["api_version"],
+            http_client=http_client,
+        )
+
+    # 직접 API key 모드: AZURE_OPENAI_API_KEY가 설정된 경우
     if is_azure_mode():
         try:
             from openai import AzureOpenAI
