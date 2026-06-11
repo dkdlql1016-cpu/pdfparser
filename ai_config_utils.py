@@ -136,10 +136,18 @@ def ai_provider_for_model(model_name):
 
 
 def required_ai_api_key_name(model_name):
+    if is_proxy_mode():
+        return "LLM_PROXY_SHARED_SECRET"
+    if is_azure_mode():
+        return "AZURE_OPENAI_API_KEY"
     return "OPENAI_API_KEY" if ai_provider_for_model(model_name) == "openai" else "ANTHROPIC_API_KEY"
 
 
 def required_ai_api_key(model_name):
+    if is_proxy_mode():
+        return os.environ.get("LLM_PROXY_SHARED_SECRET")
+    if is_azure_mode():
+        return os.environ.get("AZURE_OPENAI_API_KEY") or os.environ.get("AZURE_LLM_API_KEY")
     return os.environ.get(required_ai_api_key_name(model_name))
 
 

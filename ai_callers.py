@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from ai_config_utils import (
     ai_provider_for_model,
@@ -68,6 +69,175 @@ def _get_api_client(model):
         except Exception as e:
             raise RuntimeError("anthropic package is not installed") from e
         return "anthropic", Anthropic(api_key=api_key)
+
+
+def _proxy_completion_text(model, messages, *, timeout=120.0):
+    try:
+        import httpx
+    except Exception as e:
+        raise RuntimeError("httpx package is not installed") from e
+
+    settings = resolve_proxy_settings(model)
+    base_url = settings["proxy_base_url"].rstrip("/")
+    url = f"{base_url}/api/v1/internal/llm_proxy/openai/responses/stream/{model}"
+    headers = {"X-LLM-Proxy-Secret": settings["shared_secret"]}
+    if settings["host_header"]:
+        headers["Host"] = settings["host_header"]
+
+    payload = {
+        "input": messages,
+        "temperature": 0,
+        "max_output_tokens": 4000,
+    }
+
+    with httpx.Client(headers=headers, verify=settings["ssl_verify"], timeout=timeout) as client:
+        response = client.post(url, json=payload)
+
+    if response.status_code >= 400:
+        body = (response.text or "").strip().replace("\n", " ")
+        raise RuntimeError(f"proxy completion failed ({response.status_code}): {body[:300]}")
+
+    raw = response.text or ""
+    chunks = []
+    final_text = ""
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = json.loads(line)
+        except Exception:
+            continue
+        event_type = event.get("type")
+        if event_type == "delta":
+            delta = event.get("delta")
+            if isinstance(delta, str):
+                chunks.append(delta)
+        elif event_type == "completed":
+            text = event.get("final_text")
+            if isinstance(text, str):
+                final_text = text
+
+    if final_text:
+        return final_text.strip()
+    if chunks:
+        return "".join(chunks).strip()
+
+    # Fallback for non line-delimited responses.
+    match = re.search(r'"final_text"\s*:\s*"((?:\\.|[^"\\])*)"', raw)
+    if match:
+        try:
+            return json.loads(f'"{match.group(1)}"').strip()
+        except Exception:
+            return match.group(1).strip()
+    return raw.strip()
+
+
+def _extract_first_json(text):
+    if not text:
+        raise ValueError("empty AI response")
+
+    # Prefer fenced JSON blocks if present.
+    fenced = re.findall(r"```(?:json)?\s*(\{[\s\S]*?\}|\[[\s\S]*?\])\s*```", text, flags=re.IGNORECASE)
+    for block in fenced:
+        try:
+            return json.loads(block)
+        except Exception:
+            pass
+
+    stripped = text.strip()
+    try:
+        return json.loads(stripped)
+    except Exception:
+        pass
+
+    decoder = json.JSONDecoder()
+    for idx, ch in enumerate(text):
+        if ch not in "[{":
+            continue
+        try:
+            obj, _end = decoder.raw_decode(text[idx:])
+            return obj
+        except Exception:
+            continue
+    raise ValueError(f"AI did not return parseable JSON: {stripped[:300]}")
+
+
+def _proxy_assessment_payload(prompt, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
+    instruction = (
+        "Return ONLY one JSON object with keys: verdict, confidence, reasoning, evidence_old, evidence_new. "
+        "Allowed verdict values: cleared, partial, unclear, not_cleared."
+    )
+    text = _proxy_completion_text(
+        model,
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{prompt}\n\n{instruction}"},
+        ],
+    )
+    payload = normalize_assessment_payload(_extract_first_json(text))
+    payload["tool_trace"] = []
+    return payload
+
+
+def _proxy_batch_assessment_payload(context_packs, available_sections, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
+    prompt = build_batch_assessment_prompt(context_packs, available_sections)
+    instruction = (
+        "Return ONLY one JSON object: {\"items\": [...]} where each item has review_id, verdict, confidence, reasoning, evidence_old, evidence_new. "
+        "Return exactly one item per input review_id. Allowed verdict values: cleared, partial, unclear, not_cleared."
+    )
+    text = _proxy_completion_text(
+        model,
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{prompt}\n\n{instruction}"},
+        ],
+    )
+    payloads = normalize_batch_assessment_payload(_extract_first_json(text))
+    for payload in payloads.values():
+        payload["tool_trace"] = []
+    return payloads
+
+
+def _proxy_change_assessment_payload(prompt, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
+    instruction = (
+        "Return ONLY one JSON object with keys: verdict, confidence, reasoning, recommended_comment, evidence_old, evidence_new. "
+        "Allowed verdict values: high, medium, low."
+    )
+    text = _proxy_completion_text(
+        model,
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{prompt}\n\n{instruction}"},
+        ],
+    )
+    payload = normalize_change_assessment_payload(_extract_first_json(text))
+    payload["tool_trace"] = []
+    return payload
+
+
+def _proxy_change_batch_assessment_payload(context_packs, available_sections, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    system_prompt = load_system_prompt_fn(prompt_path, prompt_fallback)
+    prompt = build_change_batch_assessment_prompt(context_packs, available_sections)
+    instruction = (
+        "Return ONLY one JSON object: {\"items\": [...]} where each item has change_id, verdict, confidence, reasoning, recommended_comment, evidence_old, evidence_new. "
+        "Return exactly one item per input change_id. Allowed verdict values: high, medium, low."
+    )
+    text = _proxy_completion_text(
+        model,
+        [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{prompt}\n\n{instruction}"},
+        ],
+    )
+    payloads = normalize_change_batch_assessment_payload(_extract_first_json(text))
+    for payload in payloads.values():
+        payload["tool_trace"] = []
+    return payloads
+
 from ai_runtime_utils import (
     assessment_tool_definitions,
     change_assessment_tool_definitions,
@@ -143,6 +313,14 @@ def _attach_tool_trace_batch(payloads, tool_trace):
 
 
 def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    if is_proxy_mode():
+        return _proxy_assessment_payload(
+            prompt,
+            model=model,
+            prompt_path=prompt_path,
+            prompt_fallback=prompt_fallback,
+            load_system_prompt_fn=load_system_prompt_fn,
+        )
     _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
@@ -184,6 +362,15 @@ def call_ai_assessment_openai(prompt, tool_context, *, model, prompt_path, promp
 
 
 def call_ai_assessment_batch_openai(context_packs, available_sections, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    if is_proxy_mode():
+        return _proxy_batch_assessment_payload(
+            context_packs,
+            available_sections,
+            model=model,
+            prompt_path=prompt_path,
+            prompt_fallback=prompt_fallback,
+            load_system_prompt_fn=load_system_prompt_fn,
+        )
     _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
@@ -310,6 +497,14 @@ def call_ai_assessment_batch(context_packs, available_sections, tool_context, *,
 
 
 def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    if is_proxy_mode():
+        return _proxy_change_assessment_payload(
+            prompt,
+            model=model,
+            prompt_path=prompt_path,
+            prompt_fallback=prompt_fallback,
+            load_system_prompt_fn=load_system_prompt_fn,
+        )
     _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
@@ -351,6 +546,15 @@ def call_ai_change_assessment_openai(prompt, tool_context, *, model, prompt_path
 
 
 def call_ai_change_assessment_batch_openai(context_packs, available_sections, tool_context, *, model, prompt_path, prompt_fallback, load_system_prompt_fn):
+    if is_proxy_mode():
+        return _proxy_change_batch_assessment_payload(
+            context_packs,
+            available_sections,
+            model=model,
+            prompt_path=prompt_path,
+            prompt_fallback=prompt_fallback,
+            load_system_prompt_fn=load_system_prompt_fn,
+        )
     _, client = _get_api_client(model)
     messages = [
         {"role": "system", "content": load_system_prompt_fn(prompt_path, prompt_fallback)},
