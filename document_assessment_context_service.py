@@ -1,5 +1,7 @@
 import re
 
+import run_layout
+
 
 def assessment_reviews_for_run(
     doc_id,
@@ -117,7 +119,7 @@ def change_by_id(viewer_data, change_id):
 
 def section_id_for_change_anchor(run_dir, section_map, change, side, *, infer_section_id_for_anchor_fn, section_entries_fn):
     anchor = (change or {}).get("old_anchor" if side == "old" else "new_anchor") or {}
-    inferred = infer_section_id_for_anchor_fn(section_map, anchor, run_dir / ("prev_report.md" if side == "old" else "report.md"))
+    inferred = infer_section_id_for_anchor_fn(section_map, anchor, run_layout.source_md(run_dir, side))
     if inferred:
         return inferred
     page = (change or {}).get("old_page" if side == "old" else "new_page")
@@ -191,9 +193,9 @@ def build_assessment_context_pack(
     reviews_for_sections_fn,
     related_diff_changes_for_review_fn,
 ):
-    prev_md = run_dir / "prev_report.md"
-    current_md = run_dir / "report.md"
-    current_words = read_json_fn(run_dir / "words.json", []) or []
+    prev_md = run_layout.source_md(run_dir, "previous")
+    current_md = run_layout.source_md(run_dir, "current")
+    current_words = read_json_fn(run_layout.words_path(run_dir, "current"), []) or []
     old_ids = list(prev_anchor.get("word_ids") or prev_anchor.get("old_word_ids") or prev_anchor.get("new_word_ids") or [])
     current_ids = map_anchor_to_current_md_anchor_fn(prev_anchor, semantic_map, current_words)
 
@@ -282,14 +284,12 @@ def nearest_words_for_anchor(new_words, page, bbox, limit=8):
 
 
 def new_word_ids_for_change(run_dir, change, *, read_json_fn, word_ids_in_page_bbox_fn, nearest_words_for_anchor_fn):
-    new_words = read_json_fn(run_dir / "words.json", []) or []
+    new_words = read_json_fn(run_layout.words_path(run_dir, "current"), []) or []
     if not new_words:
         return []
     ids = []
-    by_id = {h.get("id"): h for h in (read_json_fn(run_dir / "highlights_new.json", []) or [])}
-    if not by_id:
-        viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
-        by_id = {h.get("id"): h for h in (viewer_data.get("highlights_new") or []) if h.get("id")}
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
+    by_id = {h.get("id"): h for h in (viewer_data.get("highlights_new") or []) if h.get("id")}
     for hid in change.get("new_highlight_ids") or []:
         h = by_id.get(hid) or {}
         page = h.get("page")
@@ -335,9 +335,9 @@ def build_change_groups_for_run(
     if not run_meta.get("previous_run_id"):
         return []
     run_dir = document_run_dir_fn(doc_id, run_id)
-    prev_section_map = read_json_fn(run_dir / "prev_section_map.json", []) or []
-    current_section_map = read_json_fn(run_dir / "section_map.json", []) or []
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
+    prev_section_map = read_json_fn(run_layout.sections_path(run_dir, "previous"), []) or []
+    current_section_map = read_json_fn(run_layout.sections_path(run_dir, "current"), []) or []
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
     changes = viewer_data.get("changes", []) or []
     if change_ids is not None:
         wanted = {int(cid) for cid in (change_ids or [])}

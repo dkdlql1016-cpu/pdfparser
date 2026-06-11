@@ -9,7 +9,7 @@ Use these terms consistently throughout this document:
 - **single-run / diff-run**: single report processing vs previous/current comparison processing.
 - **semantic map**: mapping derived from `equal` diff segments between old/new word IDs.
 - **section index**: structured section catalog (`section_id`, title, range metadata).
-- **viewer payload**: the UI-facing aggregated data, primarily stored in `viewer_data.json`.
+- **viewer payload**: the UI-facing aggregated data, primarily stored in `viewer.json`.
 - **AI call loop**: iterative model/tool execution loop in `ai_callers.py`.
 
 ## 1) Runtime Sequence (File-Mapped)
@@ -27,13 +27,13 @@ This is the actual execution path from upload to AI assessment.
 3. **Markdown diff generation (text-level diff)**
    - Execution: `document_io_service.py` -> `run_diff_extract()`
    - Diff engine script: `document_diff_extract.py`
-   - Output: `result.json` segments (`equal`, `delete`, `add`) from markdown text comparison.
+   - Output: `diff/segments.json` segments (`equal`, `delete`, `add`) from markdown text comparison.
    - Note: this step is **not** PDF-coordinate mapping yet. It is textual diff first.
 
 4. **Map text diff segments to PDF-word JSON coordinates**
    - `document_diff_analysis_service.py`
    - Alignment, move suppression, highlight/change generation
-   - Input mapping target is `words.json` / `prev_words.json` (PDF words already extracted as JSON).
+   - Input mapping target is `current/words.json` / `previous/words.json` (PDF words already extracted as JSON).
    - In short: map markdown diff segments from step 3 onto PDF word-index/bbox/page data.
 
 5. **Generate semantic map + section index + viewer payload**
@@ -184,37 +184,31 @@ Cross-domain reusable utility helpers (no domain policy decisions).
   - Document metadata, title, saved flag, and run list (`runs[]`).
 - `documents/<doc_id>/reviews.json`
   - Document-level canonical review threads/anchors.
-- `documents/<doc_id>/runs/<run_id>/report.pdf`
-  - Current run source PDF file.
-- `documents/<doc_id>/runs/<run_id>/report.md`
-  - Current run markdown generated from PDF.
-- `documents/<doc_id>/runs/<run_id>/words.json`
-  - Current run PDF words extracted as JSON (text/page/bbox/index).
-- `documents/<doc_id>/runs/<run_id>/chars.json` (removed)
-  - No longer persisted. Character payload is generated on-demand from `words.json` through `/chars/<side>` APIs.
-- `documents/<doc_id>/runs/<run_id>/result.json`
-  - Markdown diff result segments (`equal/delete/add`).
-- `documents/<doc_id>/runs/<run_id>/viewer_data.json`
-  - Main viewer payload (highlights, changes, semantic/index outputs).
-- `documents/<doc_id>/runs/<run_id>/ai_assessment.json`
+- `documents/<doc_id>/runs/<run_id>/viewer.json`
+  - UI-facing derived bundle (highlights, changes, semantic map, section copy, alignment report).
+- `documents/<doc_id>/runs/<run_id>/current/`
+  - Current source artifacts: `source.pdf`, `source.md`, `words.json`, `sections.json`.
+- `documents/<doc_id>/runs/<run_id>/previous/`
+  - Previous-side source artifacts for diff runs: `source.pdf`, `source.md`, `words.json`, `sections.json`.
+- `documents/<doc_id>/runs/<run_id>/diff/segments.json`
+  - Raw markdown diff segments (`equal/delete/add`), without PDF coordinates.
+- `documents/<doc_id>/runs/<run_id>/ai/review_assessment.json`
   - Review-level AI assessment results and metadata.
-- `documents/<doc_id>/runs/<run_id>/change_ai_assessment.json`
+- `documents/<doc_id>/runs/<run_id>/ai/change_assessment.json`
   - Change-level AI assessment results and metadata.
-- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_section_map.json`
-  - Previous-run artifacts copied for update/diff context.
-- `documents/<doc_id>/runs/<run_id>/section_map.json`
-  - Current run section index metadata.
+- `documents/<doc_id>/runs/<run_id>/_cache/`
+  - Disposable intermediate outputs (`opendataloader/`, marker-stripped `diff_md/`).
 - `documents/<doc_id>/snapshots/<snapshot_id>/snapshot.json`
   - Snapshot metadata (counts, mode, source run).
-- `documents/<doc_id>/snapshots/<snapshot_id>/viewer_data.json`
-  - Frozen viewer payload for snapshot.
-- `documents/<doc_id>/snapshots/<snapshot_id>/reviews.json`
-  - Frozen review set for snapshot.
+- `documents/<doc_id>/snapshots/<snapshot_id>/...`
+  - Frozen durable run artifacts, using the same layout as runs and excluding `_cache/`.
+- `RUN_LAYOUT.md`
+  - Canonical human-readable contract for artifact meaning, requiredness, and source-of-truth rules.
 
 ### Chars API Runtime Contract
 
 - `/chars/<side>` endpoints are page-scoped server APIs (query: `page`, `page_start`, `page_end`).
-- Response is built from `words.json`/snapshot words on demand.
+- Response is built from `current/words.json` or `previous/words.json` on demand.
 - Size guards are enforced with:
   - `CHARS_MAX_WORDS` (default `50000`)
   - `CHARS_MAX_ESTIMATED_COUNT` (default `250000`)

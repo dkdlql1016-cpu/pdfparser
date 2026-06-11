@@ -1,6 +1,8 @@
 import shutil
 import uuid
 
+import run_layout
+
 
 def create_seed_document_from_pdf(
     pdf_path,
@@ -13,8 +15,8 @@ def create_seed_document_from_pdf(
     doc_id = uuid.uuid4().hex[:12]
     run_id = uuid.uuid4().hex[:12]
     run_dir = document_run_dir_fn(doc_id, run_id)
-    run_dir.mkdir(parents=True, exist_ok=True)
-    report_pdf = run_dir / "report.pdf"
+    run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+    report_pdf = run_layout.source_pdf(run_dir, "current")
     shutil.copy2(pdf_path, report_pdf)
     created_at = utc_now_fn()
     meta = {

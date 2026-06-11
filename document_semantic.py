@@ -8,7 +8,7 @@ Design (reviews target UNCHANGED content only):
   tokens that can carry a comment that maps to old PDF, new PDF, and both md
   lines at once. A review = a CHUNK of equal words captured by a drag.
 
-semantic_map shipped in viewer_data.json:
+semantic_map shipped in viewer.json:
   {
     "unit": "word",
     "equal_words": [
@@ -30,6 +30,8 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+import run_layout
 
 
 def _seg_num(seg_id):
@@ -135,7 +137,7 @@ def _now():
 
 
 def _reviews_path(run_dir):
-    return Path(run_dir) / "reviews.json"
+    return run_layout.run_reviews_path(Path(run_dir))
 
 
 def load_reviews(run_dir):
@@ -231,9 +233,9 @@ def build_ai_bundle(run_dir, review_id, context_lines=2):
     review = next((r for r in load_reviews(run_dir) if r.get("review_id") == review_id), None)
     if review is None:
         return None
-    viewer = json.loads((run_dir / "viewer_data.json").read_text(encoding="utf-8"))
-    old_md = _read_md_lines(run_dir / "prev_report.md")
-    new_md = _read_md_lines(run_dir / "report.md")
+    viewer = json.loads(run_layout.viewer_path(run_dir).read_text(encoding="utf-8"))
+    old_md = _read_md_lines(run_layout.source_md(run_dir, "previous"))
+    new_md = _read_md_lines(run_layout.source_md(run_dir, "current"))
     return {
         "job_id": viewer.get("job_id"),
         "review": {

@@ -1,5 +1,7 @@
 import uuid
 
+import run_layout
+
 
 def run_ai_assessment_service(
     doc_id,
@@ -39,13 +41,13 @@ def run_ai_assessment_service(
     if not prev_run_id:
         return None, ("AI assessment requires a diff run", 400)
     run_dir = document_run_dir_fn(doc_id, run_id)
-    prev_section_map = read_json_fn(run_dir / "prev_section_map.json", []) or []
-    current_section_map = read_json_fn(run_dir / "section_map.json", []) or []
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
+    prev_section_map = read_json_fn(run_layout.sections_path(run_dir, "previous"), []) or []
+    current_section_map = read_json_fn(run_layout.sections_path(run_dir, "current"), []) or []
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
     semantic_map = viewer_data.get("semantic_map", {}) or {}
     tool_context = {
-        "previous": (run_dir / "prev_report.md", prev_section_map),
-        "current": (run_dir / "report.md", current_section_map),
+        "previous": (run_layout.source_md(run_dir, "previous"), prev_section_map),
+        "current": (run_layout.source_md(run_dir, "current"), current_section_map),
     }
     available_sections = available_assessment_sections_fn(prev_section_map, current_section_map)
     targets = assessment_reviews_for_run_fn(doc_id, run_id, review_id=review_id)
@@ -173,12 +175,12 @@ def run_change_ai_assessment_service(
     if not prev_run_id:
         return None, ("AI assessment requires a diff run", 400)
     run_dir = document_run_dir_fn(doc_id, run_id)
-    prev_section_map = read_json_fn(run_dir / "prev_section_map.json", []) or []
-    current_section_map = read_json_fn(run_dir / "section_map.json", []) or []
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
+    prev_section_map = read_json_fn(run_layout.sections_path(run_dir, "previous"), []) or []
+    current_section_map = read_json_fn(run_layout.sections_path(run_dir, "current"), []) or []
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
     tool_context = {
-        "previous": (run_dir / "prev_report.md", prev_section_map),
-        "current": (run_dir / "report.md", current_section_map),
+        "previous": (run_layout.source_md(run_dir, "previous"), prev_section_map),
+        "current": (run_layout.source_md(run_dir, "current"), current_section_map),
     }
     changes = viewer_data.get("changes", []) or []
     if change_id is not None:
@@ -328,7 +330,7 @@ def forward_change_assessment_to_review_service(
     if not run_meta_for_fn(meta, run_id):
         return {"error": "run not found"}, 404
     run_dir = document_run_dir_fn(doc_id, run_id)
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
     change = change_by_id_fn(viewer_data, change_id)
     if not change:
         return {"error": "change not found"}, 404

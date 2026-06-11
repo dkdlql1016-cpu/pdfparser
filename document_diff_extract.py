@@ -6,7 +6,7 @@ Word/line level diff between two (markdown) text files, emitting a JSON
 document that describes equal / delete / add segments with source line numbers.
 
 Pipeline position:
-    PDF -> OpenDataLoader markdown -> diff_extract.py -> result.json
+    PDF -> OpenDataLoader markdown -> diff_extract.py -> diff/segments.json
 """
 import argparse
 import json

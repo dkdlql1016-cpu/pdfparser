@@ -9,7 +9,7 @@
 - **single-run / diff-run**: 단일 보고서 처리 / 이전-현재 비교 처리
 - **semantic map**: diff의 `equal` 세그먼트에서 나온 old/new 단어 ID 대응 맵
 - **section index**: `section_id`, 제목, 범위 메타데이터를 가진 구조화 섹션 카탈로그
-- **viewer payload**: UI 렌더링용 집계 데이터(`viewer_data.json` 중심)
+- **viewer payload**: UI 렌더링용 집계 데이터(`viewer.json` 중심)
 - **AI 호출 루프(AI call loop)**: `ai_callers.py`의 모델/툴 반복 실행 루프
 
 ## 1) 실제 구동 순서 (파일명 매칭)
@@ -27,19 +27,19 @@
 3. **Markdown diff 생성 (텍스트 레벨 diff)**
    - 실행 위치: `document_io_service.py`의 `run_diff_extract()`
    - 실제 diff 엔진 스크립트: `document_diff_extract.py`
-   - 산출물: markdown 텍스트 비교 결과인 `result.json` 세그먼트(`equal`, `delete`, `add`)
+   - 산출물: markdown 텍스트 비교 결과인 `diff/segments.json` 세그먼트(`equal`, `delete`, `add`)
    - 주의: 이 단계는 **PDF 좌표 매핑 전** 단계입니다. 먼저 텍스트 diff를 만듭니다.
 
 4. **텍스트 diff 세그먼트를 PDF 단어 JSON 좌표에 매핑**
    - `document_diff_analysis_service.py`
    - 하이라이트/변경점 계산, move suppression, 정렬 리포트 생성
-   - 매핑 대상은 `words.json` / `prev_words.json` (PDF 단어를 JSON으로 추출한 결과)입니다.
+   - 매핑 대상은 `current/words.json` / `previous/words.json` (PDF 단어를 JSON으로 추출한 결과)입니다.
    - 즉, 3번 텍스트 diff를 PDF 단어 인덱스/바운딩박스/페이지 정보에 연결하는 단계입니다.
 
 5. **semantic map + section index + viewer payload 산출**
    - semantic: `document_semantic.py`
    - 인덱스: `document_index_service.py`
-   - 결과는 `documents/<doc_id>/runs/<run_id>/viewer_data.json` 등으로 저장
+   - 결과는 `documents/<doc_id>/runs/<run_id>/viewer.json` 등으로 저장
    - `semantic_map`: diff의 `equal` 세그먼트에 속한 old/new 단어 대응 관계(`old_word_id` <-> `new_word_id`)와 line/segment 메타데이터
    - `section index`: section_id, 제목, 시작/끝 범위 메타데이터를 가진 구조화된 섹션 카탈로그(리뷰/AI 컨텍스트에서 활용)
 
@@ -183,37 +183,31 @@
   - 문서 메타데이터, 제목, 저장 상태, run 목록(`runs[]`)
 - `documents/<doc_id>/reviews.json`
   - 문서 레벨의 canonical 리뷰 스레드/앵커
-- `documents/<doc_id>/runs/<run_id>/report.pdf`
-  - 현재 run 원본 PDF
-- `documents/<doc_id>/runs/<run_id>/report.md`
-  - PDF에서 변환된 현재 run markdown
-- `documents/<doc_id>/runs/<run_id>/words.json`
-  - 현재 run PDF 단어 JSON(텍스트/페이지/bbox/index)
-- `documents/<doc_id>/runs/<run_id>/chars.json` (저장 제거)
-  - 더 이상 파일로 저장하지 않으며, `/chars/<side>` API에서 `words.json` 기반으로 on-demand 생성
-- `documents/<doc_id>/runs/<run_id>/result.json`
-  - markdown diff 세그먼트 결과(`equal/delete/add`)
-- `documents/<doc_id>/runs/<run_id>/viewer_data.json`
-  - 뷰어 핵심 payload(하이라이트/변경점/semantic/index 결과)
-- `documents/<doc_id>/runs/<run_id>/ai_assessment.json`
+- `documents/<doc_id>/runs/<run_id>/viewer.json`
+  - UI용 파생 번들(하이라이트, 변경점, semantic map, section 복사본, alignment report)
+- `documents/<doc_id>/runs/<run_id>/current/`
+  - 현재본 원본 산출물: `source.pdf`, `source.md`, `words.json`, `sections.json`
+- `documents/<doc_id>/runs/<run_id>/previous/`
+  - diff run의 이전본 원본 산출물: `source.pdf`, `source.md`, `words.json`, `sections.json`
+- `documents/<doc_id>/runs/<run_id>/diff/segments.json`
+  - PDF 좌표가 없는 raw markdown diff 세그먼트(`equal/delete/add`)
+- `documents/<doc_id>/runs/<run_id>/ai/review_assessment.json`
   - 리뷰 단위 AI 평가 결과/메타
-- `documents/<doc_id>/runs/<run_id>/change_ai_assessment.json`
+- `documents/<doc_id>/runs/<run_id>/ai/change_assessment.json`
   - 변경 단위 AI 평가 결과/메타
-- `documents/<doc_id>/runs/<run_id>/prev_report.pdf`, `prev_report.md`, `prev_words.json`, `prev_section_map.json`
-  - 업데이트/diff 문맥용 이전 run 산출물 복사본
-- `documents/<doc_id>/runs/<run_id>/section_map.json`
-  - 현재 run section index 메타데이터
+- `documents/<doc_id>/runs/<run_id>/_cache/`
+  - 버릴 수 있는 중간 산출물(`opendataloader/`, 마커 제거 `diff_md/`)
 - `documents/<doc_id>/snapshots/<snapshot_id>/snapshot.json`
   - 스냅샷 메타데이터(카운트/모드/원본 run)
-- `documents/<doc_id>/snapshots/<snapshot_id>/viewer_data.json`
-  - 스냅샷 시점의 viewer payload 고정본
-- `documents/<doc_id>/snapshots/<snapshot_id>/reviews.json`
-  - 스냅샷 시점의 리뷰 고정본
+- `documents/<doc_id>/snapshots/<snapshot_id>/...`
+  - `_cache/`를 제외한 durable run 산출물을 같은 구조로 고정 복사
+- `RUN_LAYOUT.md`
+  - 산출물 의미, 필수 여부, source of truth 규칙을 설명하는 표준 문서
 
 ### chars API 런타임 계약
 
 - `/chars/<side>`는 서버가 제공하는 페이지 범위 기반 API입니다. (`page`, `page_start`, `page_end`)
-- 응답은 `words.json`(또는 snapshot words)에서 요청 시점에 생성됩니다.
+- 응답은 `current/words.json` 또는 `previous/words.json`에서 요청 시점에 생성됩니다.
 - 크기 가드는 다음 환경변수로 제어됩니다.
   - `CHARS_MAX_WORDS` (기본값 `50000`)
   - `CHARS_MAX_ESTIMATED_COUNT` (기본값 `250000`)

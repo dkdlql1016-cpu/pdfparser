@@ -2,6 +2,8 @@ import shutil
 import uuid
 from pathlib import Path
 
+import run_layout
+
 
 def overwrite_saved_document(
     source_doc_id,
@@ -68,14 +70,14 @@ def run_side_pdf_info(
 ):
     meta = load_document_meta_fn(doc_id) or {}
     run_meta = run_meta_for_fn(meta, run_id) or {}
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", {}) or {}
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), {}) or {}
     if side in ("old", "prev", "previous"):
-        pdf_path = run_dir / "prev_report.pdf"
+        pdf_path = run_layout.source_pdf(run_dir, "previous")
         prev_run_id = run_meta.get("previous_run_id")
         prev_meta = run_meta_for_fn(meta, prev_run_id) if prev_run_id else None
-        filename = (prev_meta or {}).get("filename") or viewer_data.get("old_filename") or "prev_report.pdf"
+        filename = (prev_meta or {}).get("filename") or viewer_data.get("old_filename") or "previous.pdf"
     elif side in ("new", "report", "current"):
-        pdf_path = run_dir / "report.pdf"
+        pdf_path = run_layout.source_pdf(run_dir, "current")
         filename = run_meta.get("filename") or viewer_data.get("new_filename") or viewer_data.get("filename") or "report.pdf"
     else:
         return None, None
@@ -189,8 +191,8 @@ def write_single_file_document(
     if replace and doc_path.exists():
         shutil.rmtree(doc_path, ignore_errors=True)
     run_dir = document_run_dir_fn(doc_id, run_id)
-    run_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(pdf_path, run_dir / "report.pdf")
+    run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+    shutil.copy2(pdf_path, run_layout.source_pdf(run_dir, "current"))
     now = utc_now_fn()
     meta = {
         "doc_id": doc_id,

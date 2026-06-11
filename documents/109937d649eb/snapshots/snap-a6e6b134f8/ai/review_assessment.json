@@ -1,0 +1,34 @@
+{
+  "status": "done",
+  "model": "gpt-5.4",
+  "started_at": "2026-06-11T03:43:48.186000+00:00",
+  "completed_at": "2026-06-11T03:43:54.466521+00:00",
+  "skipped_existing_count": 0,
+  "items": [
+    {
+      "review_id": "r-4a2b221a",
+      "anchor_run_id": "1f8bbbddc7c7",
+      "section_id": null,
+      "status": "done",
+      "assessed_at": "2026-06-11T03:43:48.225631+00:00",
+      "input_summary": {
+        "previous_section_id": null,
+        "current_section_id": null,
+        "diff_count": 1,
+        "comment_count": 1,
+        "related_review_count": 0
+      },
+      "verdict": "cleared",
+      "confidence": 0.97,
+      "reasoning": "The only review comment is a generic 'e2e export review' on the cover/title area. The supplied diff shows the company name on page 1 was updated from 'DEMO INTERNATIONAL, INC. Financial Statements' to 'ENERTECH INTERNATIONAL, INC. Financial Statements', which resolves the visible placeholder/export issue in the selected anchor.",
+      "evidence_old": "Previous anchor text: 'DEMO INTERNATIONAL, INC. Financial Statements'. Diff removed_text: 'DEMO'.",
+      "evidence_new": "Current anchor text: 'INTERNATIONAL, INC. Financial Statements' with diff added_text: 'ENERTECH', indicating the title now reads 'ENERTECH INTERNATIONAL, INC. Financial Statements'.",
+      "tool_trace": [],
+      "batch_index": 1,
+      "batch_key": "previous_page:1"
+    }
+  ],
+  "doc_id": "109937d649eb",
+  "run_id": "08c1d0585041",
+  "updated_at": "2026-06-11T03:43:54.466533+00:00"
+}

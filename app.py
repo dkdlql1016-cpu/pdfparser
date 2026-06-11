@@ -9,6 +9,7 @@ import flask.cli
 from flask import Flask, Response, jsonify, request, send_file
 
 import document_semantic as semantic
+import run_layout
 from ai_config_utils import load_system_prompt, required_ai_api_key, required_ai_api_key_name
 from ai_callers import (
     call_ai_assessment as callers_call_ai_assessment,
@@ -143,8 +144,8 @@ from document_bootstrap_service import (
 from document_snapshot_service import (
     create_run_snapshot as snapshot_create_run_snapshot,
     prune_document_snapshots as snapshot_prune_document_snapshots,
+    snapshot_artifacts as snapshot_snapshot_artifacts,
     snapshot_counts as snapshot_snapshot_counts,
-    snapshot_file_names as snapshot_snapshot_file_names,
     snapshot_side_file as snapshot_snapshot_side_file,
 )
 from routes.assessment_routes import create_assessment_blueprint
@@ -639,7 +640,7 @@ def process_document_diff_run(run_dir: Path, *, doc_id=None, run_id=None):
 
 
 def document_semantic_map(doc_id, run_id):
-    p = document_run_dir(doc_id, run_id) / "viewer_data.json"
+    p = run_layout.viewer_path(document_run_dir(doc_id, run_id))
     return (read_json(p, {}) or {}).get("semantic_map", {})
 
 
@@ -674,13 +675,11 @@ def text_for_word_ids(words, word_ids):
 
 
 def semantic_map_for_run_dir(run_dir: Path):
-    return (read_json(run_dir / "viewer_data.json", {}) or {}).get("semantic_map", {}) or {}
+    return (read_json(run_layout.viewer_path(run_dir), {}) or {}).get("semantic_map", {}) or {}
 
 
 def section_context_for_side(run_dir: Path, side):
-    if side in ("old", "prev", "previous"):
-        return run_dir / "prev_report.md", read_json(run_dir / "prev_section_map.json", {}) or {}
-    return run_dir / "report.md", read_json(run_dir / "section_map.json", {}) or {}
+    return run_layout.source_md(run_dir, side), read_json(run_layout.sections_path(run_dir, side), {}) or {}
 
 
 def equal_refs_for_selection(semantic_map, side, word_ids):
@@ -794,7 +793,7 @@ def word_ids_in_page_bbox(words, page, bbox, pad=18):
 
 
 def fallback_current_word_ids_from_diff(run_dir, prev_anchor, new_words):
-    viewer_data = read_json(run_dir / "viewer_data.json", {}) or {}
+    viewer_data = read_json(run_layout.viewer_path(run_dir), {}) or {}
     semantic_map = viewer_data.get("semantic_map", {}) or {}
     candidates = related_diff_changes_for_review(viewer_data, prev_anchor, semantic_map, limit=3)
     candidate_ids = {c.get("change_id") for c in candidates}
@@ -836,8 +835,8 @@ def migrate_previous_review_to_current(doc_id, run_id, review_id):
 SNAPSHOT_LIMIT = 10
 
 
-def snapshot_file_names():
-    return snapshot_snapshot_file_names()
+def snapshot_artifacts(run_dir):
+    return snapshot_snapshot_artifacts(run_dir)
 
 
 def snapshot_counts(reviews):
@@ -865,8 +864,7 @@ def create_run_snapshot(doc_id, run_id, label=""):
         document_snapshot_dir_fn=document_snapshot_dir,
         document_reviews_for_run_fn=document_reviews_for_run,
         semantic_module=semantic,
-        snapshot_file_names_fn=snapshot_file_names,
-        copy_if_exists_fn=copy_if_exists,
+        snapshot_artifacts_fn=snapshot_artifacts,
         write_json_fn=write_json,
         utc_now_fn=utc_now,
         snapshot_counts_fn=snapshot_counts,
@@ -903,11 +901,11 @@ CHANGE_AI_ASSESSMENT_PROMPT_FALLBACK = (
 
 
 def ai_assessment_path(doc_id, run_id):
-    return document_run_dir(doc_id, run_id) / "ai_assessment.json"
+    return run_layout.review_assessment_path(document_run_dir(doc_id, run_id))
 
 
 def change_ai_assessment_path(doc_id, run_id):
-    return document_run_dir(doc_id, run_id) / "change_ai_assessment.json"
+    return run_layout.change_assessment_path(document_run_dir(doc_id, run_id))
 
 
 def load_ai_assessment(doc_id, run_id):

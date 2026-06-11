@@ -3,6 +3,8 @@ from pathlib import Path
 
 import fitz
 
+import run_layout
+
 
 def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
     """
@@ -14,11 +16,11 @@ def export_annotated_pdf(run_dir: Path, side: str) -> bytes:
     import document_semantic as _sem
 
     reviews = _sem.load_reviews(run_dir)
-    words_path = run_dir / f"{side}_words.json"
-    pdf_path = run_dir / f"{side}.pdf"
+    words_path = run_layout.words_path(run_dir, side)
+    pdf_path = run_layout.source_pdf(run_dir, side)
 
     if not pdf_path.exists():
-        raise FileNotFoundError(f"{side}.pdf not found")
+        raise FileNotFoundError(f"{run_layout.side_name(side)}/source.pdf not found")
 
     words = json.loads(words_path.read_text(encoding="utf-8")) if words_path.exists() else []
     with fitz.open(str(pdf_path)) as doc:

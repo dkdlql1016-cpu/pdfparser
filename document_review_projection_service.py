@@ -2,6 +2,8 @@ import re
 import uuid
 from pathlib import Path
 
+import run_layout
+
 
 def equal_refs_for_selection(semantic_map, side, word_ids):
     wanted = {int(w) for w in word_ids if isinstance(w, int) or str(w).isdigit()}
@@ -69,7 +71,7 @@ def anchor_for_selection(
     apply_md_metadata_to_anchor_fn,
     rect=None,
 ):
-    words_path = run_dir / ("prev_words.json" if side in ("old", "prev", "previous") else "words.json")
+    words_path = run_layout.words_path(run_dir, side)
     words = read_json_fn(words_path, []) or []
     ids = sorted({int(w) for w in word_ids if isinstance(w, int) or str(w).isdigit()})
     ids = [i for i in ids if 0 <= i < len(words)]
@@ -358,7 +360,7 @@ def migrate_previous_review_to_current(
     if not prev_anchor:
         return {"error": "previous anchor not found"}, 404
 
-    new_words = read_json_fn(run_dir / "words.json", []) or []
+    new_words = read_json_fn(run_layout.words_path(run_dir, "current"), []) or []
     new_ids = map_anchor_to_current_md_anchor_fn(prev_anchor, document_semantic_map_fn(doc_id, run_id), new_words)
     if not new_ids:
         new_ids = find_word_sequence_by_text_fn(new_words, prev_anchor.get("text") or source_review.get("text", ""))

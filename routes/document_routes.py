@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 import document_semantic as semantic
+import run_layout
 from flask import Blueprint, Response, current_app, jsonify, request, send_file
 
 _HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
@@ -90,8 +91,8 @@ def create_document_blueprint(*, deps):
         doc_id = uuid.uuid4().hex[:12]
         run_id = uuid.uuid4().hex[:12]
         run_dir = document_run_dir_fn(doc_id, run_id)
-        run_dir.mkdir(parents=True, exist_ok=True)
-        report_pdf = run_dir / "report.pdf"
+        run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+        report_pdf = run_layout.source_pdf(run_dir, "current")
         uploaded.save(report_pdf)
 
         safe_filename = Path(uploaded.filename or "report.pdf").name or "report.pdf"
@@ -219,19 +220,19 @@ def create_document_blueprint(*, deps):
 
         prev_run_id = meta["runs"][-1]["run_id"]
         prev_dir = document_run_dir_fn(doc_id, prev_run_id)
-        if not (prev_dir / "report.pdf").exists():
-            return jsonify({"error": f"previous run {prev_run_id} is missing report.pdf"}), 400
+        if not run_layout.source_pdf(prev_dir, "current").exists():
+            return jsonify({"error": f"previous run {prev_run_id} is missing current/source.pdf"}), 400
 
         run_id = uuid.uuid4().hex[:12]
         run_dir = document_run_dir_fn(doc_id, run_id)
-        run_dir.mkdir(parents=True, exist_ok=True)
-        copy_if_exists_fn(prev_dir / "report.pdf", run_dir / "prev_report.pdf")
-        copy_if_exists_fn(prev_dir / "report.md", run_dir / "prev_report.md")
-        copy_if_exists_fn(prev_dir / "words.json", run_dir / "prev_words.json")
-        copy_if_exists_fn(prev_dir / "section_map.json", run_dir / "prev_section_map.json")
-        copy_if_exists_fn(prev_dir / "reviews.json", run_dir / "prev_reviews.json")
+        run_layout.current_dir(run_dir).mkdir(parents=True, exist_ok=True)
+        run_layout.previous_dir(run_dir).mkdir(parents=True, exist_ok=True)
+        copy_if_exists_fn(run_layout.source_pdf(prev_dir, "current"), run_layout.source_pdf(run_dir, "previous"))
+        copy_if_exists_fn(run_layout.source_md(prev_dir, "current"), run_layout.source_md(run_dir, "previous"))
+        copy_if_exists_fn(run_layout.words_path(prev_dir, "current"), run_layout.words_path(run_dir, "previous"))
+        copy_if_exists_fn(run_layout.sections_path(prev_dir, "current"), run_layout.sections_path(run_dir, "previous"))
 
-        report_pdf = run_dir / "report.pdf"
+        report_pdf = run_layout.source_pdf(run_dir, "current")
         uploaded.save(report_pdf)
         safe_filename = Path(uploaded.filename or "report.pdf").name or "report.pdf"
         created_at = utc_now_fn()
@@ -339,7 +340,7 @@ def create_document_blueprint(*, deps):
         if _has_invalid_hex_id(doc_id, run_id):
             return jsonify({"error": "invalid id"}), 400
         run_dir = document_run_dir_fn(doc_id, run_id)
-        viewer_path = run_dir / "viewer_data.json"
+        viewer_path = run_layout.viewer_path(run_dir)
         if not viewer_path.exists():
             return jsonify({"error": "run data not found"}), 404
         return jsonify(read_json_fn(viewer_path, {}))
@@ -349,13 +350,10 @@ def create_document_blueprint(*, deps):
         if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
             return jsonify({"error": "invalid id"}), 400
         zoom = float(request.args.get("zoom", "1.6"))
-        if side in ("new", "report", "current"):
-            pdf_name = "report.pdf"
-        elif side in ("old", "prev", "previous"):
-            pdf_name = "prev_report.pdf"
-        else:
+        try:
+            pdf_path = run_layout.source_pdf(document_run_dir_fn(doc_id, run_id), side)
+        except ValueError:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
-        pdf_path = document_run_dir_fn(doc_id, run_id) / pdf_name
         if not pdf_path.exists():
             return jsonify({"error": "pdf not found"}), 404
         return Response(render_pdf_page_fn(pdf_path, page_no, zoom), mimetype="image/png")
@@ -364,13 +362,10 @@ def create_document_blueprint(*, deps):
     def document_words(doc_id, run_id, side):
         if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
             return jsonify({"error": "invalid id"}), 400
-        if side in ("new", "report", "current"):
-            name = "words.json"
-        elif side in ("old", "prev", "previous"):
-            name = "prev_words.json"
-        else:
+        try:
+            path = run_layout.words_path(document_run_dir_fn(doc_id, run_id), side)
+        except ValueError:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
-        path = document_run_dir_fn(doc_id, run_id) / name
         if not path.exists():
             return jsonify({"error": "not found"}), 404
         return send_file(path, mimetype="application/json")
@@ -379,13 +374,10 @@ def create_document_blueprint(*, deps):
     def document_chars(doc_id, run_id, side):
         if not _is_valid_hex_id(doc_id) or not _is_valid_hex_id(run_id):
             return jsonify({"error": "invalid id"}), 400
-        if side in ("new", "report", "current"):
-            words_name = "words.json"
-        elif side in ("old", "prev", "previous"):
-            words_name = "prev_words.json"
-        else:
+        try:
+            words_path = run_layout.words_path(document_run_dir_fn(doc_id, run_id), side)
+        except ValueError:
             return jsonify({"error": "side must be report/new/current or prev/old/previous"}), 400
-        words_path = document_run_dir_fn(doc_id, run_id) / words_name
         if not words_path.exists():
             return jsonify({"error": "not found"}), 404
         page_filters, filter_error = _chars_page_filters_from_query()
@@ -607,8 +599,8 @@ def create_document_blueprint(*, deps):
                 "review_count": len(reviews),
                 "open_reviews": sum(1 for r in reviews if r.get("status", "open") == "open"),
                 "closed_reviews": sum(1 for r in reviews if r.get("status") in ("closed", "cleared", "resolved")),
-                "has_diff": bool((run_dir / "result.json").exists()),
-                "has_ai_assessment": bool((run_dir / "ai_assessment.json").exists()),
+                "has_diff": bool(run_layout.diff_segments_path(run_dir).exists()),
+                "has_ai_assessment": bool(run_layout.review_assessment_path(run_dir).exists()),
             })
         return jsonify({"doc_id": doc_id, "title": meta.get("title"), "runs": runs})
 
@@ -616,9 +608,9 @@ def create_document_blueprint(*, deps):
     def document_report_file(doc_id, run_id):
         if _has_invalid_hex_id(doc_id, run_id):
             return jsonify({"error": "invalid id"}), 400
-        path = document_run_dir_fn(doc_id, run_id) / "report.pdf"
+        path = run_layout.source_pdf(document_run_dir_fn(doc_id, run_id), "current")
         if not path.exists():
-            return jsonify({"error": "report.pdf not found"}), 404
+            return jsonify({"error": "current/source.pdf not found"}), 404
         return send_file(path, mimetype="application/pdf", as_attachment=True, download_name=f"{run_id}.pdf")
 
     @bp.route("/api/documents/<doc_id>/runs/<run_id>/save", methods=["POST"])

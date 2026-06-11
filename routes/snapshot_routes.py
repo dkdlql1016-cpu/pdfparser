@@ -3,6 +3,8 @@ import time
 
 from flask import Blueprint, Response, current_app, jsonify, request, send_file
 
+import run_layout
+
 _HEX12_RE = re.compile(r'^[0-9a-f]{12}$')
 _SNAPSHOT_ID_RE = re.compile(r'^snap-[0-9a-f]{10}$')
 
@@ -86,7 +88,7 @@ def create_snapshot_blueprint(*, deps):
         snap_dir = document_snapshot_dir_fn(doc_id, snapshot_id)
         if not snap_dir.exists():
             return jsonify({"error": "snapshot not found"}), 404
-        viewer_data = read_json_fn(snap_dir / "viewer_data.json", None)
+        viewer_data = read_json_fn(run_layout.viewer_path(snap_dir), None)
         if not viewer_data:
             return jsonify({"error": "snapshot data not found"}), 404
         return jsonify({"snapshot": read_json_fn(snap_dir / "snapshot.json", {}), "result": viewer_data})
@@ -198,13 +200,13 @@ def create_snapshot_blueprint(*, deps):
     def snapshot_reviews(doc_id, snapshot_id):
         if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
-        return jsonify(read_json_fn(document_snapshot_dir_fn(doc_id, snapshot_id) / "reviews.json", []) or [])
+        return jsonify(read_json_fn(run_layout.run_reviews_path(document_snapshot_dir_fn(doc_id, snapshot_id)), []) or [])
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/assess")
     def snapshot_assessment(doc_id, snapshot_id):
         if not _is_valid_hex_id(doc_id) or not _is_valid_snapshot_id(snapshot_id):
             return jsonify({"error": "invalid id"}), 400
-        return jsonify(read_json_fn(document_snapshot_dir_fn(doc_id, snapshot_id) / "ai_assessment.json", {"items": []}) or {"items": []})
+        return jsonify(read_json_fn(run_layout.review_assessment_path(document_snapshot_dir_fn(doc_id, snapshot_id)), {"items": []}) or {"items": []})
 
     @bp.route("/api/documents/<doc_id>/snapshots/<snapshot_id>/export/<side>")
     def export_snapshot_pdf(doc_id, snapshot_id, side):

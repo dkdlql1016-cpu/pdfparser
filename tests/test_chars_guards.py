@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import Flask
 
 from document_pipeline_service import estimated_char_count, filter_words_for_chars
+import run_layout
 from routes.document_routes import create_document_blueprint
 from routes.snapshot_routes import create_snapshot_blueprint
 
@@ -41,11 +42,11 @@ class CharsGuardTests(unittest.TestCase):
     def _build_app(self, *, max_chars):
         app = Flask(__name__)
         doc_run_dir = self.tmp_dir / self.doc_id / "runs" / self.run_id
-        doc_run_dir.mkdir(parents=True, exist_ok=True)
-        (doc_run_dir / "words.json").write_text("[]", encoding="utf-8")
+        run_layout.current_dir(doc_run_dir).mkdir(parents=True, exist_ok=True)
+        run_layout.words_path(doc_run_dir, "current").write_text("[]", encoding="utf-8")
         snap_dir = self.tmp_dir / self.doc_id / "snapshots" / self.snapshot_id
-        snap_dir.mkdir(parents=True, exist_ok=True)
-        (snap_dir / "new.words").write_text("[]", encoding="utf-8")
+        run_layout.current_dir(snap_dir).mkdir(parents=True, exist_ok=True)
+        run_layout.words_path(snap_dir, "current").write_text("[]", encoding="utf-8")
 
         app.register_blueprint(
             create_document_blueprint(
@@ -96,7 +97,7 @@ class CharsGuardTests(unittest.TestCase):
                     "estimated_char_count_fn": estimated_char_count,
                     "chars_max_words": 100,
                     "chars_max_estimated_count": max_chars,
-                    "snapshot_side_file_fn": lambda side, kind: f"{side}.{kind}",
+                    "snapshot_side_file_fn": lambda side, kind: run_layout.words_path(".", side) if kind in ("words", "chars") else run_layout.source_pdf(".", side),
                     "render_pdf_page_fn": lambda *_args, **_kwargs: b"",
                     "export_annotated_pdf_fn": lambda *_args, **_kwargs: b"",
                 }

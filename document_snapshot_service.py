@@ -1,23 +1,11 @@
 import shutil
 import uuid
 
+import run_layout
 
-def snapshot_file_names():
-    return [
-        "viewer_data.json",
-        "result.json",
-        "ai_assessment.json",
-        "change_ai_assessment.json",
-        "reviews.json",
-        "report.pdf",
-        "report.md",
-        "words.json",
-        "section_map.json",
-        "prev_report.pdf",
-        "prev_report.md",
-        "prev_words.json",
-        "prev_section_map.json",
-    ]
+
+def snapshot_artifacts(run_dir):
+    return run_layout.durable_artifacts(run_dir)
 
 
 def snapshot_counts(reviews):
@@ -48,8 +36,7 @@ def create_run_snapshot(
     document_snapshot_dir_fn,
     document_reviews_for_run_fn,
     semantic_module,
-    snapshot_file_names_fn,
-    copy_if_exists_fn,
+    snapshot_artifacts_fn,
     write_json_fn,
     utc_now_fn,
     snapshot_counts_fn,
@@ -63,7 +50,7 @@ def create_run_snapshot(
     if not run_meta:
         return {"error": "run not found"}, 404
     run_dir = document_run_dir_fn(doc_id, run_id)
-    viewer_data = read_json_fn(run_dir / "viewer_data.json", None)
+    viewer_data = read_json_fn(run_layout.viewer_path(run_dir), None)
     if not viewer_data:
         return {"error": "run data not found"}, 404
 
@@ -72,11 +59,13 @@ def create_run_snapshot(
     snap_dir.mkdir(parents=True, exist_ok=True)
     reviews = document_reviews_for_run_fn(doc_id, run_id)
     semantic_module.save_reviews(run_dir, reviews)
-    for name in snapshot_file_names_fn():
-        copy_if_exists_fn(run_dir / name, snap_dir / name)
-    write_json_fn(snap_dir / "reviews.json", reviews)
-    if not (snap_dir / "viewer_data.json").exists():
-        write_json_fn(snap_dir / "viewer_data.json", viewer_data)
+    for src in snapshot_artifacts_fn(run_dir):
+        dst = snap_dir / src.relative_to(run_dir)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+    write_json_fn(run_layout.run_reviews_path(snap_dir), reviews)
+    if not run_layout.viewer_path(snap_dir).exists():
+        write_json_fn(run_layout.viewer_path(snap_dir), viewer_data)
 
     created_at = utc_now_fn()
     snapshot_meta = {
@@ -87,8 +76,8 @@ def create_run_snapshot(
         "filename": run_meta.get("filename"),
         "label": str(label or "").strip()[:120],
         "mode": viewer_data.get("mode"),
-        "has_diff": bool((snap_dir / "result.json").exists()),
-        "has_ai_assessment": bool((snap_dir / "ai_assessment.json").exists()),
+        "has_diff": bool(run_layout.diff_segments_path(snap_dir).exists()),
+        "has_ai_assessment": bool(run_layout.review_assessment_path(snap_dir).exists()),
         **snapshot_counts_fn(reviews),
     }
     write_json_fn(snap_dir / "snapshot.json", snapshot_meta)
@@ -104,10 +93,13 @@ def snapshot_meta_for(doc_id, snapshot_id, *, load_document_meta_fn):
 
 
 def snapshot_side_file(side, kind):
-    if kind == "pdf":
-        return "report.pdf" if side in ("new", "report", "current") else "prev_report.pdf"
-    if kind == "words":
-        return "words.json" if side in ("new", "report", "current") else "prev_words.json"
-    if kind == "chars":
-        return "words.json" if side in ("new", "report", "current") else "prev_words.json"
-    return None
+    try:
+        if kind == "pdf":
+            return run_layout.source_pdf(".", side)
+        if kind == "words":
+            return run_layout.words_path(".", side)
+        if kind == "chars":
+            return run_layout.words_path(".", side)
+        return None
+    except ValueError:
+        return None

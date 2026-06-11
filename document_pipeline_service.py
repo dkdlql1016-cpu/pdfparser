@@ -2,6 +2,8 @@ from pathlib import Path
 
 import fitz
 
+import run_layout
+
 
 def copy_if_exists(src: Path, dst: Path):
     if src.exists():
@@ -12,6 +14,7 @@ def copy_if_exists(src: Path, dst: Path):
 
 
 def write_unmarked_md_copy(src: Path, dst: Path, *, strip_section_markers_fn, read_md_lines_fn):
+    dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_text("\n".join(strip_section_markers_fn(read_md_lines_fn(src))) + "\n", encoding="utf-8")
     return dst
 
@@ -79,15 +82,16 @@ def process_single_document_run(
     filename=None,
 ):
     words, page_sizes = extract_pdf_words_fn(pdf_path)
-    write_json_fn(run_dir / "words.json", words)
+    write_json_fn(run_layout.words_path(run_dir, "current"), words)
 
-    md_src = run_opendataloader_to_markdown_fn(pdf_path, run_dir / "opendataloader_report")
-    report_md = run_dir / "report.md"
+    md_src = run_opendataloader_to_markdown_fn(pdf_path, run_layout.opendataloader_cache_dir(run_dir))
+    report_md = run_layout.source_md(run_dir, "current")
+    report_md.parent.mkdir(parents=True, exist_ok=True)
     report_md.write_text(md_src.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
 
     index_items = build_new_pdf_index_fn(report_md, words, len(page_sizes))
     section_map = inject_section_markers_fn(report_md, index_items)
-    write_json_fn(run_dir / "section_map.json", section_map)
+    write_json_fn(run_layout.sections_path(run_dir, "current"), section_map)
 
     viewer_data = {
         "doc_id": doc_id,
@@ -115,7 +119,7 @@ def process_single_document_run(
         "filename": filename or pdf_path.name,
         "semantic_map": {"unit": "word", "equal_words": []},
     }
-    write_json_fn(run_dir / "viewer_data.json", viewer_data)
+    write_json_fn(run_layout.viewer_path(run_dir), viewer_data)
     return viewer_data
 
 
@@ -138,25 +142,26 @@ def process_document_diff_run(
     doc_id=None,
     run_id=None,
 ):
-    prev_pdf = run_dir / "prev_report.pdf"
-    report_pdf = run_dir / "report.pdf"
-    prev_md = run_dir / "prev_report.md"
-    report_md = run_dir / "report.md"
+    prev_pdf = run_layout.source_pdf(run_dir, "previous")
+    report_pdf = run_layout.source_pdf(run_dir, "current")
+    prev_md = run_layout.source_md(run_dir, "previous")
+    report_md = run_layout.source_md(run_dir, "current")
     if not prev_pdf.exists() or not report_pdf.exists():
-        raise FileNotFoundError("prev_report.pdf and report.pdf are required before diff")
+        raise FileNotFoundError("previous/current source.pdf files are required before diff")
     if not prev_md.exists() or not report_md.exists():
-        raise FileNotFoundError("prev_report.md and report.md are required before diff")
+        raise FileNotFoundError("previous/current source.md files are required before diff")
 
-    prev_words = read_json_fn(run_dir / "prev_words.json", [])
-    report_words = read_json_fn(run_dir / "words.json", [])
+    prev_words = read_json_fn(run_layout.words_path(run_dir, "previous"), [])
+    report_words = read_json_fn(run_layout.words_path(run_dir, "current"), [])
     with fitz.open(str(prev_pdf)) as prev_page_sizes:
         old_page_sizes = [{"width": float(p.rect.width), "height": float(p.rect.height)} for p in prev_page_sizes]
     with fitz.open(str(report_pdf)) as report_page_sizes:
         new_page_sizes = [{"width": float(p.rect.width), "height": float(p.rect.height)} for p in report_page_sizes]
 
-    result_path = run_dir / "result.json"
-    diff_prev_md = write_unmarked_md_copy_fn(prev_md, run_dir / "prev_report.diff.md")
-    diff_report_md = write_unmarked_md_copy_fn(report_md, run_dir / "report.diff.md")
+    result_path = run_layout.diff_segments_path(run_dir)
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    diff_prev_md = write_unmarked_md_copy_fn(prev_md, run_layout.diff_md_path(run_dir, "previous"))
+    diff_report_md = write_unmarked_md_copy_fn(report_md, run_layout.diff_md_path(run_dir, "current"))
     diff_doc = run_diff_extract_fn(diff_prev_md, diff_report_md, result_path)
     diff_doc["segments"], suppressed_moves = suppress_layout_moves_fn(diff_doc.get("segments", []))
     diff_doc["suppressed_moves"] = suppressed_moves
@@ -174,7 +179,7 @@ def process_document_diff_run(
     report = alignment_report_fn(diff_doc["segments"], prev_words, report_words)
     index_items = build_new_pdf_index_fn(report_md, report_words, len(new_page_sizes))
     section_map = inject_section_markers_fn(report_md, index_items)
-    write_json_fn(run_dir / "section_map.json", section_map)
+    write_json_fn(run_layout.sections_path(run_dir, "current"), section_map)
 
     mapped = map_result_segments_to_pdf_indices_fn(diff_doc["segments"], prev_words, report_words)
     semantic_map = semantic_module.build_semantic_map(diff_doc["segments"], mapped, prev_words, report_words)
@@ -205,5 +210,5 @@ def process_document_diff_run(
         "semantic_map": semantic_map,
         "carried_review_count": len(projected_reviews),
     }
-    write_json_fn(run_dir / "viewer_data.json", viewer_data)
+    write_json_fn(run_layout.viewer_path(run_dir), viewer_data)
     return viewer_data
