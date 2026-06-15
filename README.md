@@ -1,71 +1,80 @@
 # PDF Review Workspace
 
-## Prerequisites
+A local web app for reviewing financial-report PDFs: open a report, compare a
+revised version against the previous one (visual diff), anchor review comments to
+the text, and optionally generate AI assessments of the changes. Runs entirely on
+your machine.
 
-Install these **before** `pip install -r requirements.txt`. That file lists Python packages only; it does not install Python or Java for you.
+## 1. Prerequisites
 
-| Requirement | Notes |
-|-------------|--------|
-| **Python 3.11+** | Used to run the Flask app. 3.14 has been tested locally. |
-| **Java 17+** (OpenJDK or compatible) | Required by [`opendataloader-pdf`](https://pypi.org/project/opendataloader-pdf/) for PDF → markdown conversion. |
+Install these first and confirm they are on your `PATH`:
 
-Check that both are on your `PATH`:
+| Requirement | Verify with | Why it is needed |
+|---|---|---|
+| **Python 3.11+** | `python --version` | Runs the app server |
+| **Java 17+** (OpenJDK / Temurin) | `java -version` | **Required.** PDF text extraction shells out to a bundled Java tool; PDF upload and diff fail without it |
+
+> Java is not optional — uploading or comparing any PDF invokes it.
+
+## 2. Get the code running
+
+Open a terminal **in the project folder** (the one containing `app.py` and
+`requirements.txt`), then run:
 
 ```powershell
-python --version
-java -version
-```
-
-Optional (for AI review/change assessment): copy `.env.example` to `.env` and set API keys. The viewer and diff pipeline work without them.
-
-## Run
-
-```powershell
-cd pdfparser
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python app.py
 ```
 
-Open in a browser:
+On macOS/Linux, activate with `source .venv/bin/activate` instead of line 2.
 
-```text
-http://127.0.0.1:8000
+When you see `PDF Diff Viewer running: http://127.0.0.1:8000`, open
+**http://127.0.0.1:8000** in your browser.
+
+## 3. AI features (optional)
+
+PDF upload, viewer, diff, comments, and export all work **without** any API key.
+Only the AI assessment step needs one.
+
+To enable it, copy `.env.example` to `.env` (note the leading dot) and fill in your key:
+
+```powershell
+copy .env.example .env
 ```
 
-For maintainers/handoff, see `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_KOR.md`, `docs/RUN_LAYOUT.md`, and `docs/CHARS_API_CONTRACT.md`.
-
-File Manager lists only workspaces that were explicitly saved. Analysis sessions and History snapshots stay on disk under the workspace, but do not auto-register new File Manager entries.
-
-## Project Structure
-
-- `app.py`: Flask entrypoint and composition root (wires blueprints and services).
-- `routes/`: HTTP layer grouped by domain (`document`, `assessment`, `snapshot`, `file_manager`).
-- `document_*_service.py`: document-domain business logic (pipeline, IO, diff analysis, review projection, snapshot, bootstrap).
-- `assessment_service.py`, `ai_callers.py`, `ai_runtime_utils.py`: AI assessment orchestration and tool-calling runtime.
-- `storage_utils.py`, `text_utils.py`, `section_context_utils.py`: shared helpers for storage/text/markdown section context.
-
-## Features
-
-1. Upload an initial report and review it in a single-pane PDF viewer.
-2. Upload an updated report and run a previous/current diff.
-3. Convert PDFs to markdown with `opendataloader_pdf.convert`.
-4. Generate word-level diff output through `document_diff_extract.py`.
-5. Align markdown diff segments to PDF word bounding boxes.
-6. Add document-level review comments anchored to selected PDF text.
-7. Store report versions under `documents/workspaces/<workspace_id>/runs/<run_id>`.
-8. Export PDF annotations from saved reviews.
-
-## OpenDataLoader Configuration
-
-```python
-opendataloader_pdf.convert(
-    input_path=[str(pdf_path)],
-    output_dir=str(output_dir),
-    format="markdown",
-    table_method="default",
-    markdown_page_separator="--- %page-number% ---",
-    reading_order="xycut",
-)
+```ini
+# .env
+OPENAI_API_KEY=sk-...        # default model is gpt-5.4 (OpenAI)
 ```
+
+> The default model `gpt-5.4` uses OpenAI, so `OPENAI_API_KEY` is what you need.
+> If you instead set a Claude model (e.g. `AI_ASSESSMENT_MODEL=claude-...`), provide
+> `ANTHROPIC_API_KEY` instead. Restart `python app.py` after editing `.env`.
+
+## 4. Try it (sample reports included)
+
+Three demo PDFs ship in [input/](input/) so you can exercise the app without your
+own files:
+
+1. **Upload a report** — upload `input/Demo_FY24_Report_v1_clean.pdf` to open it in the viewer.
+2. **Compare revisions** — upload `input/Demo_FY24_Report_v2_clean.pdf` to run a previous/current diff.
+3. **Add review comments** — select text in the PDF to anchor and save a comment.
+4. **AI assessment** — generate an AI review of the changes (requires the key from step 3).
+5. **Export annotations** — export saved reviews as PDF annotations.
+
+## A note on `_KOR` / `_Kor` files
+
+The app runs entirely on the **English** prompts and docs. Files ending in `_KOR`
+or `_Kor` (e.g. `docs/ARCHITECTURE_KOR.md`, `prompts/ai_assessment_system_Kor.md`)
+are the developer's own Korean review notes — they are **not loaded at runtime** and
+can be ignored.
+
+## Troubleshooting
+
+- **`'java' command not found`** — install Java 17+ and reopen the terminal so `PATH` updates.
+- **Port 8000 already in use** — stop the other process, or it is likely a previous
+  instance of this app still running.
+- **AI step says a key is required** — confirm the file is named exactly `.env` (not
+  `env`), sits next to `app.py`, and that you restarted the server.
